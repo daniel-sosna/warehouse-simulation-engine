@@ -1,17 +1,80 @@
 package lt.bananull.whse;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import lt.bananull.whse.dto.dataset.BinDto;
+import lt.bananull.whse.dto.dataset.GridDto;
+import lt.bananull.whse.dto.dataset.ShipmentDto;
+import lt.bananull.whse.dto.dataset.PortDto;
+import lt.bananull.whse.dto.dataset.ShiftDto;
+import lt.bananull.whse.load.DataLoader;
+import lt.bananull.whse.load.SimulationState;
+
+import java.nio.file.Path;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        String dataDirArg = "./data/1"; // default
+        for (int i = 0; i < args.length - 1; i++) {
+            if ("--dataDir".equals(args[i])) {
+                dataDirArg = args[i + 1];
+            }
+        }
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        System.out.println("Using dataDir: " + dataDirArg);
+
+        Path dataDir = Path.of(dataDirArg);
+        DataLoader loader = new DataLoader(dataDir);
+
+        SimulationState state = loader.loadAll();
+
+        System.out.println();
+        System.out.println("=== DATASET STATE SUMMARY ===");
+        System.out.println("Bins:       " + state.bins().size());
+        System.out.println("Grids:      " + state.grids().size());
+        System.out.println("Shipments:  " + state.shipments().size());
+        System.out.println();
+
+        System.out.println("=== BINS ===");
+        for (BinDto bin : state.bins()) {
+            System.out.println("Bin ID: " + bin.id()
+                    + ", grid: " + bin.currentGridLocation());
+            bin.itemsInBin().forEach((ean, itemDto) ->
+                    System.out.println("  Item " + ean
+                            + " -> qty=" + itemDto.quantity())
+            );
+            System.out.println();
+        }
+
+        System.out.println("=== GRIDS ===");
+        for (GridDto grid : state.grids()) {
+            System.out.println("Grid ID: " + grid.id());
+
+            if (grid.shifts() != null) {
+                for (ShiftDto shift : grid.shifts()) {
+                    System.out.println("  Shift: " + shift.start()
+                            + " - " + shift.end());
+
+                    if (shift.portConfig() != null) {
+                        System.out.println("    Ports:");
+                        for (PortDto port : shift.portConfig()) {
+                            System.out.println("      Port ID: " + port.id()
+                                    + ", flags=" + port.handlingFlags());
+                        }
+                    }
+                }
+            }
+
+            System.out.println();
+        }
+
+        System.out.println("=== SHIPMENTS ===");
+        for (ShipmentDto shipment : state.shipments()) {
+            System.out.println("Shipment ID:   " + shipment.id());
+            System.out.println("Shipment date: " + shipment.shipmentDate());
+            System.out.println("Items:");
+            shipment.items().forEach((ean, qty) ->
+                    System.out.println("  " + ean + " -> " + qty)
+            );
+            System.out.println();
         }
     }
 }
