@@ -47,16 +47,6 @@
                 </configuration>
             </plugin>
 
-            <!-- JUnit 5 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <useModulePath>false</useModulePath>
-                </configuration>
-            </plugin>
-
             <!-- Optional: build a runnable fat jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
