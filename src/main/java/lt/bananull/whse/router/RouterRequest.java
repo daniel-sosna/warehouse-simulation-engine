@@ -1,28 +1,18 @@
 package lt.bananull.whse.router;
 
+import lt.bananull.whse.dto.dataset.BinDto;
+import lt.bananull.whse.dto.dataset.ShipmentDto;
+
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 public record RouterRequest(State state) {
 
     public record State(
             Instant now,
-            List<RouterShipment> shipments_backlog,
-            List<RouterStockBin> stock_bins,
+            List<ShipmentDto> shipments_backlog,
+            List<BinDto> stock_bins,
             List<RouterGrid> grids
-    ) {}
-
-    public record RouterShipment(
-            String id,
-            Instant created_at,
-            Map<String, Integer> items
-    ) {}
-
-    public record RouterStockBin(
-            String bin_id,
-            String grid_id,
-            Map<String, Integer> items
     ) {}
 
     public record RouterGrid(

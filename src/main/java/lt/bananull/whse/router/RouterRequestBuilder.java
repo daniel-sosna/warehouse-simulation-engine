@@ -1,6 +1,5 @@
 package lt.bananull.whse.router;
 
-import lt.bananull.whse.dto.dataset.BinDto;
 import lt.bananull.whse.dto.dataset.GridDto;
 import lt.bananull.whse.dto.dataset.ShipmentDto;
 import lt.bananull.whse.dto.dataset.ShiftDto;
@@ -14,8 +13,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RouterRequestBuilder {
 
@@ -25,14 +22,12 @@ public class RouterRequestBuilder {
         ZoneId zone = ZoneId.of("UTC");
         LocalDate simulationDate = resolveSimulationDateFromShipments(state, zone);
 
-        List<RouterRequest.RouterShipment> shipmentsBacklog = mapShipments(state.shipments());
-        List<RouterRequest.RouterStockBin> stockBins = mapBins(state.bins());
         List<RouterRequest.RouterGrid> grids = mapGrids(state.grids(), simulationDate, zone);
 
         RouterRequest.State routerState = new RouterRequest.State(
                 now,
-                shipmentsBacklog,
-                stockBins,
+                state.shipments(),
+                state.bins(),
                 grids
         );
 
@@ -45,30 +40,6 @@ public class RouterRequestBuilder {
                 .min(Comparator.naturalOrder())
                 .map(instant -> LocalDateTime.ofInstant(instant, zone).toLocalDate())
                 .orElseGet(() -> LocalDate.now(zone));
-    }
-
-    private List<RouterRequest.RouterShipment> mapShipments(List<ShipmentDto> dtos) {
-        return dtos.stream()
-                .map(dto -> new RouterRequest.RouterShipment(
-                        dto.id(),
-                        dto.shipmentDate(),
-                        dto.items()
-                ))
-                .toList();
-    }
-
-    private List<RouterRequest.RouterStockBin> mapBins(List<BinDto> dtos) {
-        return dtos.stream()
-                .map(dto -> new RouterRequest.RouterStockBin(
-                        dto.id(),
-                        dto.currentGridLocation(),
-                        dto.itemsInBin().entrySet().stream()
-                                .collect(Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> e.getValue().quantity()
-                                ))
-                ))
-                .toList();
     }
 
     private List<RouterRequest.RouterGrid> mapGrids(List<GridDto> dtos,
@@ -122,3 +93,4 @@ public class RouterRequestBuilder {
         );
     }
 }
+
