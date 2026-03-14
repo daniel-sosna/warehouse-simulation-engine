@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>lt.null</groupId>
+    <groupId>lt.bananull</groupId>
     <artifactId>whse</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>whse</name>
@@ -80,10 +80,9 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <finalName>whse</finalName>
 
-                            <!-- IMPORTANT: change this if your main class has a different name -->
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>lt.null.whse.Main</mainClass>
+                                    <mainClass>lt.bananull.whse.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
