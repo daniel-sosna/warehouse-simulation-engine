@@ -1,8 +1,8 @@
 package lt.bananull.whse.load;
 
-import lt.bananull.whse.dto.dataset.BinDto;
-import lt.bananull.whse.dto.dataset.GridDto;
-import lt.bananull.whse.dto.dataset.ShipmentDto;
+import lt.bananull.whse.load.dto.BinDto;
+import lt.bananull.whse.load.dto.GridDto;
+import lt.bananull.whse.load.dto.ShipmentDto;
 
 import java.util.List;
 
