@@ -1,4 +1,4 @@
-package lt.bananull.whse.router;
+package lt.bananull.whse.router.dto;
 
 import java.util.List;
 

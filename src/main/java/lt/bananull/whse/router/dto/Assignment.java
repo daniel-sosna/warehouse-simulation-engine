@@ -1,4 +1,4 @@
-package lt.bananull.whse.router;
+package lt.bananull.whse.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,9 +10,4 @@ public record Assignment(
         @JsonProperty("packing_grid") String packingGrid,
         @JsonProperty("picks") List<Pick> picks
 ) {
-    public record Pick(
-            @JsonProperty("ean") String ean,
-            @JsonProperty("bin_id") String binId,
-            @JsonProperty("qty") int qty
-    ) {}
 }

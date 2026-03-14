@@ -1,4 +1,4 @@
-package lt.bananull.whse.router;
+package lt.bananull.whse.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lt.bananull.whse.dto.dataset.BinDto;

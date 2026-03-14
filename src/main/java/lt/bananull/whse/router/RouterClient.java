@@ -2,6 +2,8 @@ package lt.bananull.whse.router;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lt.bananull.whse.json.JacksonMapper;
+import lt.bananull.whse.router.dto.RouterRequest;
+import lt.bananull.whse.router.dto.RouterResponse;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
