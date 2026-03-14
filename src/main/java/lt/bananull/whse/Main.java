@@ -1,14 +1,11 @@
 package lt.bananull.whse;
 
-import lt.bananull.whse.dto.dataset.BinDto;
-import lt.bananull.whse.dto.dataset.GridDto;
-import lt.bananull.whse.dto.dataset.ShipmentDto;
-import lt.bananull.whse.dto.dataset.PortDto;
-import lt.bananull.whse.dto.dataset.ShiftDto;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.SimulationState;
+import lt.bananull.whse.sim.BasicShipmentProcessor;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -33,47 +30,20 @@ public class Main {
         System.out.println("Shipments:  " + state.shipments().size());
         System.out.println();
 
-        System.out.println("=== BINS ===");
-        for (BinDto bin : state.bins()) {
-            System.out.println("Bin ID: " + bin.id()
-                    + ", grid: " + bin.currentGridLocation());
-            bin.itemsInBin().forEach((ean, itemDto) ->
-                    System.out.println("  Item " + ean
-                            + " -> qty=" + itemDto.quantity())
-            );
-            System.out.println();
-        }
+        BasicShipmentProcessor processor = new BasicShipmentProcessor();
+        BasicShipmentProcessor.Result result = processor.process(state);
 
-        System.out.println("=== GRIDS ===");
-        for (GridDto grid : state.grids()) {
-            System.out.println("Grid ID: " + grid.id());
+        System.out.println("=== LEVEL 1 PROCESSING RESULT ===");
+        System.out.println("Packed shipments:            " + result.packedShipments());
+        System.out.println("Failed/unprocessed shipments:" + result.failedShipments());
+        System.out.println();
 
-            if (grid.shifts() != null) {
-                for (ShiftDto shift : grid.shifts()) {
-                    System.out.println("  Shift: " + shift.start()
-                            + " - " + shift.end());
-
-                    if (shift.portConfig() != null) {
-                        System.out.println("    Ports:");
-                        for (PortDto port : shift.portConfig()) {
-                            System.out.println("      Port ID: " + port.id()
-                                    + ", flags=" + port.handlingFlags());
-                        }
-                    }
-                }
+        System.out.println("Remaining bin quantities:");
+        for (Map.Entry<String, Map<String, Integer>> bin : result.remainingBinQuantities().entrySet()) {
+            System.out.println("  Bin " + bin.getKey() + ":");
+            for (Map.Entry<String, Integer> item : bin.getValue().entrySet()) {
+                System.out.println("    " + item.getKey() + " -> qty=" + item.getValue());
             }
-
-            System.out.println();
-        }
-
-        System.out.println("=== SHIPMENTS ===");
-        for (ShipmentDto shipment : state.shipments()) {
-            System.out.println("Shipment ID:   " + shipment.id());
-            System.out.println("Shipment date: " + shipment.shipmentDate());
-            System.out.println("Items:");
-            shipment.items().forEach((ean, qty) ->
-                    System.out.println("  " + ean + " -> " + qty)
-            );
             System.out.println();
         }
     }
