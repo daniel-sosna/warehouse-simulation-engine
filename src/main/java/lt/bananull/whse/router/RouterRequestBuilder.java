@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class RouterRequestBuilder {
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
         ZoneId zone = ZoneId.of("UTC");
-        LocalDate simulationDate = LocalDateTime.ofInstant(now, zone).toLocalDate();
+        LocalDate simulationDate = resolveSimulationDateFromShipments(state, zone);
 
         List<RouterRequest.RouterShipment> shipmentsBacklog = mapShipments(state.shipments());
         List<RouterRequest.RouterStockBin> stockBins = mapBins(state.bins());
@@ -36,6 +37,14 @@ public class RouterRequestBuilder {
         );
 
         return new RouterRequest(routerState);
+    }
+
+    private LocalDate resolveSimulationDateFromShipments(SimulationState state, ZoneId zone) {
+        return state.shipments().stream()
+                .map(ShipmentDto::shipmentDate)
+                .min(Comparator.naturalOrder())
+                .map(instant -> LocalDateTime.ofInstant(instant, zone).toLocalDate())
+                .orElseGet(() -> LocalDate.now(zone));
     }
 
     private List<RouterRequest.RouterShipment> mapShipments(List<ShipmentDto> dtos) {
