@@ -1,6 +1,10 @@
 package lt.bananull.whse;
 
+import lt.bananull.whse.load.DataLoader;
+import lt.bananull.whse.load.SimulationState;
 import lt.bananull.whse.router.RouterClient;
+
+import java.nio.file.Path;
 
 public class Main {
     private static String dataDir = "./data";
@@ -11,6 +15,8 @@ public class Main {
         collectArgs(args);
 
         // TODO 1. read files from dataDir
+        DataLoader loader = new DataLoader(Path.of(dataDir));
+        SimulationState state = loader.loadAll();
 
         // Create router client
         RouterClient routerClient = new RouterClient(routerCmd);
