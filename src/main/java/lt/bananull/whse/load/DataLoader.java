@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.ShipmentDto;
-import lt.bananull.whse.json.JacksonMapper;
+import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.load.dto.SimulationState;
 
 import java.io.IOException;

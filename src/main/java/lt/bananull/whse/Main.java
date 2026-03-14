@@ -1,7 +1,7 @@
 package lt.bananull.whse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lt.bananull.whse.json.JacksonMapper;
+import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationState;
 import lt.bananull.whse.router.RouterClient;
