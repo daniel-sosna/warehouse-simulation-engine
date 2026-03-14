@@ -13,7 +13,6 @@
         <maven.compiler.release>21</maven.compiler.release>
 
         <jackson.version>2.20.1</jackson.version>
-        <junit.jupiter.version>5.10.3</junit.jupiter.version>
     </properties>
 
     <dependencies>
@@ -31,13 +30,6 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Tests -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
