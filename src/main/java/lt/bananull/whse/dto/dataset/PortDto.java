@@ -1,4 +1,4 @@
-package lt.bananull.whse.dto;
+package lt.bananull.whse.dto.dataset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
