@@ -21,21 +21,28 @@ public class DataLoader {
         this.objectMapper = objectMapper;
     }
 
+    public DatasetState loadAll() throws IOException {
+        List<BinDto> bins = loadBins();
+        List<GridDto> grids = loadGrids();
+        List<ShipmentDto> shipments = loadShipments();
+        return new DatasetState(bins, grids, shipments);
+    }
+
     public List<BinDto> loadBins() throws IOException {
         Path binsPath = dataDir.resolve("bins.json");
         String json = Files.readString(binsPath);
-        return objectMapper.readValue(json, new TypeReference<List<BinDto>>() {});
+        return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
     public List<GridDto> loadGrids() throws IOException {
         Path gridsPath = dataDir.resolve("grids.json");
         String json = Files.readString(gridsPath);
-        return objectMapper.readValue(json, new TypeReference<List<GridDto>>() {});
+        return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
     public List<ShipmentDto> loadShipments() throws IOException {
         Path shipmentsPath = dataDir.resolve("shipments.json");
         String json = Files.readString(shipmentsPath);
-        return objectMapper.readValue(json, new TypeReference<List<ShipmentDto>>() {});
+        return objectMapper.readValue(json, new TypeReference<>() {});
     }
 }
