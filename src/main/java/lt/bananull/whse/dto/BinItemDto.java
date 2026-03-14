@@ -1,4 +1,7 @@
 package lt.bananull.whse.dto;
 
-public class BinItemDto {
-}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record BinItemDto(
+        @JsonProperty("quantity") int quantity
+) {}

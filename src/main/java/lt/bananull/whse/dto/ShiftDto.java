@@ -1,4 +1,12 @@
 package lt.bananull.whse.dto;
 
-public record ShiftDto() {
-}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.LocalTime;
+import java.util.List;
+
+public record ShiftDto(
+        @JsonProperty("start") LocalTime start,          // "07:00"
+        @JsonProperty("end") LocalTime end,              // "10:00"
+        @JsonProperty("portConfig") List<PortDto> portConfig
+) {}
