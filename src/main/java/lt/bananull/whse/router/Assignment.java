@@ -6,13 +6,13 @@ import java.util.List;
 
 public record Assignment(
         @JsonProperty("shipment_id") String shipmentId,
-        int priority,
+        @JsonProperty("priority") int priority,
         @JsonProperty("packing_grid") String packingGrid,
-        List<Pick> picks
+        @JsonProperty("picks") List<Pick> picks
 ) {
     public record Pick(
-            String ean,
+            @JsonProperty("ean") String ean,
             @JsonProperty("bin_id") String binId,
-            int qty
+            @JsonProperty("qty") int qty
     ) {}
 }
