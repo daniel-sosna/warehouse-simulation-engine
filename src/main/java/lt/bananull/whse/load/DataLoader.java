@@ -28,19 +28,19 @@ public class DataLoader {
         return new DatasetState(bins, grids, shipments);
     }
 
-    public List<BinDto> loadBins() throws IOException {
+    private List<BinDto> loadBins() throws IOException {
         Path binsPath = dataDir.resolve("bins.json");
         String json = Files.readString(binsPath);
         return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
-    public List<GridDto> loadGrids() throws IOException {
+    private List<GridDto> loadGrids() throws IOException {
         Path gridsPath = dataDir.resolve("grids.json");
         String json = Files.readString(gridsPath);
         return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
-    public List<ShipmentDto> loadShipments() throws IOException {
+    private List<ShipmentDto> loadShipments() throws IOException {
         Path shipmentsPath = dataDir.resolve("shipments.json");
         String json = Files.readString(shipmentsPath);
         return objectMapper.readValue(json, new TypeReference<>() {});
