@@ -1,5 +1,6 @@
 package lt.bananull.whse.router;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lt.bananull.whse.json.JacksonMapper;
 
@@ -8,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 public class RouterClient {
 
@@ -30,7 +32,7 @@ public class RouterClient {
         this.mapper = JacksonMapper.create();
     }
 
-    public RouterResponse route(RouterRequest request) {
+    public List<Assignment> route(RouterRequest request) {
         try {
             String json = mapper.writeValueAsString(request);
 
@@ -48,7 +50,7 @@ public class RouterClient {
                 throw new RuntimeException("Router returned empty response");
             }
 
-            return mapper.readValue(response, RouterResponse.class);
+            return mapper.readValue(response, new TypeReference<>() {});
         } catch (IOException e) {
             throw new RuntimeException("Communication with router failed", e);
         }
