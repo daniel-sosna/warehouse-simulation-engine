@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lt.bananull.whse.dto.dataset.BinDto;
 import lt.bananull.whse.dto.dataset.GridDto;
 import lt.bananull.whse.dto.dataset.ShipmentDto;
+import lt.bananull.whse.json.JacksonMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,16 +17,20 @@ public class DataLoader {
     private final Path dataDir;
     private final ObjectMapper objectMapper;
 
-    public DataLoader(Path dataDir, ObjectMapper objectMapper) {
+    public DataLoader(Path dataDir) {
         this.dataDir = dataDir;
-        this.objectMapper = objectMapper;
+        this.objectMapper = JacksonMapper.create();
     }
 
-    public DatasetState loadAll() throws IOException {
-        List<BinDto> bins = loadBins();
-        List<GridDto> grids = loadGrids();
-        List<ShipmentDto> shipments = loadShipments();
-        return new DatasetState(bins, grids, shipments);
+    public SimulationState loadAll() {
+        try {
+            List<BinDto> bins = loadBins();
+            List<GridDto> grids = loadGrids();
+            List<ShipmentDto> shipments = loadShipments();
+            return new SimulationState(bins, grids, shipments);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load dataset from " + dataDir, e);
+        }
     }
 
     private List<BinDto> loadBins() throws IOException {

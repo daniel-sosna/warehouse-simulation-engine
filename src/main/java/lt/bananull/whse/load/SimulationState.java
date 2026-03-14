@@ -6,7 +6,7 @@ import lt.bananull.whse.dto.dataset.ShipmentDto;
 
 import java.util.List;
 
-public record DatasetState(
+public record SimulationState(
         List<BinDto> bins,
         List<GridDto> grids,
         List<ShipmentDto> shipments
