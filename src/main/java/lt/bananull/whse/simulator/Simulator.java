@@ -1,12 +1,10 @@
 package lt.bananull.whse.simulator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
-import lt.bananull.whse.utils.JacksonMapper;
 
 import java.time.Instant;
 import java.util.PriorityQueue;
@@ -32,11 +30,8 @@ public class Simulator {
         // TEMP
         RouterRequestDto routerRequest = RouterRequestDto.from(state, now);
         RouterResponseDto routerResponse = routerClient.route(routerRequest);
-        try {
-            System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        assignments.addAll(routerResponse.assignments());
+        System.out.println(assignments);
 
         // Run event loop
     }
