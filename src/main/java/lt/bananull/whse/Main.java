@@ -1,6 +1,8 @@
 package lt.bananull.whse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.TestEvent;
 import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationState;
@@ -11,9 +13,9 @@ import lt.bananull.whse.router.dto.RouterResponse;
 import java.nio.file.Path;
 
 public class Main {
+
     private static String dataDir = "./data/1"; // TODO change to "./data"
     private static String routerCmd = "./build/router";
-    private static String eventLogFile = "./simulation.log";
 
     public static void main(String[] args) throws JsonProcessingException {
         collectArgs(args);
@@ -31,6 +33,7 @@ public class Main {
         System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
 
         // TODO 2. main while loop
+        EventHandler.handle(new TestEvent(100L));
     }
 
     private static void collectArgs(String[] args) {
@@ -38,7 +41,8 @@ public class Main {
             switch (args[i]) {
                 case "--dataDir" -> dataDir = args[++i];
                 case "--router" -> routerCmd = args[++i];
-                case "--eventLogFile" -> eventLogFile = args[++i];
+                case "--eventLogFile" -> System.setProperty("eventLogFile", args[++i]);
+                case "--debug" -> System.setProperty("logLevel", "DEBUG");
                 default -> System.err.println("Unknown argument: " + args[i]);
             }
         }
