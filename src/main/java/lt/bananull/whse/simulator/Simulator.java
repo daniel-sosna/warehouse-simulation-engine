@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.BinArrivesAtPort;
 import lt.bananull.whse.event.events.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
@@ -59,8 +60,15 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            long doneAt = simTime + TRAVEL_SECONDS; // for now to test
-            enqueueEvent(new TestEvent(doneAt));
+            long doneAt = simTime + TRAVEL_SECONDS;
+            enqueueEvent(new BinArrivesAtPort(doneAt, a));
+
+            // TODO: a lot later we should create a dispacher/scheduler for the logic
+            // then we will need: Dispatcher (or PortScheduler) that:
+            // - takes AssignmentDto
+            // - decides which port/grid can start now
+            // - reserves bin/port
+            // - schedules BinArrivedAtPort, BinPickCompleted, etc.
         }
     }
 
