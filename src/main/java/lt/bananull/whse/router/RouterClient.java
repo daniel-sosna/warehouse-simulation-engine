@@ -2,8 +2,8 @@ package lt.bananull.whse.router;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lt.bananull.whse.utils.JacksonMapper;
-import lt.bananull.whse.router.dto.RouterRequest;
-import lt.bananull.whse.router.dto.RouterResponse;
+import lt.bananull.whse.router.dto.RouterRequestDto;
+import lt.bananull.whse.router.dto.RouterResponseDto;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class RouterClient {
         this.mapper = JacksonMapper.create();
     }
 
-    public RouterResponse route(RouterRequest request) {
+    public RouterResponseDto route(RouterRequestDto request) {
         Process process = startProcess();
 
         try (BufferedWriter stdin = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))) {
@@ -41,7 +41,7 @@ public class RouterClient {
                 throw new RuntimeException("Router process failed with exit code " + exitCode);
             }
 
-            return mapper.readValue(process.getInputStream(), RouterResponse.class);
+            return mapper.readValue(process.getInputStream(), RouterResponseDto.class);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Communication with router failed", e);
         }  finally {
