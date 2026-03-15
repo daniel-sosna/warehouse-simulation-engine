@@ -13,6 +13,6 @@ public record AssignmentDto (
 
     @Override
     public int compareTo(AssignmentDto other) {
-        return other.priority - this.priority;
+        return Integer.compare(other.priority, this.priority);
     }
 }

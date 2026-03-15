@@ -8,7 +8,9 @@ import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.load.dto.ShiftDto;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,7 +27,7 @@ public record RouterRequestDto(
         List<RouterStockBin> stockBins = mapBins(simulationState.bins());
         List<RouterGrid> grids = mapGrids(simulationState.grids(), simulationDate, zone);
 
-        var routerState = new RouterState(
+        RouterState routerState = new RouterState(
                 simulationNow,
                 shipmentsBacklog,
                 stockBins,

@@ -11,8 +11,8 @@ import java.util.PriorityQueue;
 
 public class Simulator {
 
-    private final Instant SimulationStartTime;
-    private final Instant SimulationEndTime;
+    private final Instant simulationStartTime;
+    private final Instant simulationEndTime;
     private final RouterClient routerClient;
     private long simTime = 0;
     private Instant now;
@@ -22,8 +22,8 @@ public class Simulator {
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
         this.routerClient = routerClient;
         this.state = initialState;
-        this.SimulationStartTime = startTime;
-        this.SimulationEndTime = endTime;
+        this.simulationStartTime = startTime;
+        this.simulationEndTime = endTime;
         this.now = startTime;
     }
 
