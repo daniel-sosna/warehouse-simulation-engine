@@ -14,6 +14,7 @@ public class Simulator {
     private final Instant SimulationStartTime;
     private final Instant SimulationEndTime;
     private final RouterClient routerClient;
+    private long simTime = 0;
     private Instant now;
     private SimulationStateDto state;
     private PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();

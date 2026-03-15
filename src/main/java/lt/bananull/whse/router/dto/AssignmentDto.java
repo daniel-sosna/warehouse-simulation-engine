@@ -10,6 +10,7 @@ public record AssignmentDto (
         @JsonProperty("packing_grid") String packingGrid,
         @JsonProperty("picks") List<PickDto> picks
 ) implements Comparable<AssignmentDto> {
+
     @Override
     public int compareTo(AssignmentDto other) {
         return other.priority - this.priority;
