@@ -63,7 +63,7 @@ public class Simulator {
             long doneAt = simTime + TRAVEL_SECONDS;
             enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
-            // TODO: a lot later we should create a dispacher/scheduler for the logic
+            // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
             // then we will need: Dispatcher (or PortScheduler) that:
             // - takes AssignmentDto
             // - decides which port/grid can start now
