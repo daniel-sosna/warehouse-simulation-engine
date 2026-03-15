@@ -1,23 +1,38 @@
 package lt.bananull.whse.simulator;
 
-import lt.bananull.whse.load.SimulationState;
-import lt.bananull.whse.router.dto.Assignment;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lt.bananull.whse.load.dto.SimulationStateDto;
+import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.router.dto.RouterRequestDto;
+import lt.bananull.whse.router.dto.RouterResponseDto;
+import lt.bananull.whse.utils.JacksonMapper;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.PriorityQueue;
 
 public class Simulator {
 
-    private PriorityQueue<Assignment> assignments = new PriorityQueue<>();
+    private final RouterClient routerClient;
     private Instant now;
-    private SimulationState state;
+    private SimulationStateDto state;
+    private PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
 
-    public Simulator(List<Assignment> assignments) {
-        this.assignments.addAll(assignments);
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState) {
+        this.routerClient = routerClient;
+        this.state = initialState;
     }
 
     public void run() {
+        // TEMP
+        RouterRequestDto routerRequest = RouterRequestDto.from(state);
+        RouterResponseDto routerResponse = routerClient.route(routerRequest);
+        try {
+            System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         // Run event loop
     }
 }

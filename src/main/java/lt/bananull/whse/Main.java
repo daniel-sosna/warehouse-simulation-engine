@@ -1,12 +1,9 @@
 package lt.bananull.whse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lt.bananull.whse.utils.JacksonMapper;
+import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
-import lt.bananull.whse.router.dto.RouterRequestDto;
-import lt.bananull.whse.router.dto.RouterResponseDto;
 
 import java.nio.file.Path;
 
@@ -15,22 +12,19 @@ public class Main {
     private static String routerCmd = "./build/router";
     private static String eventLogFile = "./simulation.log";
 
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
         collectArgs(args);
 
-        // TODO 1. read files from dataDir
+        // Read files from dataDir
         DataLoader loader = new DataLoader(Path.of(dataDir));
         SimulationStateDto state = loader.loadAll();
 
         // Create router client
         RouterClient routerClient = new RouterClient(routerCmd);
 
-        // TEMP
-        RouterRequestDto routerRequest = RouterRequestDto.from(state);
-        RouterResponseDto routerResponse = routerClient.route(routerRequest);
-        System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
-
-        // TODO 2. main while loop
+        // Main loop
+        Simulator simulator = new Simulator(routerClient, state);
+        simulator.run();
     }
 
     private static void collectArgs(String[] args) {
