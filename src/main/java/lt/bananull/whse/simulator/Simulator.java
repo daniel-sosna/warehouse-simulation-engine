@@ -20,9 +20,9 @@ public class Simulator {
 
     // For now random numbers
     // TODO: move to a constants file
-    @Getter private static final long ROUTER_PERIOD = 900;
-    @Getter private static final long TRAVEL_SECONDS = 60;
-    @Getter private static final long PICK_SECONDS = 30;
+    @Getter private final long ROUTER_PERIOD = 900;
+    @Getter private final long TRAVEL_SECONDS = 60;
+    @Getter private final long PICK_SECONDS = 30;
 
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
