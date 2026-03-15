@@ -55,6 +55,11 @@ public class Port {
         return handlingFlags.containsAll(shipmentHandlingFlags);
     }
 
+    /**
+     * Enqueues a shipment. Callers must check {@link #hasCapacity()} first.
+     *
+     * @throws IllegalStateException if the queue is at capacity.
+     */
     public void enqueueShipment(String shipmentId) {
         if (!hasCapacity()) {
             throw new IllegalStateException(

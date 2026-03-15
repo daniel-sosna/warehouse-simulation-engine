@@ -45,22 +45,61 @@ public class Bin {
 
     public Map<String, Integer> getReservedItems() { return Collections.unmodifiableMap(reservedItems); }
 
-    /**
-     * Deducts {@code qty} units of {@code ean} from this bin's stock.
-     *
-     * @throws IllegalArgumentException if insufficient stock is present.
-     */
-    public void deductStock(String ean, int qty) {
-        int current = stock.getOrDefault(ean, 0);
-        if (current < qty) {
-            throw new IllegalArgumentException(
-                    "Bin %s has only %d units of EAN %s; cannot deduct %d".formatted(id, current, ean, qty));
+    public Map<String, Integer> getAvailableStock() {
+        Map<String, Integer> availableStock = new HashMap<>(stock);
+
+        for (Map.Entry<String, Integer> entry : reservedItems.entrySet()) {
+            String ean = entry.getKey();
+            int reservedQty = entry.getValue();
+            int remaining = availableStock.getOrDefault(ean, 0) - reservedQty;
+
+            if (remaining <= 0) {
+                availableStock.remove(ean);
+            } else {
+                availableStock.put(ean, remaining);
+            }
         }
-        int remaining = current - qty;
-        if (remaining == 0) {
-            stock.remove(ean);
-        } else {
-            stock.put(ean, remaining);
+
+        return Collections.unmodifiableMap(availableStock);
+    }
+
+    /**
+     * Deducts multiple EAN quantities from this bin's stock.
+     * All deductions are validated first and then applied.
+     *
+     * @throws IllegalArgumentException if requested quantities are invalid or insufficient stock is present.
+     */
+    public void deductStock(Map<String, Integer> itemsToDeduct) {
+        if (itemsToDeduct == null || itemsToDeduct.isEmpty()) {
+            throw new IllegalArgumentException("Items to deduct must be provided for bin %s".formatted(id));
+        }
+
+        for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
+            String ean = entry.getKey();
+            Integer qty = entry.getValue();
+
+            if (qty == null || qty <= 0) {
+                throw new IllegalArgumentException(
+                        "Deduct quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
+            }
+
+            int current = stock.getOrDefault(ean, 0);
+            if (current < qty) {
+                throw new IllegalArgumentException(
+                        "Bin %s has only %d units of EAN %s; cannot deduct %d".formatted(id, current, ean, qty));
+            }
+        }
+
+        for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
+            String ean = entry.getKey();
+            int qty = entry.getValue();
+            int remaining = stock.get(ean) - qty;
+
+            if (remaining == 0) {
+                stock.remove(ean);
+            } else {
+                stock.put(ean, remaining);
+            }
         }
     }
 
