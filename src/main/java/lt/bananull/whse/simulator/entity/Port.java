@@ -4,9 +4,10 @@ import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -20,7 +21,7 @@ public class Port {
     private final String gridId;
     private final Set<String> handlingFlags;
     private PortStatus status;
-    private final Deque<String> shipmentQueue;
+    private final Queue<String> shipmentQueue;
     private String activeShipmentId;
 
     public Port(String id, String gridId, Set<String> handlingFlags) {
@@ -43,7 +44,7 @@ public class Port {
 
     public PortStatus getStatus() { return status; }
 
-    public Deque<String> getShipmentQueue() { return shipmentQueue; }
+    public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
     public String getActiveShipmentId() { return activeShipmentId; }
 
@@ -65,11 +66,11 @@ public class Port {
             throw new IllegalStateException(
                     "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY));
         }
-        shipmentQueue.addLast(shipmentId);
+        shipmentQueue.add(shipmentId);
     }
 
     public String dequeueShipment() {
-        return shipmentQueue.pollFirst();
+        return shipmentQueue.poll();
     }
 
     public void setStatus(PortStatus status) {

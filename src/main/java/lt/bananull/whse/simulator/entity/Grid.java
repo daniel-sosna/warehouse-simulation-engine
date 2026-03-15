@@ -4,9 +4,10 @@ import lt.bananull.whse.load.dto.GridDto;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
@@ -15,7 +16,7 @@ public class Grid {
 
     private final String id;
     private final List<String> portIds;
-    private final Deque<String> shipmentQueue;
+    private final Queue<String> shipmentQueue;
 
     public Grid(String id) {
         this.id = id;
@@ -31,14 +32,14 @@ public class Grid {
 
     public List<String> getPortIds() { return Collections.unmodifiableList(portIds); }
 
-    public Deque<String> getShipmentQueue() { return shipmentQueue; }
+    public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
     public void enqueueShipment(String shipmentId) {
-        shipmentQueue.addLast(shipmentId);
+        shipmentQueue.add(shipmentId);
     }
 
     public String dequeueShipment() {
-        return shipmentQueue.pollFirst();
+        return shipmentQueue.poll();
     }
 
     public boolean hasQueuedShipments() {

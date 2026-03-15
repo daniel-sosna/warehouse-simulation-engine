@@ -117,8 +117,14 @@ public class Bin {
      * @throws IllegalArgumentException if reserved quantities are invalid or exceed stock.
      */
     public void reserveForPort(String portId, Map<String, Integer> itemsToReserve) {
+        if (portId == null || portId.isBlank()) {
+            throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));
+        }
         if (itemsToReserve == null || itemsToReserve.isEmpty()) {
             throw new IllegalArgumentException("Reserved items must be provided when reserving bin %s".formatted(id));
+        }
+        if (status == BinStatus.RESERVED) {
+            throw new IllegalStateException("Bin %s is already reserved for port %s".formatted(id, reservedForPortId));
         }
 
         Map<String, Integer> validatedReservedItems = new HashMap<>();
