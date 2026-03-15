@@ -1,9 +1,5 @@
 package lt.bananull.whse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lt.bananull.whse.event.EventHandler;
-import lt.bananull.whse.event.TestEvent;
-import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
@@ -37,7 +33,6 @@ public class Main {
         // Main loop
         Simulator simulator = new Simulator(routerClient, state, startTime, endTime);
         simulator.run();
-        EventHandler.handle(new TestEvent(100L));
     }
 
     private static void collectArgs(String[] args) {
