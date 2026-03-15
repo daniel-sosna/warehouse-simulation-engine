@@ -1,12 +1,10 @@
 package lt.bananull.whse.event;
 
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.simulator.Simulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j(topic = "EVENT_LOGGER")
 public class EventHandler {
-
-    private static final Logger eventLogger = LoggerFactory.getLogger("EVENT_LOGGER");
 
     private final Simulator simulator;
 
@@ -15,7 +13,7 @@ public class EventHandler {
     }
 
     public void handle(Event event) {
-        eventLogger.info(event.toString());
+        log.info(event.toString());
         event.execute(simulator);
     }
 

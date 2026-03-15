@@ -1,5 +1,6 @@
 package lt.bananull.whse.simulator;
 
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
@@ -7,15 +8,12 @@ import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.PriorityQueue;
 
+@Slf4j
 public class Simulator {
-
-    private static final Logger log = LoggerFactory.getLogger(Simulator.class);
 
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
