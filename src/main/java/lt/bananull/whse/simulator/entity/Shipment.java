@@ -1,5 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
@@ -14,11 +16,19 @@ import java.util.Map;
  */
 public class Shipment {
 
+    @Getter
     private final String id;
     private final Map<String, Integer> items;
+    @Getter
     private final Instant shipmentDate;
+    @Getter
+    @Setter
     private ShipmentStatus status;
+    @Getter
+    @Setter
     private String assignedGridId;
+    @Getter
+    @Setter
     private String assignedPortId;
 
     public Shipment(String id, Map<String, Integer> items, Instant shipmentDate) {
@@ -32,29 +42,7 @@ public class Shipment {
         return new Shipment(dto.id(), dto.items(), dto.shipmentDate());
     }
 
-    public String getId() { return id; }
-
     public Map<String, Integer> getItems() { return Collections.unmodifiableMap(items); }
-
-    public Instant getShipmentDate() { return shipmentDate; }
-
-    public ShipmentStatus getStatus() { return status; }
-
-    public String getAssignedGridId() { return assignedGridId; }
-
-    public String getAssignedPortId() { return assignedPortId; }
-
-    public void setStatus(ShipmentStatus status) {
-        this.status = status;
-    }
-
-    public void setAssignedGridId(String assignedGridId) {
-        this.assignedGridId = assignedGridId;
-    }
-
-    public void setAssignedPortId(String assignedPortId) {
-        this.assignedPortId = assignedPortId;
-    }
 
     @Override
     public String toString() {

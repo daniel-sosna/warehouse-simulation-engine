@@ -1,5 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.simulator.enums.BinStatus;
 
@@ -12,10 +14,16 @@ import java.util.Map;
  */
 public class Bin {
 
+    @Getter
     private final String id;
+    @Getter
+    @Setter
     private String currentGridId;
     private final Map<String, Integer> stock;
+    @Getter
+    @Setter
     private BinStatus status;
+    @Getter
     private String reservedForPortId;
     private final Map<String, Integer> reservedItems;
 
@@ -33,15 +41,7 @@ public class Bin {
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
     }
 
-    public String getId() { return id; }
-
-    public String getCurrentGridId() { return currentGridId; }
-
     public Map<String, Integer> getStock() { return Collections.unmodifiableMap(stock); }
-
-    public BinStatus getStatus() { return status; }
-
-    public String getReservedForPortId() { return reservedForPortId; }
 
     public Map<String, Integer> getReservedItems() { return Collections.unmodifiableMap(reservedItems); }
 
@@ -101,14 +101,6 @@ public class Bin {
                 stock.put(ean, remaining);
             }
         }
-    }
-
-    public void setCurrentGridId(String currentGridId) {
-        this.currentGridId = currentGridId;
-    }
-
-    public void setStatus(BinStatus status) {
-        this.status = status;
     }
 
     /**

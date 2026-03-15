@@ -1,5 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
@@ -17,11 +19,17 @@ public class Port {
 
     public static final int DEFAULT_QUEUE_CAPACITY = 20;
 
+    @Getter
     private final String id;
+    @Getter
     private final String gridId;
     private final Set<String> handlingFlags;
+    @Getter
+    @Setter
     private PortStatus status;
     private final Queue<String> shipmentQueue;
+    @Getter
+    @Setter
     private String activeShipmentId;
 
     public Port(String id, String gridId, Set<String> handlingFlags) {
@@ -36,17 +44,9 @@ public class Port {
         return new Port(dto.id(), gridId, new HashSet<>(dto.handlingFlags()));
     }
 
-    public String getId() { return id; }
-
-    public String getGridId() { return gridId; }
-
     public Set<String> getHandlingFlags() { return Collections.unmodifiableSet(handlingFlags); }
 
-    public PortStatus getStatus() { return status; }
-
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
-
-    public String getActiveShipmentId() { return activeShipmentId; }
 
     public boolean hasCapacity() {
         return shipmentQueue.size() < DEFAULT_QUEUE_CAPACITY;
@@ -71,14 +71,6 @@ public class Port {
 
     public String dequeueShipment() {
         return shipmentQueue.poll();
-    }
-
-    public void setStatus(PortStatus status) {
-        this.status = status;
-    }
-
-    public void setActiveShipmentId(String activeShipmentId) {
-        this.activeShipmentId = activeShipmentId;
     }
 
     @Override
