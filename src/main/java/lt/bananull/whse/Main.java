@@ -1,36 +1,38 @@
 package lt.bananull.whse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import lt.bananull.whse.utils.JacksonMapper;
+import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.load.DataLoader;
-import lt.bananull.whse.load.dto.SimulationState;
+import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
-import lt.bananull.whse.router.dto.RouterRequest;
-import lt.bananull.whse.router.dto.RouterResponse;
+import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
 
 public class Main {
     private static String dataDir = "./data/1"; // TODO change to "./data"
     private static String routerCmd = "./build/router";
     private static String eventLogFile = "./simulation.log";
 
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
         collectArgs(args);
 
-        // TODO 1. read files from dataDir
+        // Read files from dataDir
         DataLoader loader = new DataLoader(Path.of(dataDir));
-        SimulationState state = loader.loadAll();
+        SimulationStateDto state = loader.loadAll();
 
         // Create router client
         RouterClient routerClient = new RouterClient(routerCmd);
 
-        // TEMP
-        RouterRequest routerRequest = RouterRequest.from(state);
-        RouterResponse routerResponse = routerClient.route(routerRequest);
-        System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
+        // Resolve time
+        ZoneId zone = ZoneId.of("UTC");
+        Instant startTime = DateTimeResolver.resolveSimulationStart(state, zone);
+        Instant endTime = DateTimeResolver.resolveSimulationEnd(state, zone);
 
-        // TODO 2. main while loop
+        // Main loop
+        Simulator simulator = new Simulator(routerClient, state, startTime, endTime);
+        simulator.run();
     }
 
     private static void collectArgs(String[] args) {
