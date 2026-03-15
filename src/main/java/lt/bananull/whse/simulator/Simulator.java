@@ -40,7 +40,8 @@ public class Simulator {
         assignments.addAll(routerResponse.assignments());
         log.info(assignments.toString());
 
-        EventHandler.handle(new TestEvent(100L));
+        EventHandler eventHandler = new EventHandler(this);
+        eventHandler.handle(new TestEvent(100L));
         // Run event loop
     }
 }

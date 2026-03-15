@@ -1,5 +1,6 @@
 package lt.bananull.whse.event;
 
+import lt.bananull.whse.simulator.Simulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,7 @@ public class TestEvent extends Event {
     }
 
     @Override
-    public void execute() {
+    public void execute(Simulator simulator) {
         log.info("Doing work...");
         log.debug("Debugging...");
     }
