@@ -6,7 +6,7 @@ import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.load.dto.ShiftDto;
-import lt.bananull.whse.load.dto.SimulationState;
+import lt.bananull.whse.load.dto.SimulationStateDto;
 
 import java.time.*;
 import java.util.Comparator;
@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record RouterRequest(
+public record RouterRequestDto(
         @JsonProperty("state") State state
 ) {
 
-    public static RouterRequest from(SimulationState simulationState) {
+    public static RouterRequestDto from(SimulationStateDto simulationState) {
         ZoneId zone = ZoneId.of("UTC");
 
         LocalDate simulationDate = resolveSimulationDateFromShipments(simulationState, zone);
@@ -35,7 +35,7 @@ public record RouterRequest(
                 grids
         );
 
-        return new RouterRequest(routerState);
+        return new RouterRequestDto(routerState);
     }
 
     private record State(
@@ -73,7 +73,7 @@ public record RouterRequest(
             @JsonProperty("handling_flags") List<String> handlingFlags
     ) {}
 
-    private static LocalDate resolveSimulationDateFromShipments(SimulationState state, ZoneId zone) {
+    private static LocalDate resolveSimulationDateFromShipments(SimulationStateDto state, ZoneId zone) {
         return state.shipments().stream()
                 .map(ShipmentDto::shipmentDate)
                 .min(Comparator.naturalOrder())
@@ -81,7 +81,7 @@ public record RouterRequest(
                 .orElseGet(() -> LocalDate.now(zone));
     }
 
-    private static Instant resolveSimulationNow(SimulationState state,
+    private static Instant resolveSimulationNow(SimulationStateDto state,
                                                 LocalDate simulationDate,
                                                 ZoneId zone) {
         return state.grids().stream()
@@ -151,7 +151,7 @@ public record RouterRequest(
         List<RouterPortConfig> ports =
                 dto.portConfig() == null ? List.of()
                         : dto.portConfig().stream()
-                        .map(RouterRequest::mapPort)
+                        .map(RouterRequestDto::mapPort)
                         .toList();
 
         Instant start = dto.start()

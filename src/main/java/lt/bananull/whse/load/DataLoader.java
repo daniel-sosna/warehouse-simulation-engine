@@ -6,7 +6,7 @@ import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.utils.JacksonMapper;
-import lt.bananull.whse.load.dto.SimulationState;
+import lt.bananull.whse.load.dto.SimulationStateDto;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +24,12 @@ public class DataLoader {
         this.objectMapper = JacksonMapper.create();
     }
 
-    public SimulationState loadAll() {
+    public SimulationStateDto loadAll() {
         try {
             List<BinDto> bins = loadBins();
             List<GridDto> grids = loadGrids();
             List<ShipmentDto> shipments = loadShipments();
-            return new SimulationState(bins, grids, shipments);
+            return new SimulationStateDto(bins, grids, shipments);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load dataset from " + dataDir, e);
         }
