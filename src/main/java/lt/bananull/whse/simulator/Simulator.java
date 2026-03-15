@@ -19,9 +19,10 @@ import java.util.PriorityQueue;
 public class Simulator {
 
     // For now random numbers
-    private static final long ROUTER_PERIOD = 900;
-    private static final long TRAVEL_SECONDS = 60;
-    private static final long PICK_SECONDS = 30;
+    // TODO: move to a constants file
+    public static final long ROUTER_PERIOD = 900;
+    public static final long TRAVEL_SECONDS = 60;
+    public static final long PICK_SECONDS = 30;
 
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
