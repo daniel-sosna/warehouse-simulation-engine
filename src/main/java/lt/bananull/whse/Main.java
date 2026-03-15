@@ -11,9 +11,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 public class Main {
+
     private static String dataDir = "./data/1"; // TODO change to "./data"
     private static String routerCmd = "./build/router";
-    private static String eventLogFile = "./simulation.log";
 
     public static void main(String[] args) {
         collectArgs(args);
@@ -40,7 +40,8 @@ public class Main {
             switch (args[i]) {
                 case "--dataDir" -> dataDir = args[++i];
                 case "--router" -> routerCmd = args[++i];
-                case "--eventLogFile" -> eventLogFile = args[++i];
+                case "--eventLogFile" -> System.setProperty("eventLogFile", args[++i]);
+                case "--debug" -> System.setProperty("logLevel", "DEBUG");
                 default -> System.err.println("Unknown argument: " + args[i]);
             }
         }

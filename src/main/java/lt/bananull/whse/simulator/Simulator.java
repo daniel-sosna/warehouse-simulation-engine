@@ -1,5 +1,8 @@
 package lt.bananull.whse.simulator;
 
+import lombok.extern.slf4j.Slf4j;
+import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
@@ -9,6 +12,7 @@ import lt.bananull.whse.router.dto.RouterResponseDto;
 import java.time.Instant;
 import java.util.PriorityQueue;
 
+@Slf4j
 public class Simulator {
 
     private final Instant simulationStartTime;
@@ -32,8 +36,10 @@ public class Simulator {
         RouterRequestDto routerRequest = RouterRequestDto.from(state, now);
         RouterResponseDto routerResponse = routerClient.route(routerRequest);
         assignments.addAll(routerResponse.assignments());
-        System.out.println(assignments);
+        log.info(assignments.toString());
 
+        EventHandler eventHandler = new EventHandler(this);
+        eventHandler.handle(new TestEvent(100L));
         // Run event loop
     }
 }

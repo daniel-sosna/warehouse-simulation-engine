@@ -1,0 +1,31 @@
+<configuration>
+
+    <property name="EVENT_LOG_FILE" value="${eventLogFile:-./simulation.log}" />
+
+    <!-- Console -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Event log -->
+    <appender name="EVENT_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${EVENT_LOG_FILE}</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Event logger -->
+    <logger name="EVENT_LOGGER" level="${logLevel:-INFO}" additivity="false">
+        <appender-ref ref="EVENT_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="${logLevel:-INFO}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
