@@ -1,12 +1,12 @@
-package lt.bananull.whse.router;
+package lt.bananull.whse.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lt.bananull.whse.dto.dataset.BinDto;
-import lt.bananull.whse.dto.dataset.GridDto;
-import lt.bananull.whse.dto.dataset.PortDto;
-import lt.bananull.whse.dto.dataset.ShipmentDto;
-import lt.bananull.whse.dto.dataset.ShiftDto;
-import lt.bananull.whse.load.SimulationState;
+import lt.bananull.whse.load.dto.BinDto;
+import lt.bananull.whse.load.dto.GridDto;
+import lt.bananull.whse.load.dto.PortDto;
+import lt.bananull.whse.load.dto.ShipmentDto;
+import lt.bananull.whse.load.dto.ShiftDto;
+import lt.bananull.whse.load.dto.SimulationState;
 
 import java.time.*;
 import java.util.Comparator;

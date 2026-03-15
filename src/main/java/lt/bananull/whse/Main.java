@@ -1,80 +1,46 @@
 package lt.bananull.whse;
 
-import lt.bananull.whse.dto.dataset.BinDto;
-import lt.bananull.whse.dto.dataset.GridDto;
-import lt.bananull.whse.dto.dataset.ShipmentDto;
-import lt.bananull.whse.dto.dataset.PortDto;
-import lt.bananull.whse.dto.dataset.ShiftDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.load.DataLoader;
-import lt.bananull.whse.load.SimulationState;
+import lt.bananull.whse.load.dto.SimulationState;
+import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.router.dto.RouterRequest;
+import lt.bananull.whse.router.dto.RouterResponse;
 
 import java.nio.file.Path;
 
 public class Main {
-    public static void main(String[] args) {
-        String dataDirArg = "./data/1"; // default
-        for (int i = 0; i < args.length - 1; i++) {
-            if ("--dataDir".equals(args[i])) {
-                dataDirArg = args[i + 1];
-            }
-        }
+    private static String dataDir = "./data/1"; // TODO change to "./data"
+    private static String routerCmd = "./build/router";
+    private static String eventLogFile = "./simulation.log";
 
-        System.out.println("Using dataDir: " + dataDirArg);
+    public static void main(String[] args) throws JsonProcessingException {
+        collectArgs(args);
 
-        Path dataDir = Path.of(dataDirArg);
-        DataLoader loader = new DataLoader(dataDir);
-
+        // TODO 1. read files from dataDir
+        DataLoader loader = new DataLoader(Path.of(dataDir));
         SimulationState state = loader.loadAll();
 
-        System.out.println();
-        System.out.println("=== DATASET STATE SUMMARY ===");
-        System.out.println("Bins:       " + state.bins().size());
-        System.out.println("Grids:      " + state.grids().size());
-        System.out.println("Shipments:  " + state.shipments().size());
-        System.out.println();
+        // Create router client
+        RouterClient routerClient = new RouterClient(routerCmd);
 
-        System.out.println("=== BINS ===");
-        for (BinDto bin : state.bins()) {
-            System.out.println("Bin ID: " + bin.id()
-                    + ", grid: " + bin.currentGridLocation());
-            bin.itemsInBin().forEach((ean, itemDto) ->
-                    System.out.println("  Item " + ean
-                            + " -> qty=" + itemDto.quantity())
-            );
-            System.out.println();
-        }
+        // TEMP
+        RouterRequest routerRequest = RouterRequest.from(state);
+        RouterResponse routerResponse = routerClient.route(routerRequest);
+        System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));
 
-        System.out.println("=== GRIDS ===");
-        for (GridDto grid : state.grids()) {
-            System.out.println("Grid ID: " + grid.id());
+        // TODO 2. main while loop
+    }
 
-            if (grid.shifts() != null) {
-                for (ShiftDto shift : grid.shifts()) {
-                    System.out.println("  Shift: " + shift.start()
-                            + " - " + shift.end());
-
-                    if (shift.portConfig() != null) {
-                        System.out.println("    Ports:");
-                        for (PortDto port : shift.portConfig()) {
-                            System.out.println("      Port ID: " + port.id()
-                                    + ", flags=" + port.handlingFlags());
-                        }
-                    }
-                }
+    private static void collectArgs(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--dataDir" -> dataDir = args[++i];
+                case "--router" -> routerCmd = args[++i];
+                case "--eventLogFile" -> eventLogFile = args[++i];
+                default -> System.err.println("Unknown argument: " + args[i]);
             }
-
-            System.out.println();
-        }
-
-        System.out.println("=== SHIPMENTS ===");
-        for (ShipmentDto shipment : state.shipments()) {
-            System.out.println("Shipment ID:   " + shipment.id());
-            System.out.println("Shipment date: " + shipment.shipmentDate());
-            System.out.println("Items:");
-            shipment.items().forEach((ean, qty) ->
-                    System.out.println("  " + ean + " -> " + qty)
-            );
-            System.out.println();
         }
     }
 }
