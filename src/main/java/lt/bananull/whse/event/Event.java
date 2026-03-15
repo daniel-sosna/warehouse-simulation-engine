@@ -1,9 +1,11 @@
 package lt.bananull.whse.event;
 
+import lombok.Getter;
 import lt.bananull.whse.simulator.Simulator;
 
 public abstract class Event implements Comparable<Event> {
 
+    @Getter
     private final long simTime;
 
     public Event(long simTime) {

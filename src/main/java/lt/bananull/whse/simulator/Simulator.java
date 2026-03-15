@@ -1,6 +1,8 @@
 package lt.bananull.whse.simulator;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
@@ -15,13 +17,25 @@ import java.util.PriorityQueue;
 @Slf4j
 public class Simulator {
 
+    // For now random numbers
+    private static final long ROUTER_PERIOD = 900;
+    private static final long TRAVEL_SECONDS = 60;
+    private static final long PICK_SECONDS = 30;
+
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
     private final RouterClient routerClient;
+
+    @Getter
     private long simTime = 0;
+    @Getter
     private Instant now;
+
     private SimulationStateDto state;
-    private PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
+
+    private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
+    private final PriorityQueue<Event> events = new PriorityQueue<>();
+
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
         this.routerClient = routerClient;
@@ -29,6 +43,15 @@ public class Simulator {
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
+    }
+
+    public void schedule(Event e) {
+        events.add(e);
+    }
+
+    private void setSimTime(long newSimTimeSeconds) {
+        this.simTime = newSimTimeSeconds;
+        this.now = simulationStartTime.plusSeconds(simTime);
     }
 
     public void run() {
@@ -40,6 +63,12 @@ public class Simulator {
 
         EventHandler eventHandler = new EventHandler(this);
         eventHandler.handle(new TestEvent(100L));
-        // Run event loop
+
+        while (!events.isEmpty()) {
+            Event e = events.poll();
+            setSimTime(e.getSimTime());
+            if (now.isAfter(simulationEndTime)) break;
+            e.execute(this);
+        }
     }
 }
