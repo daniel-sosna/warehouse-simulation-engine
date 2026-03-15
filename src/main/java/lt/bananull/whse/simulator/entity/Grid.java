@@ -1,5 +1,6 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.Getter;
 import lt.bananull.whse.load.dto.GridDto;
 
 import java.util.ArrayDeque;
@@ -14,6 +15,7 @@ import java.util.Queue;
  */
 public class Grid {
 
+    @Getter
     private final String id;
     private final List<String> portIds;
     private final Queue<String> shipmentQueue;
@@ -27,8 +29,6 @@ public class Grid {
     public static Grid from(GridDto dto) {
         return new Grid(dto.id());
     }
-
-    public String getId() { return id; }
 
     public List<String> getPortIds() { return Collections.unmodifiableList(portIds); }
 
