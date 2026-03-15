@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
-import lt.bananull.whse.event.TestEvent;
+import lt.bananull.whse.event.events.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
@@ -45,13 +45,23 @@ public class Simulator {
         this.now = startTime;
     }
 
-    public void schedule(Event e) {
+    public void enqueueEvent(Event e) {
         events.add(e);
     }
 
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
         this.now = simulationStartTime.plusSeconds(simTime);
+        log.info("Time is: " + simTime);
+    }
+
+    public void dispatchAll() {
+        while (!assignments.isEmpty()) {
+            AssignmentDto a = assignments.poll();
+
+            long doneAt = simTime + TRAVEL_SECONDS; // for now to test
+            enqueueEvent(new TestEvent(doneAt));
+        }
     }
 
     public void run() {
@@ -62,13 +72,13 @@ public class Simulator {
         log.info(assignments.toString());
 
         EventHandler eventHandler = new EventHandler(this);
-        eventHandler.handle(new TestEvent(100L));
+        dispatchAll();
 
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (now.isAfter(simulationEndTime)) break;
-            e.execute(this);
+            eventHandler.handle(e);
         }
     }
 }
