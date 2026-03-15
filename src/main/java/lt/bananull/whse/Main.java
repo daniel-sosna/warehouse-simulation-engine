@@ -4,8 +4,11 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
 
 public class Main {
     private static String dataDir = "./data/1"; // TODO change to "./data"
@@ -22,8 +25,13 @@ public class Main {
         // Create router client
         RouterClient routerClient = new RouterClient(routerCmd);
 
+        // Resolve time
+        ZoneId zone = ZoneId.of("UTC");
+        Instant startTime = DateTimeResolver.resolveSimulationStart(state, zone);
+        Instant endTime = DateTimeResolver.resolveSimulationEnd(state, zone);
+
         // Main loop
-        Simulator simulator = new Simulator(routerClient, state);
+        Simulator simulator = new Simulator(routerClient, state, startTime, endTime);
         simulator.run();
     }
 

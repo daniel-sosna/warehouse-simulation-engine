@@ -13,19 +13,24 @@ import java.util.PriorityQueue;
 
 public class Simulator {
 
+    private final Instant SimulationStartTime;
+    private final Instant SimulationEndTime;
     private final RouterClient routerClient;
     private Instant now;
     private SimulationStateDto state;
     private PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState) {
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
         this.routerClient = routerClient;
         this.state = initialState;
+        this.SimulationStartTime = startTime;
+        this.SimulationEndTime = endTime;
+        this.now = startTime;
     }
 
     public void run() {
         // TEMP
-        RouterRequestDto routerRequest = RouterRequestDto.from(state);
+        RouterRequestDto routerRequest = RouterRequestDto.from(state, now);
         RouterResponseDto routerResponse = routerClient.route(routerRequest);
         try {
             System.out.println(JacksonMapper.create().writeValueAsString(routerResponse));

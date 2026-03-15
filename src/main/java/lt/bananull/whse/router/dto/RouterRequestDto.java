@@ -9,26 +9,23 @@ import lt.bananull.whse.load.dto.ShiftDto;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 
 import java.time.*;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public record RouterRequestDto(
-        @JsonProperty("state") State state
+        @JsonProperty("state") RouterState state
 ) {
 
-    public static RouterRequestDto from(SimulationStateDto simulationState) {
+    public static RouterRequestDto from(SimulationStateDto simulationState, Instant simulationNow) {
         ZoneId zone = ZoneId.of("UTC");
-
-        LocalDate simulationDate = resolveSimulationDateFromShipments(simulationState, zone);
-        Instant simulationNow = resolveSimulationNow(simulationState, simulationDate, zone);
+        LocalDate simulationDate = LocalDate.ofInstant(simulationNow, zone);
 
         List<RouterShipment> shipmentsBacklog = mapShipments(simulationState.shipments());
         List<RouterStockBin> stockBins = mapBins(simulationState.bins());
         List<RouterGrid> grids = mapGrids(simulationState.grids(), simulationDate, zone);
 
-        State routerState = new State(
+        var routerState = new RouterState(
                 simulationNow,
                 shipmentsBacklog,
                 stockBins,
@@ -38,7 +35,7 @@ public record RouterRequestDto(
         return new RouterRequestDto(routerState);
     }
 
-    private record State(
+    private record RouterState(
             @JsonProperty("now") Instant now,
             @JsonProperty("shipments_backlog") List<RouterShipment> shipmentsBacklog,
             @JsonProperty("stock_bins") List<RouterStockBin> stockBins,
@@ -72,35 +69,6 @@ public record RouterRequestDto(
             @JsonProperty("port_id") String portId,
             @JsonProperty("handling_flags") List<String> handlingFlags
     ) {}
-
-    private static LocalDate resolveSimulationDateFromShipments(SimulationStateDto state, ZoneId zone) {
-        return state.shipments().stream()
-                .map(ShipmentDto::shipmentDate)
-                .min(Comparator.naturalOrder())
-                .map(instant -> LocalDateTime.ofInstant(instant, zone).toLocalDate())
-                .orElseGet(() -> LocalDate.now(zone));
-    }
-
-    private static Instant resolveSimulationNow(SimulationStateDto state,
-                                                LocalDate simulationDate,
-                                                ZoneId zone) {
-        return state.grids().stream()
-                .flatMap(grid -> grid.shifts().stream())
-                .map(ShiftDto::start)
-                .min(Comparator.naturalOrder())
-                .map(firstShiftStart ->
-                        firstShiftStart
-                                .atDate(simulationDate)
-                                .atZone(zone)
-                                .toInstant()
-                )
-                .orElseGet(() ->
-                        LocalTime.MIDNIGHT
-                                .atDate(simulationDate)
-                                .atZone(zone)
-                                .toInstant()
-                );
-    }
 
     private static List<RouterShipment> mapShipments(List<ShipmentDto> dtos) {
         return dtos.stream()
