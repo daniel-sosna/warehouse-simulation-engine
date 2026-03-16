@@ -19,20 +19,18 @@ public class Bin {
     private final String id;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
-    @Getter(AccessLevel.NONE)
-    private final Map<String, Integer> reservedItems;
     @Setter
     private String currentGridId;
     @Setter
-    private BinStatus status;
+    private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
+    @Getter(AccessLevel.NONE)
+    private final Map<String, Integer> reservedItems = new HashMap<>();
 
     public Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
         this.currentGridId = currentGridId;
         this.stock = new HashMap<>(stock);
-        this.reservedItems = new HashMap<>();
-        this.status = BinStatus.AVAILABLE;
     }
 
     public static Bin from(BinDto dto) {

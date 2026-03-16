@@ -24,13 +24,12 @@ public class Grid {
     private final List<ShiftDto> shifts;
     private final Map<String, Port> ports;
     @Getter(AccessLevel.NONE)
-    private final Queue<String> shipmentQueue;
+    private final Queue<String> shipmentQueue = new ArrayDeque<>();
 
     public Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
         this.id = id;
         this.shifts = List.copyOf(shifts);
         this.ports = Map.copyOf(ports);
-        this.shipmentQueue = new ArrayDeque<>();
     }
 
     public static Grid from(GridDto dto) {
