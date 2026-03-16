@@ -1,5 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
+import lt.bananull.whse.load.dto.SimulationStateDto;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,20 +22,25 @@ public record SimulationState(
             Map<String, Grid> grids
     ) {
         this.shipments = new HashMap<>(shipments);
-        this.bins = new HashMap<>(bins);
-        this.grids = new HashMap<>(grids);
+        this.bins = Map.copyOf(bins);
+        this.grids = Map.copyOf(grids);
     }
 
-    // Accessors - return unmodifiable views; mutate the entity objects, not these maps
+    public static SimulationState from(SimulationStateDto dto) {
+        Map<String, Shipment> shipments = new HashMap<>();
+        dto.shipments().forEach(s -> shipments.put(s.id(), Shipment.from(s)));
+
+        Map<String, Bin> bins = new HashMap<>();
+        dto.bins().forEach(b -> bins.put(b.id(), Bin.from(b)));
+
+        Map<String, Grid> grids = new HashMap<>();
+        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g)));
+
+        return new SimulationState(shipments, bins, grids);
+    }
 
     @Override
     public Map<String, Shipment> shipments() { return Collections.unmodifiableMap(shipments); }
-
-    @Override
-    public Map<String, Bin> bins() { return Collections.unmodifiableMap(bins); }
-
-    @Override
-    public Map<String, Grid> grids() { return Collections.unmodifiableMap(grids); }
 
     public Shipment getShipment(String id) {
         return shipments.get(id);
