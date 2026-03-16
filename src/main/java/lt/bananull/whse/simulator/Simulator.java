@@ -32,7 +32,7 @@ public class Simulator {
     @Getter private Instant now;
     @Getter private final SimulationState state;
 
-    @Getter private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
+    private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
