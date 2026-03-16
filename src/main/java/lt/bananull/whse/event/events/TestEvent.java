@@ -1,6 +1,7 @@
-package lt.bananull.whse.event;
+package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
+import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 
 @Slf4j
