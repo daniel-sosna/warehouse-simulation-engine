@@ -23,7 +23,7 @@ public class BinArrivesAtPort extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        long pickDoneAt = simulator.getSimTime() + simulator.getPICK_SECONDS();
+        long pickDoneAt = getSimTime() + simulator.getPICK_SECONDS();
         simulator.enqueueEvent(new BinPickCompleted(pickDoneAt, assignment));
     }
 
