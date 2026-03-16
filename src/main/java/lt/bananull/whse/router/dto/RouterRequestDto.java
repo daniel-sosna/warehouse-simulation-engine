@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
+import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,6 +15,9 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static lt.bananull.whse.simulator.enums.ShipmentStatus.RECEIVED;
+import static lt.bananull.whse.simulator.enums.ShipmentStatus.ROUTED;
 
 public record RouterRequestDto(
         @JsonProperty("state") RouterState state
@@ -23,7 +27,8 @@ public record RouterRequestDto(
         ZoneId zone = ZoneId.of("UTC");
         LocalDate simulationDate = LocalDate.ofInstant(simulationNow, zone);
 
-        List<RouterShipment> shipmentsBacklog = mapShipments(simulationState.shipments().values());
+        List<Shipment> filteredShipments = filterShipmentsForRouting(simulationNow, simulationState.shipments().values());
+        List<RouterShipment> shipmentsBacklog = mapShipments(filteredShipments);
         List<RouterStockBin> stockBins = mapBins(simulationState.bins().values());
         List<RouterGrid> grids = mapGrids(simulationState.grids().values(), simulationDate, zone);
 
@@ -132,5 +137,14 @@ public record RouterRequestDto(
                 dto.id(),
                 dto.handlingFlags()
         );
+    }
+
+    private static List<Shipment> filterShipmentsForRouting(Instant simulationNow, Collection<Shipment> shipments) {
+        List<ShipmentStatus> validStatusList = List.of(RECEIVED, ROUTED);
+
+        return shipments.stream()
+                .filter(shipment -> !shipment.getShipmentDate().isAfter(simulationNow)
+                        && validStatusList.contains(shipment.getStatus()))
+                .toList();
     }
 }
