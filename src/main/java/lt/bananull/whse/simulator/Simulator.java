@@ -27,7 +27,6 @@ public class Simulator {
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
-    @Getter private final RouterClient routerClient;
 
     @Getter private long simTime = 0;
     @Getter private Instant now;
@@ -37,7 +36,6 @@ public class Simulator {
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
-        this.routerClient = routerClient;
         this.state = SimulationState.from(initialState);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
