@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.BinArrivesAtPort;
-import lt.bananull.whse.event.events.TestEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
@@ -51,7 +50,7 @@ public class Simulator {
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
         this.now = simulationStartTime.plusSeconds(simTime);
-        log.info("Time is: " + simTime);
+        log.info("Time is: {}", simTime);
     }
 
     public void dispatchAll() {
