@@ -1,0 +1,89 @@
+{
+  "pickingThroughput": {
+    "standard": 140,
+    "fragile": 70,
+    "randomness": {
+      "min": 0.8,
+      "max": 1.2
+    }
+  },
+  "gridBinDelivery": {
+    "portQueueCapacity": 20,
+    "deliveryTimes": {
+      "AS1": 6,
+      "AS2": 4,
+      "AS3": 5
+    },
+    "randomness": {
+      "min": 0.8,
+      "max": 1.2
+    }
+  },
+  "transfersConveyors": {
+    "durations": [
+      {
+        "from": "AS1",
+        "to": "AS2",
+        "duration": 60,
+        "throughput": 1000
+      },
+      {
+        "from": "AS1",
+        "to": "AS3",
+        "duration": 240,
+        "throughput": 800
+      },
+      {
+        "from": "AS2",
+        "to": "AS3",
+        "duration": 360,
+        "throughput": 600
+      }
+    ],
+    "durationRandomness": {
+      "min": 0.8,
+      "max": 1.2
+    },
+    "throughputRandomness": {
+      "min": 0.9,
+      "max": 1.1
+    }
+  },
+  "truckArrivalSchedules": {
+    "schedules": [
+      {
+        "sortingDirection": "direction-1",
+        "pullTimes": [
+          "14:00",
+          "18:00"
+        ],
+        "weekdays": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ]
+      },
+      {
+        "sortingDirection": "direction-1",
+        "pullTimes": [
+          "19:00"
+        ],
+        "weekdays": [
+          "Saturday"
+        ]
+      },
+      {
+        "sortingDirection": "direction-2",
+        "pullTimes": [
+          "16:30"
+        ],
+        "weekdays": [
+          "Wednesday"
+        ]
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@ import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.SimulationConstants;
 
 public class RouterTickEvent extends Event {
 
@@ -24,7 +25,7 @@ public class RouterTickEvent extends Event {
 
         simulator.dispatchAll();
 
-        long nextSimTime = getSimTime() + simulator.getROUTER_PERIOD();
+        long nextSimTime = getSimTime() + SimulationConstants.ROUTER_INTERVAL_SECONDS;
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
         }

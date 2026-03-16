@@ -2,9 +2,11 @@ package lt.bananull.whse.load;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.ShipmentDto;
+import lt.bananull.whse.simulator.SimulationParameters;
 import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 
@@ -14,7 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+@Slf4j
 public class DataLoader {
+
+    private static final String PARAMETERS_FILE = "parameters.json";
 
     private final Path dataDir;
     private final ObjectMapper objectMapper;
@@ -32,6 +37,27 @@ public class DataLoader {
             return new SimulationStateDto(bins, grids, shipments);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load dataset from " + dataDir, e);
+        }
+    }
+
+    /**
+     * Loads simulation parameters from {@code parameters.json} in the dataset directory.
+     * If the file does not exist, default parameter values are returned.
+     * Values present in the file override the corresponding defaults.
+     */
+    public SimulationParameters loadParameters() {
+        Path parametersPath = dataDir.resolve(PARAMETERS_FILE);
+        SimulationParameters defaults = new SimulationParameters();
+
+        if (!Files.exists(parametersPath)) {
+            log.info("No {} found in {}; using default simulation parameters.", PARAMETERS_FILE, dataDir);
+            return defaults;
+        }
+
+        try (InputStream in = Files.newInputStream(parametersPath)) {
+            return objectMapper.readerForUpdating(defaults).readValue(in);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + PARAMETERS_FILE + " from " + dataDir, e);
         }
     }
 

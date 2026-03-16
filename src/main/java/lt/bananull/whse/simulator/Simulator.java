@@ -18,12 +18,6 @@ import java.util.PriorityQueue;
 @Slf4j
 public class Simulator {
 
-    // For now random numbers
-    // TODO: move to a constants file
-    @Getter private final long ROUTER_PERIOD = 900;
-    @Getter private final long TRAVEL_SECONDS = 60;
-    @Getter private final long PICK_SECONDS = 30;
-
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
@@ -31,16 +25,18 @@ public class Simulator {
     @Getter private long simTime = 0;
     @Getter private Instant now;
     @Getter private final SimulationState state;
+    @Getter private final SimulationParameters parameters;
 
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime, Instant endTime, SimulationParameters parameters) {
         this.state = SimulationState.from(initialState);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
         this.simulationDurationSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        this.parameters = parameters;
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
@@ -64,7 +60,9 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            long doneAt = simTime + TRAVEL_SECONDS;
+            int deliverySeconds = parameters.getGridBinDelivery().getDeliveryTimes()
+                    .getOrDefault(a.packingGrid(), SimulationConstants.DEFAULT_DELIVERY_SECONDS);
+            long doneAt = simTime + deliverySeconds;
             enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
             // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
