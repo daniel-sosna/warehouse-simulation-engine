@@ -77,7 +77,7 @@ public record RouterRequestDto(
             @JsonProperty("handling_flags") List<String> handlingFlags
     ) {}
 
-    private static List<RouterShipment> mapShipments(List<Shipment> entities) {
+    private static List<RouterShipment> mapShipments(Collection<Shipment> entities) {
         return entities.stream()
                 .map(entity -> new RouterShipment(
                         entity.getId(),
