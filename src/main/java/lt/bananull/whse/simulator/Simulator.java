@@ -5,11 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.BinArrivesAtPort;
+import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
-import lt.bananull.whse.router.dto.RouterRequestDto;
-import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
@@ -26,13 +25,13 @@ public class Simulator {
 
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
-    private final RouterClient routerClient;
+    @Getter private final RouterClient routerClient;
 
     @Getter private long simTime = 0;
     @Getter private Instant now;
     @Getter private final SimulationState state;
 
-    private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
+    @Getter private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
@@ -41,6 +40,11 @@ public class Simulator {
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
+
+        long endSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        for (long t = 0; t <= endSeconds; t += ROUTER_PERIOD) {
+            enqueueEvent(new RouterTickEvent(t));
+        }
     }
 
     public void enqueueEvent(Event e) {
@@ -70,14 +74,7 @@ public class Simulator {
     }
 
     public void run() {
-        // TEMP
-        RouterRequestDto routerRequest = RouterRequestDto.from(state, now);
-        RouterResponseDto routerResponse = routerClient.route(routerRequest);
-        assignments.addAll(routerResponse.assignments());
-        log.info(assignments.toString());
-
         EventHandler eventHandler = new EventHandler(this);
-        dispatchAll();
 
         while (!events.isEmpty()) {
             Event e = events.poll();
