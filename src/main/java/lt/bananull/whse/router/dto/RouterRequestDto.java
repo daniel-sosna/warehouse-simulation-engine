@@ -1,31 +1,31 @@
 package lt.bananull.whse.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lt.bananull.whse.load.dto.BinDto;
-import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
-import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.load.dto.ShiftDto;
-import lt.bananull.whse.load.dto.SimulationStateDto;
+import lt.bananull.whse.simulator.entity.Bin;
+import lt.bananull.whse.simulator.entity.Grid;
+import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public record RouterRequestDto(
         @JsonProperty("state") RouterState state
 ) {
 
-    public static RouterRequestDto from(SimulationStateDto simulationState, Instant simulationNow) {
+    public static RouterRequestDto from(SimulationState simulationState, Instant simulationNow) {
         ZoneId zone = ZoneId.of("UTC");
         LocalDate simulationDate = LocalDate.ofInstant(simulationNow, zone);
 
-        List<RouterShipment> shipmentsBacklog = mapShipments(simulationState.shipments());
-        List<RouterStockBin> stockBins = mapBins(simulationState.bins());
-        List<RouterGrid> grids = mapGrids(simulationState.grids(), simulationDate, zone);
+        List<RouterShipment> shipmentsBacklog = mapShipments(simulationState.shipments().values());
+        List<RouterStockBin> stockBins = mapBins(simulationState.bins().values());
+        List<RouterGrid> grids = mapGrids(simulationState.grids().values(), simulationDate, zone);
 
         RouterState routerState = new RouterState(
                 simulationNow,
@@ -72,47 +72,37 @@ public record RouterRequestDto(
             @JsonProperty("handling_flags") List<String> handlingFlags
     ) {}
 
-    private static List<RouterShipment> mapShipments(List<ShipmentDto> dtos) {
-        return dtos.stream()
-                .map(dto -> new RouterShipment(
-                        dto.id(),
-                        dto.shipmentDate(),
-                        dto.items()
+    private static List<RouterShipment> mapShipments(Collection<Shipment> entities) {
+        return entities.stream()
+                .map(entity -> new RouterShipment(
+                        entity.getId(),
+                        entity.getShipmentDate(),
+                        entity.getItems()
                 ))
                 .toList();
     }
 
-    private static List<RouterStockBin> mapBins(List<BinDto> dtos) {
-        return dtos.stream()
-                .map(dto -> new RouterStockBin(
-                        dto.id(),
-                        dto.currentGridLocation(),
-                        dto.itemsInBin().entrySet().stream()
-                                .collect(Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        e -> e.getValue().quantity()
-                                ))
+    private static List<RouterStockBin> mapBins(Collection<Bin> entities) {
+        return entities.stream()
+                .map(entity -> new RouterStockBin(
+                        entity.getId(),
+                        entity.getCurrentGridId(), // TODO: find out whether it might be null or should we store `destinationGrid`
+                        entity.getAvailableStock()
                 ))
                 .toList();
     }
 
-    private static List<RouterGrid> mapGrids(List<GridDto> dtos,
+    private static List<RouterGrid> mapGrids(Collection<Grid> entities,
                                              LocalDate simulationDate,
                                              ZoneId zone) {
-        return dtos.stream()
-                .map(dto -> mapGrid(dto, simulationDate, zone))
+        return entities.stream()
+                .map(entity -> {
+                    List<RouterShift> shifts = entity.getShifts().stream()
+                            .map(shiftDto -> mapShift(shiftDto, simulationDate, zone))
+                            .toList();
+                    return new RouterGrid(entity.getId(), shifts);
+                })
                 .toList();
-    }
-
-    private static RouterGrid mapGrid(GridDto dto,
-                                      LocalDate simulationDate,
-                                      ZoneId zone) {
-        List<RouterShift> shifts = dto.shifts() == null ? List.of()
-                : dto.shifts().stream()
-                .map(shiftDto -> mapShift(shiftDto, simulationDate, zone))
-                .toList();
-
-        return new RouterGrid(dto.id(), shifts);
     }
 
     private static RouterShift mapShift(ShiftDto dto,

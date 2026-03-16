@@ -1,0 +1,62 @@
+package lt.bananull.whse.simulator.entity;
+
+import lt.bananull.whse.load.dto.SimulationStateDto;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Live simulation state: indexed maps for O(1) lookup of every entity by ID.
+ * This is the single source of truth used by all simulator components.
+ */
+public record SimulationState(
+        Map<String, Shipment> shipments,
+        Map<String, Bin> bins,
+        Map<String, Grid> grids
+) {
+
+    public SimulationState(
+            Map<String, Shipment> shipments,
+            Map<String, Bin> bins,
+            Map<String, Grid> grids
+    ) {
+        this.shipments = new HashMap<>(shipments);
+        this.bins = Map.copyOf(bins);
+        this.grids = Map.copyOf(grids);
+    }
+
+    public static SimulationState from(SimulationStateDto dto) {
+        Map<String, Shipment> shipments = new HashMap<>();
+        dto.shipments().forEach(s -> shipments.put(s.id(), Shipment.from(s)));
+
+        Map<String, Bin> bins = new HashMap<>();
+        dto.bins().forEach(b -> bins.put(b.id(), Bin.from(b)));
+
+        Map<String, Grid> grids = new HashMap<>();
+        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g)));
+
+        return new SimulationState(shipments, bins, grids);
+    }
+
+    @Override
+    public Map<String, Shipment> shipments() { return Collections.unmodifiableMap(shipments); }
+
+    public Shipment getShipment(String id) {
+        return shipments.get(id);
+    }
+
+    public Bin getBin(String id) {
+        return bins.get(id);
+    }
+
+    public Grid getGrid(String id) {
+        return grids.get(id);
+    }
+
+    @Override
+    public String toString() {
+        return "SimulationState{shipments=%d, bins=%d, grids=%d}"
+                .formatted(shipments.size(), bins.size(), grids.size());
+    }
+}

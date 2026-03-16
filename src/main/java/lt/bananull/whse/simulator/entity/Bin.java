@@ -1,5 +1,6 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lt.bananull.whse.load.dto.BinDto;
@@ -12,27 +13,24 @@ import java.util.Map;
 /**
  * Simulation entity representing a physical storage bin.
  */
+@Getter
 public class Bin {
 
-    @Getter
     private final String id;
-    @Getter
+    @Getter(AccessLevel.NONE)
+    private final Map<String, Integer> stock;
     @Setter
     private String currentGridId;
-    private final Map<String, Integer> stock;
-    @Getter
     @Setter
-    private BinStatus status;
-    @Getter
+    private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
-    private final Map<String, Integer> reservedItems;
+    @Getter(AccessLevel.NONE)
+    private final Map<String, Integer> reservedItems = new HashMap<>();
 
     public Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
         this.currentGridId = currentGridId;
         this.stock = new HashMap<>(stock);
-        this.reservedItems = new HashMap<>();
-        this.status = BinStatus.AVAILABLE;
     }
 
     public static Bin from(BinDto dto) {

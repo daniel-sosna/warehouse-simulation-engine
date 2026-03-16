@@ -8,6 +8,6 @@ public enum BinStatus {
     AVAILABLE,
     /** Bin has been claimed by a port; other ports enter a FCFS waiting list. */
     RESERVED,
-    /** Bin is in transit on a conveyor belt (moving to a port or being transferred between grids). */
+    /** Bin is in transit on a conveyor belt (being transferred between grids). */
     OUTSIDE
 }

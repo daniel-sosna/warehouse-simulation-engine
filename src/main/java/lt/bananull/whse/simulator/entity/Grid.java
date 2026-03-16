@@ -1,36 +1,46 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lt.bananull.whse.load.dto.GridDto;
+import lt.bananull.whse.load.dto.PortDto;
+import lt.bananull.whse.load.dto.ShiftDto;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
+@Getter
 public class Grid {
 
-    @Getter
     private final String id;
-    private final List<String> portIds;
-    private final Queue<String> shipmentQueue;
+    private final List<ShiftDto> shifts;
+    private final Map<String, Port> ports;
+    @Getter(AccessLevel.NONE)
+    private final Queue<String> shipmentQueue = new ArrayDeque<>();
 
-    public Grid(String id) {
+    public Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
         this.id = id;
-        this.portIds = new ArrayList<>();
-        this.shipmentQueue = new ArrayDeque<>();
+        this.shifts = List.copyOf(shifts);
+        this.ports = Map.copyOf(ports);
     }
 
     public static Grid from(GridDto dto) {
-        return new Grid(dto.id());
+        Map<String, Port> ports = new HashMap<>();
+        for (ShiftDto shift : dto.shifts()) {
+            for (PortDto port : shift.portConfig()) {
+                ports.put(port.id(), Port.from(port));
+            }
+        }
+        return new Grid(dto.id(), dto.shifts(), ports);
     }
-
-    public List<String> getPortIds() { return Collections.unmodifiableList(portIds); }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
@@ -46,14 +56,8 @@ public class Grid {
         return !shipmentQueue.isEmpty();
     }
 
-    public void registerPort(String portId) {
-        if (!portIds.contains(portId)) {
-            portIds.add(portId);
-        }
-    }
-
     @Override
     public String toString() {
-        return "Grid{id='%s', ports=%s, queueSize=%d}".formatted(id, portIds, shipmentQueue.size());
+        return "Grid{id='%s', shifts=%s, queueSize=%d}".formatted(id, shifts, shipmentQueue.size());
     }
 }
