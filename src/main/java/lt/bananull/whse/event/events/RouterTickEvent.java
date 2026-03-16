@@ -10,21 +10,23 @@ import lt.bananull.whse.simulator.Simulator;
 @Slf4j
 public class RouterTickEvent extends Event {
 
-    public RouterTickEvent(long simTime) {
+    private final RouterClient routerClient;
+
+    public RouterTickEvent(long simTime, RouterClient routerClient) {
         super(simTime);
+        this.routerClient = routerClient;
     }
 
     @Override
     public void execute(Simulator simulator) {
-        log.info(">>> RouterTickEvent at simTime={} (now={})", getSimTime(), simulator.getNow());
-
-        RouterClient routerClient = simulator.getRouterClient();
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), simulator.getNow());
-
         RouterResponseDto response = routerClient.route(request);
 
-        simulator.getAssignments().addAll(response.assignments());
+        simulator.updateAssignments(response.assignments());
 
-        simulator.dispatchAll();
+        long nextSimTime = getSimTime() + simulator.getROUTER_PERIOD();
+        if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
+            simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
+        }
     }
 }

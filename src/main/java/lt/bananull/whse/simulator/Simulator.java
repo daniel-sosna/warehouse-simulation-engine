@@ -12,6 +12,7 @@ import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.PriorityQueue;
 
 @Slf4j
@@ -25,6 +26,7 @@ public class Simulator {
 
     private final Instant simulationStartTime;
     private final Instant simulationEndTime;
+    @Getter private final long simulationDurationSeconds;
     @Getter private final RouterClient routerClient;
 
     @Getter private long simTime = 0;
@@ -40,15 +42,19 @@ public class Simulator {
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
+        this.simulationDurationSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
 
-        long endSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
-        for (long t = 0; t <= endSeconds; t += ROUTER_PERIOD) {
-            enqueueEvent(new RouterTickEvent(t));
-        }
+        enqueueEvent(new RouterTickEvent(0, routerClient));
     }
 
     public void enqueueEvent(Event e) {
         events.add(e);
+    }
+
+    public void updateAssignments(Collection<AssignmentDto> newAssignments) {
+        assignments.clear();
+        assignments.addAll(newAssignments);
+        dispatchAll();
     }
 
     private void setSimTime(long newSimTimeSeconds) {
