@@ -26,7 +26,7 @@ public class BinArrivesAtPort extends Event {
         log.info("bin_arrived binId={} grid={} shipmentId={} priority={}",
                 binId, packingGrid, assignment.shipmentId(), assignment.priority());
 
-        long pickDoneAt = simulator.getSimTime() + simulator.getPICK_SECONDS();
+        long pickDoneAt = simTime + simulator.getPICK_SECONDS();
         simulator.enqueueEvent(new BinPickCompleted(pickDoneAt, assignment));
     }
 
