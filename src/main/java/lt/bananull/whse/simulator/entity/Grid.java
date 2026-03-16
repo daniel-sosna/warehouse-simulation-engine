@@ -9,9 +9,10 @@ import lt.bananull.whse.load.dto.ShiftDto;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
@@ -20,23 +21,26 @@ import java.util.Set;
 public class Grid {
 
     private final String id;
-    private final Set<String> portIds;
+    private final List<ShiftDto> shifts;
+    private final Map<String, Port> ports;
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
-    public Grid(String id, Collection<String> portIds) {
+    public Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
         this.id = id;
-        this.portIds = Set.copyOf(portIds);
+        this.shifts = List.copyOf(shifts);
+        this.ports = Map.copyOf(ports);
         this.shipmentQueue = new ArrayDeque<>();
     }
 
     public static Grid from(GridDto dto) {
-        List<String> portIds = dto.shifts().stream()
-                .flatMap(shift -> shift.portConfig().stream())
-                .map(PortDto::id)
-                .distinct()
-                .toList();
-        return new Grid(dto.id(), portIds);
+        Map<String, Port> ports = new HashMap<>();
+        for (ShiftDto shift : dto.shifts()) {
+            for (PortDto port : shift.portConfig()) {
+                ports.put(port.id(), Port.from(port));
+            }
+        }
+        return new Grid(dto.id(), dto.shifts(), ports);
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
@@ -55,6 +59,6 @@ public class Grid {
 
     @Override
     public String toString() {
-        return "Grid{id='%s', ports=%s, queueSize=%d}".formatted(id, portIds, shipmentQueue.size());
+        return "Grid{id='%s', shifts=%s, queueSize=%d}".formatted(id, shifts, shipmentQueue.size());
     }
 }

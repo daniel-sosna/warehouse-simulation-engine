@@ -11,20 +11,17 @@ import java.util.Map;
 public record SimulationState(
         Map<String, Shipment> shipments,
         Map<String, Bin> bins,
-        Map<String, Grid> grids,
-        Map<String, Port> ports
+        Map<String, Grid> grids
 ) {
 
     public SimulationState(
             Map<String, Shipment> shipments,
             Map<String, Bin> bins,
-            Map<String, Grid> grids,
-            Map<String, Port> ports
+            Map<String, Grid> grids
     ) {
         this.shipments = new HashMap<>(shipments);
         this.bins = new HashMap<>(bins);
         this.grids = new HashMap<>(grids);
-        this.ports = new HashMap<>(ports);
     }
 
     // Accessors - return unmodifiable views; mutate the entity objects, not these maps
@@ -38,9 +35,6 @@ public record SimulationState(
     @Override
     public Map<String, Grid> grids() { return Collections.unmodifiableMap(grids); }
 
-    @Override
-    public Map<String, Port> ports() { return Collections.unmodifiableMap(ports); }
-
     public Shipment getShipment(String id) {
         return shipments.get(id);
     }
@@ -53,13 +47,9 @@ public record SimulationState(
         return grids.get(id);
     }
 
-    public Port getPort(String id) {
-        return ports.get(id);
-    }
-
     @Override
     public String toString() {
-        return "SimulationState{shipments=%d, bins=%d, grids=%d, ports=%d}"
-                .formatted(shipments.size(), bins.size(), grids.size(), ports.size());
+        return "SimulationState{shipments=%d, bins=%d, grids=%d}"
+                .formatted(shipments.size(), bins.size(), grids.size());
     }
 }

@@ -21,7 +21,6 @@ public class Port {
     public static final int DEFAULT_QUEUE_CAPACITY = 20;
 
     private final String id;
-    private final String gridId;
     private final Set<String> handlingFlags;
     @Setter
     private PortStatus status;
@@ -30,16 +29,15 @@ public class Port {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
-    public Port(String id, String gridId, Collection<String> handlingFlags) {
+    public Port(String id, Collection<String> handlingFlags) {
         this.id = id;
-        this.gridId = gridId;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.status = PortStatus.CLOSED;
         this.shipmentQueue = new ArrayDeque<>();
     }
 
-    public static Port from(PortDto dto, String gridId) {
-        return new Port(dto.id(), gridId, dto.handlingFlags());
+    public static Port from(PortDto dto) {
+        return new Port(dto.id(), dto.handlingFlags());
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
@@ -71,7 +69,7 @@ public class Port {
 
     @Override
     public String toString() {
-        return "Port{id='%s', grid='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(id, gridId, status, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY, activeShipmentId);
+        return "Port{id='%s', status=%s, queueSize=%d/%d, active='%s'}"
+                .formatted(id, status, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY, activeShipmentId);
     }
 }
