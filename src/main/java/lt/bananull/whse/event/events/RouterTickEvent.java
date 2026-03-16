@@ -22,6 +22,8 @@ public class RouterTickEvent extends Event {
 
         simulator.updateAssignments(response.assignments());
 
+        simulator.dispatchAll();
+
         long nextSimTime = getSimTime() + simulator.getROUTER_PERIOD();
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));

@@ -52,7 +52,6 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
-        dispatchAll();
     }
 
     private void setSimTime(long newSimTimeSeconds) {
