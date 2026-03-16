@@ -24,9 +24,6 @@ public class BinPickCompleted extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        log.info("pick_completed binId={} grid={} shipmentId={} picks={}",
-                binId, packingGrid, assignment.shipmentId(), assignment.picks().size());
-
         // For now just logging...
 
         // Todo:
