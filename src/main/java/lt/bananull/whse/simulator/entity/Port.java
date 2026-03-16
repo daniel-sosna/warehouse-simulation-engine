@@ -110,7 +110,8 @@ public class Port {
                     "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY));
         }
         if (!canHandle(shipmentHandlingFlags)) {
-            throw new IllegalStateException("Port %s cannot handle shipment %s with flags %s".formatted(id, shipmentId, shipmentHandlingFlags));
+            throw new IllegalStateException(
+                    "Port %s cannot handle shipment %s with flags %s".formatted(id, shipmentId, shipmentHandlingFlags));
         }
 
         shipmentQueue.add(shipmentId);

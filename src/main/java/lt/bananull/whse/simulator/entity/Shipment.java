@@ -32,6 +32,13 @@ public class Shipment {
         return new Shipment(dto.id(), dto.items(), dto.shipmentDate());
     }
 
+    public boolean isAvailableForRerouting() {
+        return (status == ShipmentStatus.ROUTED
+                || status == ShipmentStatus.CONSOLIDATION
+                || status == ShipmentStatus.READY)
+                && assignedPortId == null;
+    }
+
     public void routeToGrid(String gridId) {
         if (status != ShipmentStatus.RECEIVED) {
             throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
@@ -118,15 +125,13 @@ public class Shipment {
     }
 
     public void rollbackToReceived() {
-        if (status != ShipmentStatus.ROUTED
-                && status != ShipmentStatus.CONSOLIDATION
-                && status != ShipmentStatus.READY) {
+        if (!isAvailableForRerouting()) {
             throw new IllegalStateException(
-                    "Shipment %s cannot be rolled back to received from status %s".formatted(id, status));
+                    "Shipment %s cannot be rolled back to received. Status: %s, Assigned Port: %s"
+                            .formatted(id, status, assignedPortId));
         }
 
         this.assignedGridId = null;
-        this.assignedPortId = null;
         this.status = ShipmentStatus.RECEIVED;
     }
 
