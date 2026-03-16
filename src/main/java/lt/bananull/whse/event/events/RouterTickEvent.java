@@ -1,13 +1,11 @@
 package lt.bananull.whse.event.events;
 
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 
-@Slf4j
 public class RouterTickEvent extends Event {
 
     private final RouterClient routerClient;
