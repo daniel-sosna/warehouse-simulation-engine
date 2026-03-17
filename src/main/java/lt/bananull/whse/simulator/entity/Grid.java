@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
@@ -40,6 +41,13 @@ public class Grid {
             }
         }
         return new Grid(dto.id(), dto.shifts(), ports);
+    }
+
+    // TODO: include handling flags filter
+    public List<Port> getAvailablePorts() {
+        return ports.values().stream()
+                .filter(Port::hasCapacity)
+                .toList();
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
