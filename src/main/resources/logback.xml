@@ -9,17 +9,14 @@
         </encoder>
     </appender>
 
-    <!-- Console appender for EVENT_LOGGER: honours ${logLevel:-INFO} threshold -->
+    <!-- Event log: Console -->
     <appender name="EVENT_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>${logLevel:-INFO}</level>
-        </filter>
         <encoder>
             <pattern>%d{HH:mm:ss} %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Event log: accepts DEBUG and above -->
+    <!-- Event log: File -->
     <appender name="EVENT_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${EVENT_LOG_FILE}</file>
         <append>false</append>
