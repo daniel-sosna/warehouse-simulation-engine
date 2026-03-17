@@ -31,14 +31,14 @@ public class ShipmentIsReady extends Event {
     private void enqueueShipment(Simulator simulator, Shipment shipment) {
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
         Port availablePort = currentGrid.getAvailablePort();
-        if (availablePort == null) {
-            currentGrid.enqueueShipment(shipmentId);
-        } else {
+        if (availablePort != null) {
             availablePort.enqueueShipment(shipmentId, Set.of());
             // TODO: handling flags being passed as empty set because shipment has no field handlingFlags
             if (availablePort.getStatus() == IDLE) {
                 simulator.enqueueEvent(new BeginShipmentPicking(getSimTime(), currentGrid.getId(), availablePort.getId()));
             }
+        } else {
+            currentGrid.enqueueShipment(shipmentId);
         }
     }
 
