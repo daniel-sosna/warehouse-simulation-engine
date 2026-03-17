@@ -25,7 +25,7 @@ public record RouterRequestDto(
         ZoneId zone = ZoneId.of("UTC");
         LocalDate simulationDate = LocalDate.ofInstant(simulationNow, zone);
 
-        List<Shipment> filteredShipments = filterShipmentsForRouting(simulationNow, simulationState.shipments().values());
+        List<Shipment> filteredShipments = filterShipmentsForRouting(simulationState.shipments().values());
         List<RouterShipment> shipmentsBacklog = mapShipments(filteredShipments);
         List<RouterStockBin> stockBins = mapBins(simulationState.bins().values());
         List<RouterGrid> grids = mapGrids(simulationState.grids().values(), simulationDate, zone);
@@ -137,10 +137,9 @@ public record RouterRequestDto(
         );
     }
 
-    private static List<Shipment> filterShipmentsForRouting(Instant simulationNow, Collection<Shipment> shipments) {
+    private static List<Shipment> filterShipmentsForRouting(Collection<Shipment> shipments) {
         return shipments.stream()
-                .filter(shipment -> !shipment.getShipmentDate().isAfter(simulationNow)
-                        && (shipment.getStatus() == RECEIVED || shipment.isAvailableForRerouting()))
+                .filter(shipment -> (shipment.getStatus() == RECEIVED || shipment.isAvailableForRerouting()))
                 .toList();
     }
 }

@@ -1,6 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
@@ -17,6 +18,7 @@ public class Shipment {
     private final String id;
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
+    @Setter
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
@@ -26,7 +28,7 @@ public class Shipment {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
-        this.status = ShipmentStatus.RECEIVED;
+        this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {

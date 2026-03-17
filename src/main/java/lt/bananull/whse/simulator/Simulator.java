@@ -27,7 +27,7 @@ public class Simulator {
     @Getter private final long PICK_SECONDS = 30;
 
     private final Instant simulationStartTime;
-    private final Instant simulationEndTime;
+    @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
@@ -88,13 +88,11 @@ public class Simulator {
     }
 
     public void run() {
-        EventHandler eventHandler = new EventHandler(this);
-
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (now.isAfter(simulationEndTime)) break;
-            eventHandler.handle(e);
+            EventHandler.getInstance(this).handle(e);
         }
     }
 }
