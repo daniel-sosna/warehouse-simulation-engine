@@ -51,6 +51,10 @@ public class Port {
         return handlingFlags.containsAll(shipmentHandlingFlags);
     }
 
+    public boolean canAcceptShipment(Collection<String> shipmentHandlingFlags) {
+        return (status == PortStatus.IDLE || status == PortStatus.BUSY) && hasCapacity() && canHandle(shipmentHandlingFlags);
+    }
+
     public void open() {
         if (status != PortStatus.CLOSED) {
             throw new IllegalStateException("Port %s cannot open from status %s".formatted(id, status));

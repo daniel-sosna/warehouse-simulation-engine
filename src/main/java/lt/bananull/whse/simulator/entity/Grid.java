@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
-import static lt.bananull.whse.simulator.enums.PortStatus.BUSY;
-
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
@@ -50,7 +47,7 @@ public class Grid {
 
     public Port getAvailablePort(Collection<String> shipmentHandlingFlags) {
         return ports.values().stream()
-                .filter(port -> port.hasCapacity() && (port.getStatus() == IDLE || port.getStatus() == BUSY) && port.canHandle(shipmentHandlingFlags))
+                .filter(port -> port.canAcceptShipment(shipmentHandlingFlags))
                 .min(Comparator.comparingInt(Port::getQueueSize))
                 .orElse(null);
     }
