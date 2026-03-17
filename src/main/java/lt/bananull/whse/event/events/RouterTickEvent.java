@@ -6,6 +6,7 @@ import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
@@ -23,14 +24,12 @@ public class RouterTickEvent extends Event {
     @Override
     public void execute(Simulator simulator) {
         checkForReceivedShipments(simulator);
-
-        // TODO: implement the rollbackToReceived
+        // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), simulator.getNow());
         RouterResponseDto response = routerClient.route(request);
 
         simulator.updateAssignments(response.assignments());
-
         simulator.dispatchAll();
 
         long nextSimTime = getSimTime() + ROUTER_INTERVAL_SECONDS;
@@ -51,6 +50,12 @@ public class RouterTickEvent extends Event {
                     ShipmentReceivedEvent event = new ShipmentReceivedEvent(shipmentSimTime, shipment);
                     EventHandler.getInstance(simulator).handle(event);
                 });
+    }
+
+    private void rollbackToReceived(Simulator simulator) {
+        simulator.getState().shipments().values().stream()
+                .filter(Shipment::isAvailableForRerouting)
+                .forEach(Shipment::rollbackToReceived);
     }
 
     @Override

@@ -44,6 +44,14 @@ public class Shipment {
                 && assignedPortId == null;
     }
 
+    public void markReceived() {
+        if (status != null) {
+            throw new IllegalStateException("Shipment %s cannot be received from status %s".formatted(id, status));
+        }
+
+        this.status = ShipmentStatus.RECEIVED;
+    }
+
     public void routeToGrid(String gridId) {
         if (status != ShipmentStatus.RECEIVED) {
             // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));

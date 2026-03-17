@@ -139,7 +139,7 @@ public record RouterRequestDto(
 
     private static List<Shipment> filterShipmentsForRouting(Collection<Shipment> shipments) {
         return shipments.stream()
-                .filter(shipment -> (shipment.getStatus() == RECEIVED || shipment.isAvailableForRerouting()))
+                .filter(shipment -> shipment.getStatus() == RECEIVED)
                 .toList();
     }
 }
