@@ -13,8 +13,8 @@ public class EventHandler {
     }
 
     public void handle(Event event) {
-        log.info(event.toString());
         event.execute(simulator);
+        log.info(event.toString());
     }
 
 }

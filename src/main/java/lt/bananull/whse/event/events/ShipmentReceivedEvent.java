@@ -3,6 +3,7 @@ package lt.bananull.whse.event.events;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 public class ShipmentReceivedEvent extends Event {
 
@@ -15,7 +16,7 @@ public class ShipmentReceivedEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        // This event only used as wrapper for good toString() method
+        shipment.setStatus(ShipmentStatus.RECEIVED);
     }
 
     @Override
