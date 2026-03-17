@@ -31,6 +31,7 @@ public class BinPickCompleted extends Event {
         // - mark shipment Packed if all items picked
         // - set bin status Available
         // - trigger simulator.dispatch() to start next waiting assignment
+        // - set port status to idle and then start next shipment again
     }
 
     @Override

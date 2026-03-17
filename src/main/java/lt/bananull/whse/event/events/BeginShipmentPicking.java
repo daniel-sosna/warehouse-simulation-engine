@@ -4,9 +4,7 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
-import lt.bananull.whse.simulator.entity.Shipment;
 
-import java.util.List;
 import java.util.Map;
 
 public class BeginShipmentPicking extends Event {
@@ -32,7 +30,8 @@ public class BeginShipmentPicking extends Event {
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("No bin found for EAN %s".formatted(item)));
             String binId = bin.getId();
-
+            // TODO: create and call the event BinRequestedAtPort
+            // TODO: also check the quantity and reduce the stock
         }
     }
 }
