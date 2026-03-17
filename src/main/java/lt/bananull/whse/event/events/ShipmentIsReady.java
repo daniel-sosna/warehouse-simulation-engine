@@ -6,6 +6,7 @@ import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.Map;
 import java.util.Set;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
@@ -40,6 +41,11 @@ public class ShipmentIsReady extends Event {
         } else {
             currentGrid.enqueueShipment(shipmentId);
         }
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of("shipmentId", shipmentId);
     }
 
 }

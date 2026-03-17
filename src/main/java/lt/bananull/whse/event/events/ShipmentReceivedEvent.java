@@ -5,6 +5,8 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
+import java.util.Map;
+
 public class ShipmentReceivedEvent extends Event {
 
     private final Shipment shipment;
@@ -20,8 +22,7 @@ public class ShipmentReceivedEvent extends Event {
     }
 
     @Override
-    public String toString() {
-        // TODO logs fixed in other issue
-        return super.toString() + ";shipment_id=" + shipment.getId();
+    public Map<String, Object> getData() {
+        return Map.of("shipmentId", shipment.getId());
     }
 }

@@ -67,7 +67,7 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()););
+            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()));
             // long doneAt = simTime + TRAVEL_SECONDS;
             // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 

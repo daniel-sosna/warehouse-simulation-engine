@@ -6,6 +6,8 @@ import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
 
+import java.util.Map;
+
 @Slf4j
 public class BinArrivesAtPort extends Event {
 
@@ -30,10 +32,11 @@ public class BinArrivesAtPort extends Event {
     }
 
     @Override
-    public String toString() {
-        return super.toString()
-                + ";shipmentId=" + assignment.shipmentId()
-                + ";binId=" + binId
-                + ";grid=" + packingGrid;
+    public Map<String, Object> getData() {
+        return Map.of(
+                "shipmentId", assignment.shipmentId(),
+                "binId", binId,
+                "grid", packingGrid
+        );
     }
 }

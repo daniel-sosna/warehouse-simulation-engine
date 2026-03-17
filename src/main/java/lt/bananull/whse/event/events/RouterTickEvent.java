@@ -7,6 +7,8 @@ import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 
+import java.util.Map;
+
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;
@@ -50,5 +52,10 @@ public class RouterTickEvent extends Event {
                     event.execute(simulator);
                     EventHandler.getInstance(simulator).handle(event);
                 });
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of();
     }
 }

@@ -34,4 +34,12 @@ public class BeginShipmentPicking extends Event {
             // TODO: also check the quantity and reduce the stock
         }
     }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of(
+                "gridId", gridId,
+                "portId", portId
+        );
+    }
 }
