@@ -8,7 +8,15 @@ import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 
 /**
@@ -44,8 +52,7 @@ public class Grid {
     // TODO: include handling flags filter
     public Port getAvailablePort(Set<String> shipmentHandlingFlags) {
         Port chosen = ports.values().stream()
-                .filter(port -> port.hasCapacity() && (port.getStatus() == PortStatus.IDLE || port.getStatus() == PortStatus.BUSY))
-                .filter(port -> port.canHandle(shipmentHandlingFlags))
+                .filter(port -> port.hasCapacity() && (port.getStatus() == PortStatus.IDLE || port.getStatus() == PortStatus.BUSY) && port.canHandle(shipmentHandlingFlags))
                 .min(Comparator.comparingInt(Port::getQueueSize))
                 .orElse(null);
 

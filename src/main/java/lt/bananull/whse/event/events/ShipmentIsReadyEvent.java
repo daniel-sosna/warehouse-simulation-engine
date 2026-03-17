@@ -32,9 +32,9 @@ public class ShipmentIsReadyEvent extends Event {
     private void enqueueShipment(Simulator simulator, Shipment shipment) {
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
 
-        Set<String> handlingFlags = shipment.getHandlingFlags() != null ? Set.copyOf(shipment.getHandlingFlags()) : Set.of();
-
+        Set<String> handlingFlags = Set.copyOf(shipment.getHandlingFlags());
         Port availablePort = currentGrid.getAvailablePort(handlingFlags);
+
         if (availablePort != null) {
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
