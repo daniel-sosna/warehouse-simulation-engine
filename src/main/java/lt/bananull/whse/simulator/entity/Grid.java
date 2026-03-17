@@ -44,10 +44,13 @@ public class Grid {
     }
 
     // TODO: include handling flags filter
-    public List<Port> getAvailablePorts() {
-        return ports.values().stream()
-                .filter(Port::hasCapacity)
-                .toList();
+    public Port getAvailablePort() {
+        for (Port port : ports.values()) {
+            if (port.hasCapacity()) {
+                return port;
+            }
+        }
+        return null;
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }

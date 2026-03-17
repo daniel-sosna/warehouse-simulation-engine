@@ -20,6 +20,7 @@ public class Shipment {
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
+    // TODO: add handlingFlags field
 
     public Shipment(String id, Map<String, Integer> items, Instant shipmentDate) {
         this.id = id;
