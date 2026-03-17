@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
-import lt.bananull.whse.event.events.BinArrivesAtPort;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReady;
 import lt.bananull.whse.load.dto.SimulationStateDto;
@@ -67,7 +66,7 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()););
+            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()));
             // long doneAt = simTime + TRAVEL_SECONDS;
             // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
