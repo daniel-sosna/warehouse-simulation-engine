@@ -2,7 +2,6 @@ package lt.bananull.whse.simulator.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.simulator.enums.BinStatus;
 
@@ -19,9 +18,7 @@ public class Bin {
     private final String id;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
-    @Setter
     private String currentGridId;
-    @Setter
     private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)
@@ -146,6 +143,20 @@ public class Bin {
     public void release() {
         this.reservedForPortId = null;
         this.reservedItems.clear();
+        this.status = BinStatus.AVAILABLE;
+    }
+
+    public void sendOnConveyorBelt() {
+        this.currentGridId = null;
+        this.status = BinStatus.OUTSIDE;
+    }
+
+    public void arriveAtGrid(String gridId) {
+        if (gridId == null || gridId.isBlank()) {
+            throw new IllegalArgumentException("Grid ID must be provided when bin %s arrives".formatted(id));
+        }
+
+        this.currentGridId = gridId;
         this.status = BinStatus.AVAILABLE;
     }
 
