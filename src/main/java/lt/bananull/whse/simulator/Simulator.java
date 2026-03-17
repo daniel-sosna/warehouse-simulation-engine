@@ -6,9 +6,11 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.BinArrivesAtPort;
 import lt.bananull.whse.event.events.RouterTickEvent;
+import lt.bananull.whse.event.events.ShipmentIsReady;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
@@ -19,7 +21,7 @@ import java.util.PriorityQueue;
 public class Simulator {
 
     private final Instant simulationStartTime;
-    private final Instant simulationEndTime;
+    @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
@@ -49,6 +51,10 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
+        for (AssignmentDto assignment : assignments) {
+            Shipment shipment = state.getShipment(assignment.shipmentId());
+            shipment.routeToGrid(assignment.packingGrid());
+        }
     }
 
     private void setSimTime(long newSimTimeSeconds) {
@@ -61,8 +67,9 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            Integer deliverySeconds = parameters.gridBinDelivery().deliveryTimes().get(a.packingGrid());
-            enqueueEvent(new BinArrivesAtPort(simTime + deliverySeconds, a));
+            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()););
+            // long doneAt = simTime + TRAVEL_SECONDS;
+            // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
             // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
             // then we will need: Dispatcher (or PortScheduler) that:
@@ -74,13 +81,11 @@ public class Simulator {
     }
 
     public void run() {
-        EventHandler eventHandler = new EventHandler(this);
-
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (now.isAfter(simulationEndTime)) break;
-            eventHandler.handle(e);
+            EventHandler.getInstance(this).handle(e);
         }
     }
 }

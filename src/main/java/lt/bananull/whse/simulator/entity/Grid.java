@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import static lt.bananull.whse.simulator.enums.PortStatus.CLOSED;
+
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
@@ -40,6 +42,16 @@ public class Grid {
             }
         }
         return new Grid(dto.id(), dto.shifts(), ports);
+    }
+
+    // TODO: include handling flags filter
+    public Port getAvailablePort() {
+        for (Port port : ports.values()) {
+            if (port.hasCapacity() && port.getStatus() != CLOSED) {
+                return port;
+            }
+        }
+        return null;
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }

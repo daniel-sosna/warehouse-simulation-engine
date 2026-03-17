@@ -1,6 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
@@ -17,15 +18,17 @@ public class Shipment {
     private final String id;
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
+    @Setter
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
+    // TODO: add handlingFlags field
 
     public Shipment(String id, Map<String, Integer> items, Instant shipmentDate) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
-        this.status = ShipmentStatus.RECEIVED;
+        this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
@@ -41,7 +44,8 @@ public class Shipment {
 
     public void routeToGrid(String gridId) {
         if (status != ShipmentStatus.RECEIVED) {
-            throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // TODO: uncomment this when roll back to received is implemented and used
         }
 
         this.assignedGridId = gridId;
