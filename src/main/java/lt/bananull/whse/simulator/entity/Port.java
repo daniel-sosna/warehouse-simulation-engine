@@ -43,6 +43,10 @@ public class Port {
         return shipmentQueue.size() < queueCapacity;
     }
 
+    public int getQueueSize() {
+        return shipmentQueue.size();
+    }
+
     public boolean canHandle(Set<String> shipmentHandlingFlags) {
         return handlingFlags.containsAll(shipmentHandlingFlags);
     }

@@ -2,6 +2,7 @@ package lt.bananull.whse.simulator.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Comparator;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.CLOSED;
 
@@ -20,6 +22,7 @@ import static lt.bananull.whse.simulator.enums.PortStatus.CLOSED;
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
 @Getter
+@Slf4j
 public class Grid {
 
     private final String id;
@@ -44,14 +47,23 @@ public class Grid {
         return new Grid(dto.id(), dto.shifts(), ports);
     }
 
+
     // TODO: include handling flags filter
     public Port getAvailablePort() {
-        for (Port port : ports.values()) {
-            if (port.hasCapacity() && port.getStatus() != CLOSED) {
-                return port;
-            }
-        }
-        return null;
+        Port chosen = ports.values().stream()
+                .filter(port -> port.hasCapacity() && port.getStatus() != CLOSED)
+                .min(Comparator.comparingInt(Port::getQueueSize))
+                .orElse(null);
+
+        log.info("Grid {} chose port {} among: {}",
+                id,
+                chosen != null ? chosen.getId() : "none",
+                ports.values().stream()
+                        .map(p -> "%s(queue=%d,status=%s)".formatted(p.getId(), p.getQueueSize(), p.getStatus()))
+                        .toList()
+        );
+
+        return chosen;
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
