@@ -18,10 +18,9 @@ import java.util.Set;
 @Getter
 public class Port {
 
-    public static final int DEFAULT_QUEUE_CAPACITY = 20;
-
     private final String id;
     private final Set<String> handlingFlags;
+    private final int queueCapacity;
     @Setter
     private PortStatus status;
     @Setter
@@ -29,20 +28,21 @@ public class Port {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue = new ArrayDeque<>();
 
-    public Port(String id, Collection<String> handlingFlags) {
+    public Port(String id, Collection<String> handlingFlags, int queueCapacity) {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
+        this.queueCapacity = queueCapacity;
         this.status = PortStatus.CLOSED;
     }
 
-    public static Port from(PortDto dto) {
-        return new Port(dto.id(), dto.handlingFlags());
+    public static Port from(PortDto dto, int queueCapacity) {
+        return new Port(dto.id(), dto.handlingFlags(), queueCapacity);
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
     public boolean hasCapacity() {
-        return shipmentQueue.size() < DEFAULT_QUEUE_CAPACITY;
+        return shipmentQueue.size() < queueCapacity;
     }
 
     public boolean canHandle(Set<String> shipmentHandlingFlags) {
@@ -57,7 +57,7 @@ public class Port {
     public void enqueueShipment(String shipmentId) {
         if (!hasCapacity()) {
             throw new IllegalStateException(
-                    "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY));
+                    "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), queueCapacity));
         }
         shipmentQueue.add(shipmentId);
     }
@@ -69,6 +69,6 @@ public class Port {
     @Override
     public String toString() {
         return "Port{id='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(id, status, shipmentQueue.size(), DEFAULT_QUEUE_CAPACITY, activeShipmentId);
+                .formatted(id, status, shipmentQueue.size(), queueCapacity, activeShipmentId);
     }
 }

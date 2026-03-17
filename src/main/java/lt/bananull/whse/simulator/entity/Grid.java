@@ -32,11 +32,11 @@ public class Grid {
         this.ports = Map.copyOf(ports);
     }
 
-    public static Grid from(GridDto dto) {
+    public static Grid from(GridDto dto, int portQueueCapacity) {
         Map<String, Port> ports = new HashMap<>();
         for (ShiftDto shift : dto.shifts()) {
             for (PortDto port : shift.portConfig()) {
-                ports.put(port.id(), Port.from(port));
+                ports.put(port.id(), Port.from(port, portQueueCapacity));
             }
         }
         return new Grid(dto.id(), dto.shifts(), ports);

@@ -26,7 +26,7 @@ public record SimulationState(
         this.grids = Map.copyOf(grids);
     }
 
-    public static SimulationState from(SimulationStateDto dto) {
+    public static SimulationState from(SimulationStateDto dto, int portQueueCapacity) {
         Map<String, Shipment> shipments = new HashMap<>();
         dto.shipments().forEach(s -> shipments.put(s.id(), Shipment.from(s)));
 
@@ -34,7 +34,7 @@ public record SimulationState(
         dto.bins().forEach(b -> bins.put(b.id(), Bin.from(b)));
 
         Map<String, Grid> grids = new HashMap<>();
-        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g)));
+        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g, portQueueCapacity)));
 
         return new SimulationState(shipments, bins, grids);
     }
