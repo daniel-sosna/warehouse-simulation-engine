@@ -7,6 +7,8 @@ import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 
+import java.util.Map;
+
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;
@@ -45,10 +47,15 @@ public class RouterTickEvent extends Event {
                 .filter(shipment -> shipment.getStatus() == null &&
                         !shipment.getShipmentDate().isAfter(simulator.getNow()))
                 .forEach(shipment -> {
-                    long shipmentSimTime = simulator.getSimulationDurationSeconds() - (simulator.getSimulationEndTime().getEpochSecond() - shipment.getShipmentDate().getEpochSecond());
+                    long shipmentSimTime = shipment.getShipmentDate().getEpochSecond() - simulator.getSimulationStartTime().getEpochSecond();
                     ShipmentReceivedEvent event = new ShipmentReceivedEvent(shipmentSimTime, shipment);
                     event.execute(simulator);
                     EventHandler.getInstance(simulator).handle(event);
                 });
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of();
     }
 }

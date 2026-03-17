@@ -3,6 +3,8 @@ package lt.bananull.whse.event;
 import lombok.Getter;
 import lt.bananull.whse.simulator.Simulator;
 
+import java.util.Map;
+
 public abstract class Event implements Comparable<Event> {
 
     @Getter
@@ -14,13 +16,10 @@ public abstract class Event implements Comparable<Event> {
 
     public abstract void execute(Simulator simulator);
 
+    public abstract Map<String, Object> getData();
+
     @Override
     public int compareTo(Event other) {
         return Long.compare(this.simTime, other.simTime);
-    }
-
-    @Override
-    public String toString() {
-        return "received_event=" + this.getClass().getSimpleName() + ";" + "simulation_time=" + simTime;
     }
 }

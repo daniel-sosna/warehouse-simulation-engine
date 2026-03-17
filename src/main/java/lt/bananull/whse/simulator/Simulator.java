@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.RouterTickEvent;
-import lt.bananull.whse.event.events.ShipmentIsReady;
+import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
@@ -19,8 +19,7 @@ import java.util.PriorityQueue;
 @Slf4j
 public class Simulator {
 
-    private final Instant simulationStartTime;
-    @Getter private final Instant simulationEndTime;
+    @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
@@ -35,9 +34,8 @@ public class Simulator {
                      Instant startTime, Instant endTime, SimulationParameters parameters) {
         this.state = SimulationState.from(initialState, parameters);
         this.simulationStartTime = startTime;
-        this.simulationEndTime = endTime;
         this.now = startTime;
-        this.simulationDurationSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
         this.parameters = parameters;
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
@@ -59,14 +57,13 @@ public class Simulator {
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
         this.now = simulationStartTime.plusSeconds(simTime);
-        log.info("Time is: {}", simTime);
     }
 
     public void dispatchAll() {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()));
+            enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
             // long doneAt = simTime + TRAVEL_SECONDS;
             // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
@@ -83,7 +80,7 @@ public class Simulator {
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
-            if (now.isAfter(simulationEndTime)) break;
+            if (simTime > simulationDurationSeconds) break;
             EventHandler.getInstance(this).handle(e);
         }
     }
