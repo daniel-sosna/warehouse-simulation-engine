@@ -25,7 +25,7 @@ public class Simulator {
     @Getter private final long PICK_SECONDS = 30;
 
     private final Instant simulationStartTime;
-    private final Instant simulationEndTime;
+    @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
