@@ -20,7 +20,7 @@ public class RouterTickEvent extends Event {
     public void execute(Simulator simulator) {
         checkForReceivedShipments(simulator);
 
-        //  TODO implement the rollbackToReceived
+        // TODO: implement the rollbackToReceived
 
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), simulator.getNow());
         RouterResponseDto response = routerClient.route(request);
