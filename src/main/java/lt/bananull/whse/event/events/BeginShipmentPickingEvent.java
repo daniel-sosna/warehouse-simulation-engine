@@ -7,12 +7,12 @@ import lt.bananull.whse.simulator.entity.Port;
 
 import java.util.Map;
 
-public class BeginShipmentPicking extends Event {
+public class BeginShipmentPickingEvent extends Event {
 
     private final String portId;
     private final String gridId;
 
-    public BeginShipmentPicking(long simTime, String gridId, String portId) {
+    public BeginShipmentPickingEvent(long simTime, String gridId, String portId) {
         super(simTime);
         this.portId = portId;
         this.gridId = gridId;
@@ -33,5 +33,13 @@ public class BeginShipmentPicking extends Event {
             // TODO: create and call the event BinRequestedAtPort
             // TODO: also check the quantity and reduce the stock
         }
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of(
+                "gridId", gridId,
+                "portId", portId
+        );
     }
 }

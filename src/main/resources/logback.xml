@@ -9,7 +9,14 @@
         </encoder>
     </appender>
 
-    <!-- Event log -->
+    <!-- Event log: Console -->
+    <appender name="EVENT_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Event log: File -->
     <appender name="EVENT_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${EVENT_LOG_FILE}</file>
         <append>false</append>
@@ -18,10 +25,11 @@
         </encoder>
     </appender>
 
-    <!-- Event logger -->
-    <logger name="EVENT_LOGGER" level="${logLevel:-INFO}" additivity="false">
+    <!-- Event logger: set to DEBUG so the file appender receives DEBUG+;
+         EVENT_CONSOLE's ThresholdFilter limits console output to ${logLevel:-INFO}+ -->
+    <logger name="EVENT_LOGGER" level="DEBUG" additivity="false">
         <appender-ref ref="EVENT_FILE"/>
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="EVENT_CONSOLE"/>
     </logger>
 
     <!-- Root logger -->

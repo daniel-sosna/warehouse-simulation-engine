@@ -6,15 +6,16 @@ import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.Map;
 import java.util.Set;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 
-public class ShipmentIsReady extends Event {
+public class ShipmentIsReadyEvent extends Event {
 
     private final String shipmentId;
 
-    public ShipmentIsReady(long simTime, String shipmentId) {
+    public ShipmentIsReadyEvent(long simTime, String shipmentId) {
         super(simTime);
         this.shipmentId = shipmentId;
     }
@@ -35,11 +36,16 @@ public class ShipmentIsReady extends Event {
             availablePort.enqueueShipment(shipmentId, Set.of());
             // TODO: handling flags being passed as empty set because shipment has no field handlingFlags
             if (availablePort.getStatus() == IDLE) {
-                simulator.enqueueEvent(new BeginShipmentPicking(getSimTime(), currentGrid.getId(), availablePort.getId()));
+                simulator.enqueueEvent(new BeginShipmentPickingEvent(getSimTime(), currentGrid.getId(), availablePort.getId()));
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);
         }
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of("shipmentId", shipmentId);
     }
 
 }
