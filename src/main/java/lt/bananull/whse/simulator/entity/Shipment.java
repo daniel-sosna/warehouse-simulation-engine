@@ -25,7 +25,7 @@ public class Shipment {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
-        this.status = ShipmentStatus.RECEIVED;
+        this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
