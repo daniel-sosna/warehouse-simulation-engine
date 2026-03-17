@@ -37,8 +37,6 @@ public class RouterTickEvent extends Event {
      * Finds all new shipments, changes their status to RECEIVED and logs ShipmentReceivedEvent
      */
     private void checkForReceivedShipments(Simulator simulator) {
-        EventHandler eventHandler = new EventHandler(simulator);
-
         simulator.getState().shipments().values().stream()
                 .filter(shipment -> shipment.getStatus() == null &&
                         !shipment.getShipmentDate().isAfter(simulator.getNow()))
@@ -46,7 +44,7 @@ public class RouterTickEvent extends Event {
                     long shipmentSimTime = simulator.getSimulationDurationSeconds() - (simulator.getSimulationEndTime().getEpochSecond() - shipment.getShipmentDate().getEpochSecond());
                     ShipmentReceivedEvent event = new ShipmentReceivedEvent(shipmentSimTime, shipment);
                     event.execute(simulator);
-                    eventHandler.handle(event);
+                    EventHandler.getInstance(simulator).handle(event);
                 });
     }
 }

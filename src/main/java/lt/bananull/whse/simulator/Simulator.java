@@ -77,13 +77,11 @@ public class Simulator {
     }
 
     public void run() {
-        EventHandler eventHandler = new EventHandler(this);
-
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (now.isAfter(simulationEndTime)) break;
-            eventHandler.handle(e);
+            EventHandler.getInstance(this).handle(e);
         }
     }
 }
