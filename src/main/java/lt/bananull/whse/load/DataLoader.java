@@ -19,6 +19,9 @@ import java.util.List;
 @Slf4j
 public class DataLoader {
 
+    private static final String BINS_FILE = "bins.json";
+    private static final String GRIDS_FILE = "grids.json";
+    private static final String SHIPMENTS_FILE = "shipments.json";
     private static final String PARAMETERS_FILE = "parameters.json";
 
     private final Path dataDir;
@@ -60,21 +63,21 @@ public class DataLoader {
     }
 
     private List<BinDto> loadBins() throws IOException {
-        Path binsPath = dataDir.resolve("bins.json");
+        Path binsPath = dataDir.resolve(BINS_FILE);
         try (InputStream in = Files.newInputStream(binsPath)) {
             return objectMapper.readValue(in, new TypeReference<>() {});
         }
     }
 
     private List<GridDto> loadGrids() throws IOException {
-        Path gridsPath = dataDir.resolve("grids.json");
+        Path gridsPath = dataDir.resolve(GRIDS_FILE);
         try (InputStream in = Files.newInputStream(gridsPath)) {
             return objectMapper.readValue(in, new TypeReference<>() {});
         }
     }
 
     private List<ShipmentDto> loadShipments() throws IOException {
-        Path shipmentsPath = dataDir.resolve("shipments.json");
+        Path shipmentsPath = dataDir.resolve(SHIPMENTS_FILE);
         try (InputStream in = Files.newInputStream(shipmentsPath)) {
             return objectMapper.readValue(in, new TypeReference<>() {});
         }
