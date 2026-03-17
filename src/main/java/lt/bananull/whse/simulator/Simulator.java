@@ -57,7 +57,6 @@ public class Simulator {
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
         this.now = simulationStartTime.plusSeconds(simTime);
-        log.info("Time is: {}", simTime);
     }
 
     public void dispatchAll() {

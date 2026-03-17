@@ -29,7 +29,7 @@ public class EventHandler {
 
     public void handle(Event event) {
         event.execute(simulator);
-        log.info(toJson(event));
+        log.debug(toJson(event));
     }
 
     private String toJson(Event event) {
