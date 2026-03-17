@@ -9,13 +9,13 @@ import java.util.Map;
 
 public class BeginShipmentPickingEvent extends Event {
 
-    private final String portId;
     private final String gridId;
+    private final String portId;
 
     public BeginShipmentPickingEvent(long simTime, String gridId, String portId) {
         super(simTime);
-        this.portId = portId;
         this.gridId = gridId;
+        this.portId = portId;
     }
 
     @Override
