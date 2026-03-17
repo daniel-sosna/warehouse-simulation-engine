@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
-import lt.bananull.whse.simulator.enums.PortStatus;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -18,7 +17,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-
+import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
+import static lt.bananull.whse.simulator.enums.PortStatus.BUSY;
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
@@ -52,7 +52,7 @@ public class Grid {
     // TODO: include handling flags filter
     public Port getAvailablePort(Set<String> shipmentHandlingFlags) {
         Port chosen = ports.values().stream()
-                .filter(port -> port.hasCapacity() && (port.getStatus() == PortStatus.IDLE || port.getStatus() == PortStatus.BUSY) && port.canHandle(shipmentHandlingFlags))
+                .filter(port -> port.hasCapacity() && (port.getStatus() == IDLE || port.getStatus() == BUSY) && port.canHandle(shipmentHandlingFlags))
                 .min(Comparator.comparingInt(Port::getQueueSize))
                 .orElse(null);
 
