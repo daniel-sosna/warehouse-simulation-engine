@@ -6,6 +6,7 @@ import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,21 +19,22 @@ public class Shipment {
     private final String id;
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
+    private final List<String> handlingFlags;
     @Setter
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
-    // TODO: add handlingFlags field
 
-    public Shipment(String id, Map<String, Integer> items, Instant shipmentDate) {
+    public Shipment(String id, Map<String, Integer> items, Instant shipmentDate, List<String> handlingFlags) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
+        this.handlingFlags = handlingFlags != null ? List.copyOf(handlingFlags) : List.of();
         this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
-        return new Shipment(dto.id(), dto.items(), dto.shipmentDate());
+        return new Shipment(dto.id(), dto.items(), dto.shipmentDate(), dto.handlingFlags());
     }
 
     public boolean isAvailableForRerouting() {
