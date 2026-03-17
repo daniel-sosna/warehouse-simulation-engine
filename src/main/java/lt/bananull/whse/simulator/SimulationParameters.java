@@ -17,9 +17,9 @@ public record SimulationParameters(
         @JsonProperty("truckArrivalSchedules") TruckArrivalSchedules truckArrivalSchedules
 ) {
     public SimulationParameters {
-        if (pickingThroughput == null)   pickingThroughput   = PickingThroughput.defaults();
-        if (gridBinDelivery == null)     gridBinDelivery     = GridBinDelivery.defaults();
-        if (transfersConveyors == null)  transfersConveyors  = TransfersConveyors.defaults();
+        if (pickingThroughput == null)     pickingThroughput   = PickingThroughput.defaults();
+        if (gridBinDelivery == null)       gridBinDelivery     = GridBinDelivery.defaults();
+        if (transfersConveyors == null)    transfersConveyors  = TransfersConveyors.defaults();
         if (truckArrivalSchedules == null) truckArrivalSchedules = TruckArrivalSchedules.defaults();
     }
 
@@ -91,12 +91,12 @@ public record SimulationParameters(
             @JsonProperty("throughputRandomness") Randomness throughputRandomness
     ) {
         public TransfersConveyors {
-            if (durations == null) durations = List.of(
+            if (durations == null)            durations = List.of(
                     new TransferDuration("AS1", "AS2", 60,  1000),
                     new TransferDuration("AS1", "AS3", 240, 800),
                     new TransferDuration("AS2", "AS3", 360, 600)
             );
-            if (durationRandomness == null)  durationRandomness  = new Randomness(0.8, 1.2);
+            if (durationRandomness == null)   durationRandomness  = new Randomness(0.8, 1.2);
             if (throughputRandomness == null) throughputRandomness = new Randomness(0.9, 1.1);
         }
 
@@ -106,7 +106,7 @@ public record SimulationParameters(
     }
 
     /**
-     * One-way transfer specification between two grids.
+     * Two-way transfer specification between two grids.
      * {@code duration} — Transfer duration in seconds.
      * {@code throughput} — Conveyor throughput in bins per hour.
      */

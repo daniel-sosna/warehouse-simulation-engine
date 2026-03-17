@@ -1,6 +1,7 @@
 package lt.bananull.whse.simulator.entity;
 
 import lt.bananull.whse.load.dto.SimulationStateDto;
+import lt.bananull.whse.simulator.SimulationParameters;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public record SimulationState(
         this.grids = Map.copyOf(grids);
     }
 
-    public static SimulationState from(SimulationStateDto dto, int portQueueCapacity) {
+    public static SimulationState from(SimulationStateDto dto, SimulationParameters parameters) {
         Map<String, Shipment> shipments = new HashMap<>();
         dto.shipments().forEach(s -> shipments.put(s.id(), Shipment.from(s)));
 
@@ -34,7 +35,7 @@ public record SimulationState(
         dto.bins().forEach(b -> bins.put(b.id(), Bin.from(b)));
 
         Map<String, Grid> grids = new HashMap<>();
-        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g, portQueueCapacity)));
+        dto.grids().forEach(g -> grids.put(g.id(), Grid.from(g, parameters.gridBinDelivery().portQueueCapacity())));
 
         return new SimulationState(shipments, bins, grids);
     }

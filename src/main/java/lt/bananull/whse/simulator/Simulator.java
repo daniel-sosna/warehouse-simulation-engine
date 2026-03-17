@@ -30,8 +30,9 @@ public class Simulator {
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime, Instant endTime, SimulationParameters parameters) {
-        this.state = SimulationState.from(initialState, parameters.gridBinDelivery().portQueueCapacity());
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState,
+                     Instant startTime, Instant endTime, SimulationParameters parameters) {
+        this.state = SimulationState.from(initialState, parameters);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;

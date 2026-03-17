@@ -26,13 +26,14 @@ public class Port {
     @Setter
     private String activeShipmentId;
     @Getter(AccessLevel.NONE)
-    private final Queue<String> shipmentQueue = new ArrayDeque<>();
+    private final Queue<String> shipmentQueue;
 
     public Port(String id, Collection<String> handlingFlags, int queueCapacity) {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;
         this.status = PortStatus.CLOSED;
+        this.shipmentQueue = new ArrayDeque<>(queueCapacity);
     }
 
     public static Port from(PortDto dto, int queueCapacity) {
