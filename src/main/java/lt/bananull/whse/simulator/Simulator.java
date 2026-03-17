@@ -60,8 +60,10 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            int deliverySeconds = parameters.getGridBinDelivery().getDeliveryTimes()
-                    .getOrDefault(a.packingGrid(), SimulationConstants.DEFAULT_DELIVERY_SECONDS);
+            Integer deliverySeconds = parameters.gridBinDelivery().deliveryTimes().get(a.packingGrid());
+            if (deliverySeconds == null) {
+                throw new IllegalArgumentException("No delivery time configured for grid: " + a.packingGrid());
+            }
             long doneAt = simTime + deliverySeconds;
             enqueueEvent(new BinArrivesAtPort(doneAt, a));
 

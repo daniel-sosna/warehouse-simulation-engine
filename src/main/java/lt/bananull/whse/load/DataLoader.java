@@ -47,15 +47,13 @@ public class DataLoader {
      */
     public SimulationParameters loadParameters() {
         Path parametersPath = dataDir.resolve(PARAMETERS_FILE);
-        SimulationParameters defaults = new SimulationParameters();
-
         if (!Files.exists(parametersPath)) {
             log.info("No {} found in {}; using default simulation parameters.", PARAMETERS_FILE, dataDir);
-            return defaults;
+            return SimulationParameters.defaults();
         }
 
         try (InputStream in = Files.newInputStream(parametersPath)) {
-            return objectMapper.readerForUpdating(defaults).readValue(in);
+            return objectMapper.readValue(in, SimulationParameters.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load " + PARAMETERS_FILE + " from " + dataDir, e);
         }
