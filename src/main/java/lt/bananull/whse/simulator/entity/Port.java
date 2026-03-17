@@ -29,7 +29,7 @@ public class Port {
     public Port(String id, Collection<String> handlingFlags) {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
-        this.status = PortStatus.CLOSED;
+        this.status = PortStatus.IDLE; // TODO: for now it will be open to test how the queues work
     }
 
     public static Port from(PortDto dto) {
