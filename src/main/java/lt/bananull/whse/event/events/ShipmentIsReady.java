@@ -8,6 +8,8 @@ import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Set;
 
+import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
+
 public class ShipmentIsReady extends Event {
 
     private final String shipmentId;
@@ -33,7 +35,11 @@ public class ShipmentIsReady extends Event {
             currentGrid.enqueueShipment(shipmentId);
         } else {
             availablePort.enqueueShipment(shipmentId, Set.of());
-           // TODO: handling flags being passed as empty set because shipment has no field handlingFlags
+            // TODO: handling flags being passed as empty set because shipment has no field handlingFlags
+            if (availablePort.getStatus() == IDLE) {
+                simulator.enqueueEvent(new BeginShipmentPicking(getSimTime(), currentGrid.getId(), availablePort.getId()));
+            }
         }
     }
+
 }

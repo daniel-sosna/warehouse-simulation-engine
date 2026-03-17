@@ -74,7 +74,7 @@ public class Simulator {
             log.info(shipment.toString());
 
             Event markShipmentAsReady = new ShipmentIsReady(simTime, a.shipmentId());
-
+            enqueueEvent(markShipmentAsReady);
             // long doneAt = simTime + TRAVEL_SECONDS;
             // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 

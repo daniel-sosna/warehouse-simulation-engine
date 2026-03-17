@@ -42,7 +42,8 @@ public class Shipment {
 
     public void routeToGrid(String gridId) {
         if (status != ShipmentStatus.RECEIVED) {
-            throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // TODO: uncomment this when roll back to received is implemented and used
         }
 
         this.assignedGridId = gridId;

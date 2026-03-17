@@ -5,6 +5,7 @@ import lombok.Getter;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
+import lt.bananull.whse.simulator.enums.PortStatus;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
+
+import static lt.bananull.whse.simulator.enums.PortStatus.CLOSED;
 
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
@@ -46,7 +49,7 @@ public class Grid {
     // TODO: include handling flags filter
     public Port getAvailablePort() {
         for (Port port : ports.values()) {
-            if (port.hasCapacity()) {
+            if (port.hasCapacity() && port.getStatus() != CLOSED) {
                 return port;
             }
         }
