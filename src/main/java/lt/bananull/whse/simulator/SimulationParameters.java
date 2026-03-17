@@ -35,12 +35,15 @@ public record SimulationParameters(
     // Nested parameter records
     // -------------------------------------------------------------------------
 
+    /**
+     * Picking throughput configuration.
+     * {@code standard} — Standard items picked per hour (default 140).
+     * {@code fragile} — Fragile items picked per hour (default 70).
+     * {@code randomness} — Multiplier range applied to each pick duration (default 0.8–1.2).
+     */
     public record PickingThroughput(
-            /** Standard items picked per hour. */
             @JsonProperty("standard") Integer standard,
-            /** Fragile items picked per hour. */
             @JsonProperty("fragile") Integer fragile,
-            /** Randomness multiplier applied to each pick duration. */
             @JsonProperty("randomness") Randomness randomness
     ) {
         public PickingThroughput {
@@ -54,15 +57,15 @@ public record SimulationParameters(
         }
     }
 
+    /**
+     * Grid-to-port bin delivery configuration.
+     * {@code portQueueCapacity} — Max shipments that can queue at a port (default 20).
+     * {@code deliveryTimes} — Average delivery time in seconds from each grid ID to its port.
+     * {@code randomness} — Multiplier range applied to each delivery duration (default 0.8–1.2).
+     */
     public record GridBinDelivery(
-            /** Maximum number of shipments that can queue at a port. */
             @JsonProperty("portQueueCapacity") Integer portQueueCapacity,
-            /**
-             * Average bin delivery time (in seconds) from each grid to its port.
-             * Key: grid ID (e.g. "AS1"), value: seconds.
-             */
             @JsonProperty("deliveryTimes") Map<String, Integer> deliveryTimes,
-            /** Randomness multiplier applied to each bin delivery duration. */
             @JsonProperty("randomness") Randomness randomness
     ) {
         public GridBinDelivery {
@@ -76,12 +79,15 @@ public record SimulationParameters(
         }
     }
 
+    /**
+     * Inter-grid conveyor transfer configuration.
+     * {@code durations} — Transfer specs between grid pairs.
+     * {@code durationRandomness} — Multiplier range applied to transfer durations (default 0.8–1.2).
+     * {@code throughputRandomness} — Multiplier range applied to conveyor throughput (default 0.9–1.1).
+     */
     public record TransfersConveyors(
-            /** Transfer specifications between grid pairs. */
             @JsonProperty("durations") List<TransferDuration> durations,
-            /** Randomness multiplier applied to each transfer duration. */
             @JsonProperty("durationRandomness") Randomness durationRandomness,
-            /** Randomness multiplier applied to conveyor throughput. */
             @JsonProperty("throughputRandomness") Randomness throughputRandomness
     ) {
         public TransfersConveyors {
@@ -99,13 +105,15 @@ public record SimulationParameters(
         }
     }
 
-    /** One-way transfer specification between two grids. */
+    /**
+     * One-way transfer specification between two grids.
+     * {@code duration} — Transfer duration in seconds.
+     * {@code throughput} — Conveyor throughput in bins per hour.
+     */
     public record TransferDuration(
             @JsonProperty("from") String from,
             @JsonProperty("to") String to,
-            /** Transfer duration in seconds. */
             @JsonProperty("duration") int duration,
-            /** Conveyor throughput in bins per hour. */
             @JsonProperty("throughput") int throughput
     ) {}
 
@@ -121,11 +129,14 @@ public record SimulationParameters(
         }
     }
 
+    /**
+     * A single truck arrival schedule entry.
+     * {@code pullTimes} — Pull times as "HH:mm" strings.
+     * {@code weekdays} — Weekday names (e.g. "Monday") on which this schedule applies.
+     */
     public record TruckArrivalSchedule(
             @JsonProperty("sortingDirection") String sortingDirection,
-            /** Pull times as "HH:mm" strings. */
             @JsonProperty("pullTimes") List<String> pullTimes,
-            /** Weekday names (e.g. "Monday"). */
             @JsonProperty("weekdays") List<String> weekdays
     ) {}
 
@@ -135,4 +146,3 @@ public record SimulationParameters(
             @JsonProperty("max") double max
     ) {}
 }
-

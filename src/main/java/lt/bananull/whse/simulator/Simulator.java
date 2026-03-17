@@ -61,11 +61,7 @@ public class Simulator {
             AssignmentDto a = assignments.poll();
 
             Integer deliverySeconds = parameters.gridBinDelivery().deliveryTimes().get(a.packingGrid());
-            if (deliverySeconds == null) {
-                throw new IllegalArgumentException("No delivery time configured for grid: " + a.packingGrid());
-            }
-            long doneAt = simTime + deliverySeconds;
-            enqueueEvent(new BinArrivesAtPort(doneAt, a));
+            enqueueEvent(new BinArrivesAtPort(simTime + deliverySeconds, a));
 
             // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
             // then we will need: Dispatcher (or PortScheduler) that:
