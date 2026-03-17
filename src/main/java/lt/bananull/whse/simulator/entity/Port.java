@@ -39,8 +39,12 @@ public class Port {
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
+    public int getQueueSize() {
+        return shipmentQueue.size();
+    }
+
     public boolean hasCapacity() {
-        return shipmentQueue.size() < queueCapacity;
+        return getQueueSize() < queueCapacity;
     }
 
     public boolean canHandle(Collection<String> shipmentHandlingFlags) {
@@ -108,7 +112,7 @@ public class Port {
         }
         if (!hasCapacity()) {
             throw new IllegalStateException(
-                    "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), queueCapacity));
+                    "Port %s queue is full (%d/%d)".formatted(id, getQueueSize(), queueCapacity));
         }
         if (!canHandle(shipmentHandlingFlags)) {
             throw new IllegalStateException(
@@ -121,6 +125,6 @@ public class Port {
     @Override
     public String toString() {
         return "Port{id='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(id, status, shipmentQueue.size(), queueCapacity, activeShipmentId);
+                .formatted(id, status, getQueueSize(), queueCapacity, activeShipmentId);
     }
 }
