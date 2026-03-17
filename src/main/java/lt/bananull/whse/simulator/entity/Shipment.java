@@ -29,7 +29,7 @@ public class Shipment {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
-        this.handlingFlags = handlingFlags;
+        this.handlingFlags = List.copyOf(handlingFlags);
         this.status = null;
     }
 
