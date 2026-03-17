@@ -9,13 +9,13 @@ import lt.bananull.whse.simulator.Simulator;
 import java.util.Map;
 
 @Slf4j
-public class BinPickCompleted extends Event {
+public class BinPickCompletedEvent extends Event {
 
     private final AssignmentDto assignment;
     private final String binId;
     private final String packingGrid;
 
-    public BinPickCompleted(long simTime, AssignmentDto assignment) {
+    public BinPickCompletedEvent(long simTime, AssignmentDto assignment) {
         super(simTime);
         this.assignment = assignment;
         PickDto firstPick = assignment.picks().getFirst();

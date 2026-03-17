@@ -9,13 +9,13 @@ import lt.bananull.whse.simulator.Simulator;
 import java.util.Map;
 
 @Slf4j
-public class BinArrivesAtPort extends Event {
+public class BinArrivesAtPortEvent extends Event {
 
     private final AssignmentDto assignment;
     private final String binId;
     private final String packingGrid;
 
-    public BinArrivesAtPort(long simTime, AssignmentDto assignment) {
+    public BinArrivesAtPortEvent(long simTime, AssignmentDto assignment) {
         super(simTime);
         this.assignment = assignment;
         PickDto firstPick = assignment.picks().getFirst();
@@ -28,7 +28,7 @@ public class BinArrivesAtPort extends Event {
         int standardRate = simulator.getParameters().pickingThroughput().standard();
         long pickSeconds = (long) (3600.0 / standardRate);
         long pickDoneAt = getSimTime() + pickSeconds;
-        simulator.enqueueEvent(new BinPickCompleted(pickDoneAt, assignment));
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, assignment));
     }
 
     @Override

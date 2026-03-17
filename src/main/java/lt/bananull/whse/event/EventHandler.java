@@ -36,7 +36,7 @@ public class EventHandler {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("simTime", event.getSimTime());
         entry.put("timestamp", simulator.getSimulationStartTime().plusSeconds(event.getSimTime()).toString());
-        entry.put("event", event.getClass().getSimpleName());
+        entry.put("event", event.getClass().getSimpleName().split("Event")[0]);
         entry.put("data", event.getData());
         try {
             return MAPPER.writeValueAsString(entry);
