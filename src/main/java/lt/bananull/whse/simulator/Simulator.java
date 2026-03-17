@@ -20,8 +20,7 @@ import java.util.PriorityQueue;
 @Slf4j
 public class Simulator {
 
-    private final Instant simulationStartTime;
-    @Getter private final Instant simulationEndTime;
+    @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
@@ -36,9 +35,8 @@ public class Simulator {
                      Instant startTime, Instant endTime, SimulationParameters parameters) {
         this.state = SimulationState.from(initialState, parameters);
         this.simulationStartTime = startTime;
-        this.simulationEndTime = endTime;
         this.now = startTime;
-        this.simulationDurationSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
         this.parameters = parameters;
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
@@ -84,7 +82,7 @@ public class Simulator {
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
-            if (now.isAfter(simulationEndTime)) break;
+            if (simTime > simulationDurationSeconds) break;
             EventHandler.getInstance(this).handle(e);
         }
     }

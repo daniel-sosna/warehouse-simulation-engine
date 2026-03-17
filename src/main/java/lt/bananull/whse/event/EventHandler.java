@@ -35,13 +35,14 @@ public class EventHandler {
     private String toJson(Event event) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("simTime", event.getSimTime());
-        entry.put("timestamp", simulator.getNow().toString());
+        entry.put("timestamp", simulator.getSimulationStartTime().plusSeconds(event.getSimTime()).toString());
         entry.put("event", event.getClass().getSimpleName());
         entry.put("data", event.getData());
         try {
             return MAPPER.writeValueAsString(entry);
         } catch (Exception e) {
-            return "{\"error\":\"failed to serialize event\",\"event\":\"" + event.getClass().getSimpleName() + "\",\"cause\":\"" + e.getMessage() + "\"}";
+            return "{\"error\":\"failed to serialize event\",\"event\":\"" + event.getClass().getSimpleName()
+                    + "\",\"cause\":\"" + e.getMessage() + "\"}";
         }
     }
 
