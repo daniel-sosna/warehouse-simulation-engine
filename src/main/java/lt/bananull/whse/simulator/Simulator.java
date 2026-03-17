@@ -20,12 +20,6 @@ import java.util.PriorityQueue;
 @Slf4j
 public class Simulator {
 
-    // For now random numbers
-    // TODO: move to a constants file
-    @Getter private final long ROUTER_PERIOD = 900;
-    @Getter private final long TRAVEL_SECONDS = 60;
-    @Getter private final long PICK_SECONDS = 30;
-
     private final Instant simulationStartTime;
     @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
@@ -33,16 +27,19 @@ public class Simulator {
     @Getter private long simTime = 0;
     @Getter private Instant now;
     @Getter private final SimulationState state;
+    @Getter private final SimulationParameters parameters;
 
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState, Instant startTime,  Instant endTime) {
-        this.state = SimulationState.from(initialState);
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState,
+                     Instant startTime, Instant endTime, SimulationParameters parameters) {
+        this.state = SimulationState.from(initialState, parameters);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
         this.simulationDurationSeconds = simulationEndTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        this.parameters = parameters;
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
@@ -70,11 +67,7 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            Shipment shipment = state.getShipment(a.shipmentId());
-            log.info(shipment.toString());
-
-            Event markShipmentAsReady = new ShipmentIsReady(simTime, a.shipmentId());
-            enqueueEvent(markShipmentAsReady);
+            enqueueEvent(new ShipmentIsReady(simTime, a.shipmentId()););
             // long doneAt = simTime + TRAVEL_SECONDS;
             // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
