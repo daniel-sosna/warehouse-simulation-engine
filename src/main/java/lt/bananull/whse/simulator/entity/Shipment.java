@@ -20,6 +20,7 @@ public class Shipment {
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
+    // TODO: add handlingFlags field
 
     public Shipment(String id, Map<String, Integer> items, Instant shipmentDate) {
         this.id = id;
@@ -41,7 +42,8 @@ public class Shipment {
 
     public void routeToGrid(String gridId) {
         if (status != ShipmentStatus.RECEIVED) {
-            throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
+            // TODO: uncomment this when roll back to received is implemented and used
         }
 
         this.assignedGridId = gridId;

@@ -6,9 +6,11 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.BinArrivesAtPort;
 import lt.bananull.whse.event.events.RouterTickEvent;
+import lt.bananull.whse.event.events.ShipmentIsReady;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
@@ -52,6 +54,10 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
+        for (AssignmentDto assignment : assignments) {
+            Shipment shipment = state.getShipment(assignment.shipmentId());
+            shipment.routeToGrid(assignment.packingGrid());
+        }
     }
 
     private void setSimTime(long newSimTimeSeconds) {
@@ -64,8 +70,13 @@ public class Simulator {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
 
-            long doneAt = simTime + TRAVEL_SECONDS;
-            enqueueEvent(new BinArrivesAtPort(doneAt, a));
+            Shipment shipment = state.getShipment(a.shipmentId());
+            log.info(shipment.toString());
+
+            Event markShipmentAsReady = new ShipmentIsReady(simTime, a.shipmentId());
+            enqueueEvent(markShipmentAsReady);
+            // long doneAt = simTime + TRAVEL_SECONDS;
+            // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
             // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
             // then we will need: Dispatcher (or PortScheduler) that:
