@@ -52,10 +52,6 @@ public class Grid {
         return shipmentQueue.poll();
     }
 
-    public boolean hasQueuedShipments() {
-        return !shipmentQueue.isEmpty();
-    }
-
     @Override
     public String toString() {
         return "Grid{id='%s', shifts=%s, queueSize=%d}".formatted(id, shifts, shipmentQueue.size());
