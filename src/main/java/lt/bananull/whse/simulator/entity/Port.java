@@ -43,7 +43,7 @@ public class Port {
         return shipmentQueue.size() < queueCapacity;
     }
 
-    public boolean canHandle(Set<String> shipmentHandlingFlags) {
+    public boolean canHandle(Collection<String> shipmentHandlingFlags) {
         return handlingFlags.containsAll(shipmentHandlingFlags);
     }
 
@@ -101,7 +101,7 @@ public class Port {
         return completedShipmentId;
     }
 
-    public void enqueueShipment(String shipmentId, Set<String> shipmentHandlingFlags) {
+    public void enqueueShipment(String shipmentId, Collection<String> shipmentHandlingFlags) {
         if (status != PortStatus.IDLE && status != PortStatus.BUSY) {
             throw new IllegalStateException(
                     "Port %s cannot accept new shipments from status %s".formatted(id, status));
