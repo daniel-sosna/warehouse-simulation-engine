@@ -24,7 +24,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
 
-    public Bin(String id, String currentGridId, Map<String, Integer> stock) {
+    private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
         this.currentGridId = currentGridId;
         this.stock = new HashMap<>(stock);

@@ -25,7 +25,7 @@ public class Port {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
-    public Port(String id, Collection<String> handlingFlags, int queueCapacity) {
+    private Port(String id, Collection<String> handlingFlags, int queueCapacity) {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;

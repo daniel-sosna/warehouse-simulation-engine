@@ -24,7 +24,7 @@ public class Shipment {
     private String assignedGridId;
     private String assignedPortId;
 
-    public Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
+    private Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
