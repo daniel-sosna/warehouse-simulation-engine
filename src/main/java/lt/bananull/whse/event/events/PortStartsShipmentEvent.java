@@ -32,6 +32,8 @@ public class PortStartsShipmentEvent extends Event {
         port.startNextShipment();
 
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
+        shipment.assignToPort(portId);
+
         String selectedBinId = shipment.getPicks().stream()
                 .map(pickDto -> state.getBin(pickDto.binId()))
                 .filter(bin -> bin.getStatus() == AVAILABLE)
