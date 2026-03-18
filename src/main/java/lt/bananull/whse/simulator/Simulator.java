@@ -45,6 +45,10 @@ public class Simulator {
     }
 
     public void enqueueEvent(Event e) {
+        if (e.getSimTime() < simTime) {
+            log.warn("Enqueueing event in the past: nowSimTime={}, eventSimTime={}, event={}",
+                simTime, e.getSimTime(), e);
+        }
         events.add(e);
     }
 

@@ -31,7 +31,7 @@ public class BinRequestedAtPortEvent extends Event {
         if (bin.getStatus() == AVAILABLE) {
             bin.reserveForPort(portId, Map.of(ean, qty));
             double mult = simulator.sampleMultiplier(simulator.getParameters().gridBinDelivery().randomness());
-            long estSimTime =
+            long estSimTime = getSimTime() +
                 Math.round((3600.0 / simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId).doubleValue()) * mult);
             simulator.enqueueEvent(new BinArrivesAtPortEvent(estSimTime, gridId, portId, binId));
 

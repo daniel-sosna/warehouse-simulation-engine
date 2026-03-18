@@ -3,6 +3,7 @@ package lt.bananull.whse.event.events;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Bin;
 
 import java.util.Map;
 
@@ -31,7 +32,8 @@ public class BinPickCompletedEvent extends Event {
         // - trigger simulator.dispatch() to start next waiting assignment
         // - set port status to idle and then start next shipment again
 
-
+        Bin bin = simulator.getState().getBin(binId);
+        bin.release();
         simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, duration));
 
     }
