@@ -9,12 +9,12 @@ import java.util.Map;
 public class ShipmentPackedEvent extends Event {
 
     private final String shipmentId;
-    private final long packingDurationSeconds;
+    private final long duration;
 
-    public ShipmentPackedEvent(long simTime, String shipmentId, long packingDurationSeconds) {
+    public ShipmentPackedEvent(long simTime, String shipmentId, long duration) {
         super(simTime);
         this.shipmentId = shipmentId;
-        this.packingDurationSeconds = packingDurationSeconds;
+        this.duration = duration;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ShipmentPackedEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
                 "shipmentId", shipmentId,
-                "packingDurationSeconds", packingDurationSeconds
+                "Duration", duration
         );
     }
 }
