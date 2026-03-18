@@ -20,7 +20,9 @@ public class BeginShipmentPickingEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        Port port = simulator.getState().getGrid(gridId).getPorts().get(portId);
+        SimulationState state = simulator.getState();
+
+        Port port = state.getPort(gridId, portId);
         port.startNextShipment();
         // TODO: add a way to ge the bins instantly
         Map<String, Integer> items = simulator.getState().getShipment(port.getActiveShipmentId()).getItems();

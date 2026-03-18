@@ -55,6 +55,10 @@ public record SimulationState(
         return grids.get(id);
     }
 
+    public Port getPort(String gridId, String portId) {
+        return grids.get(gridId).getPorts().get(portId);
+    }
+
     @Override
     public String toString() {
         return "SimulationState{shipments=%d, bins=%d, grids=%d}"

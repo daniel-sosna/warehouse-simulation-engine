@@ -50,7 +50,7 @@ public class Simulator {
         assignments.addAll(newAssignments);
         for (AssignmentDto assignment : assignments) {
             Shipment shipment = state.getShipment(assignment.shipmentId());
-            shipment.routeToGrid(assignment.packingGrid());
+            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
         }
     }
 
