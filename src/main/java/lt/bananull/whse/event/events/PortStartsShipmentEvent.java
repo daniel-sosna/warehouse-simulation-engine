@@ -1,7 +1,6 @@
 package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
@@ -38,7 +37,7 @@ public class PortStartsShipmentEvent extends Event {
                 .findFirst()
                 .orElse(shipment.getPicks().getFirst().binId());
         BinRequestedAtPortEvent event = new BinRequestedAtPortEvent(getSimTime(), selectedBinId, gridId, portId);
-        EventHandler.getInstance(simulator).handle(event);
+        simulator.getEventHandler().handle(event);
     }
 
     @Override
