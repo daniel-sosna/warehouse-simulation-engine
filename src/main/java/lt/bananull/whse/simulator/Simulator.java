@@ -15,9 +15,12 @@ import lt.bananull.whse.simulator.entity.SimulationState;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 @Slf4j
 public class Simulator {
+
+    @Getter private final Random rng = new Random(1L); // seed can come from CLI later, for now just this will work
 
     @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
@@ -74,6 +77,11 @@ public class Simulator {
             // - reserves bin/port
             // - schedules BinArrivedAtPort, BinPickCompleted, etc.
         }
+    }
+
+    // This method draws one random multiplier from the range we get from params.json
+    public double sampleMultiplier(SimulationParameters.Randomness r) {
+        return r.min() + rng.nextDouble() * (r.max() - r.min());
     }
 
     public void run() {

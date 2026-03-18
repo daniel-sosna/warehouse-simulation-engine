@@ -1,7 +1,6 @@
 package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.simulator.SimulationParameters;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 
@@ -31,7 +30,11 @@ public class BinRequestedAtPortEvent extends Event {
         Bin bin = simulator.getState().getBin(binId);
         if (bin.getStatus() == AVAILABLE) {
             bin.reserveForPort(portId, Map.of(ean, qty));
-            long estTime = getSimTime() + simulator.getParameters().pickingThroughput().standard();
+            double mult = simulator.sampleMultiplier(simulator.getParameters().gridBinDelivery().randomness());
+            long estSimTime =
+                Math.round((3600.0 / simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId).doubleValue()) * mult);
+            simulator.enqueueEvent(new BinArrivesAtPortEvent(estSimTime, gridId, portId, binId));
+
         }
         // else: TODO: put into a queue of the bin
 
