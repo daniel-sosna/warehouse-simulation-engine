@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.simulator.Simulator;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @Slf4j(topic = "EVENT_LOGGER")
 public class EventHandler {
 
@@ -33,13 +30,9 @@ public class EventHandler {
     }
 
     private String toJson(Event event) {
-        Map<String, Object> entry = new LinkedHashMap<>();
-        entry.put("simTime", event.getSimTime());
-        entry.put("timestamp", simulator.getSimulationStartTime().plusSeconds(event.getSimTime()).toString());
-        entry.put("event", event.getClass().getSimpleName().split("Event")[0]);
-        entry.put("data", event.getData());
+        LogEvent logEvent = new LogEvent(event, simulator.getSimulationStartTime());
         try {
-            return MAPPER.writeValueAsString(entry);
+            return MAPPER.writeValueAsString(logEvent);
         } catch (Exception e) {
             return "{\"error\":\"failed to serialize event\",\"event\":\"" + event.getClass().getSimpleName()
                     + "\",\"cause\":\"" + e.getMessage() + "\"}";
