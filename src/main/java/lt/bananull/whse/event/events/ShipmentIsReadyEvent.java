@@ -1,6 +1,7 @@
 package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
+import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
@@ -31,14 +32,14 @@ public class ShipmentIsReadyEvent extends Event {
 
     private void enqueueShipment(Simulator simulator, Shipment shipment) {
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
-
-        Set<String> handlingFlags = Set.copyOf(shipment.getHandlingFlags());
+        Set<String> handlingFlags = shipment.getHandlingFlags();
         Port availablePort = currentGrid.getAvailablePort(handlingFlags);
 
         if (availablePort != null) {
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
-                simulator.enqueueEvent(new BeginShipmentPickingEvent(getSimTime(), currentGrid.getId(), availablePort.getId()));
+                PortStartsShipmentEvent event = new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getId());
+                EventHandler.getInstance(simulator).handle(event);
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);

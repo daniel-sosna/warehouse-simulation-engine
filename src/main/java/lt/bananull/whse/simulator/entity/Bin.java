@@ -24,7 +24,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
 
-    public Bin(String id, String currentGridId, Map<String, Integer> stock) {
+    private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
         this.currentGridId = currentGridId;
         this.stock = new HashMap<>(stock);
@@ -32,7 +32,7 @@ public class Bin {
 
     public static Bin from(BinDto dto) {
         Map<String, Integer> stock = new HashMap<>();
-        dto.itemsInBin().forEach((ean, binItem) -> stock.put(ean, binItem.quantity()));
+        dto.itemsInBin().forEach((ean, binItemDto) -> stock.put(ean, binItemDto.quantity()));
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
     }
 
@@ -45,8 +45,7 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : reservedItems.entrySet()) {
             String ean = entry.getKey();
-            int reservedQty = entry.getValue();
-            int remaining = availableStock.getOrDefault(ean, 0) - reservedQty;
+            int remaining = availableStock.get(ean) - entry.getValue();
 
             if (remaining <= 0) {
                 availableStock.remove(ean);
@@ -69,6 +68,7 @@ public class Bin {
             throw new IllegalArgumentException("Items to deduct must be provided for bin %s".formatted(id));
         }
 
+        // Ensure there are enough items in stock
         for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
             String ean = entry.getKey();
             Integer qty = entry.getValue();
@@ -78,7 +78,7 @@ public class Bin {
                         "Deduct quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
             }
 
-            int current = stock.getOrDefault(ean, 0);
+            int current = stock.get(ean);
             if (current < qty) {
                 throw new IllegalArgumentException(
                         "Bin %s has only %d units of EAN %s; cannot deduct %d".formatted(id, current, ean, qty));
@@ -87,8 +87,7 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
             String ean = entry.getKey();
-            int qty = entry.getValue();
-            int remaining = stock.get(ean) - qty;
+            int remaining = stock.get(ean) - entry.getValue();
 
             if (remaining == 0) {
                 stock.remove(ean);
@@ -104,7 +103,8 @@ public class Bin {
      * @throws IllegalArgumentException if reserved quantities are invalid or exceed stock.
      */
     public void reserveForPort(String portId, Map<String, Integer> itemsToReserve) {
-        if (portId == null || portId.isBlank()) {
+        // TODO: find out when to reserve a bin. If when shipment goes to port queue (no rerouting), then we need to reserve items earlier
+        if (portId == null || portId.isEmpty()) {
             throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));
         }
         if (itemsToReserve == null || itemsToReserve.isEmpty()) {
@@ -152,7 +152,7 @@ public class Bin {
     }
 
     public void arriveAtGrid(String gridId) {
-        if (gridId == null || gridId.isBlank()) {
+        if (gridId == null || gridId.isEmpty()) {
             throw new IllegalArgumentException("Grid ID must be provided when bin %s arrives".formatted(id));
         }
 

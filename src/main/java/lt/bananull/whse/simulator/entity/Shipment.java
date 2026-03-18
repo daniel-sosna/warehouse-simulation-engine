@@ -1,13 +1,15 @@
 package lt.bananull.whse.simulator.entity;
 
 import lombok.Getter;
-import lombok.Setter;
 import lt.bananull.whse.load.dto.ShipmentDto;
+import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Simulation entity representing a customer order.
@@ -19,22 +21,23 @@ public class Shipment {
     private final String id;
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
-    private final List<String> handlingFlags;
-    @Setter
+    private final Set<String> handlingFlags;
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
+    private List<PickDto> picks = List.of();
 
-    public Shipment(String id, Map<String, Integer> items, Instant shipmentDate, List<String> handlingFlags) {
+    private Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
-        this.handlingFlags = handlingFlags != null ? List.copyOf(handlingFlags) : List.of();
+        this.handlingFlags = Set.copyOf(handlingFlags);
         this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
-        return new Shipment(dto.id(), dto.items(), dto.shipmentDate(), dto.handlingFlags());
+        return new Shipment(dto.id(), dto.items(), dto.shipmentDate(),
+                dto.handlingFlags() != null ? dto.handlingFlags() : Set.of());
     }
 
     public boolean isAvailableForRerouting() {
@@ -44,7 +47,15 @@ public class Shipment {
                 && assignedPortId == null;
     }
 
-    public void routeToGrid(String gridId) {
+    public void markReceived() {
+        if (status != null) {
+            throw new IllegalStateException("Shipment %s cannot be received from status %s".formatted(id, status));
+        }
+
+        this.status = ShipmentStatus.RECEIVED;
+    }
+
+    public void routeToGrid(String gridId, Collection<PickDto> picks) {
         if (status != ShipmentStatus.RECEIVED) {
             // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
             // TODO: uncomment this when roll back to received is implemented and used
@@ -52,6 +63,7 @@ public class Shipment {
 
         this.assignedGridId = gridId;
         this.assignedPortId = null;
+        this.picks = List.copyOf(picks);
         this.status = ShipmentStatus.ROUTED;
     }
 
@@ -118,6 +130,7 @@ public class Shipment {
 
         this.assignedGridId = null;
         this.assignedPortId = null;
+        this.picks = List.of();
         this.status = ShipmentStatus.PACKED;
     }
 
@@ -138,6 +151,7 @@ public class Shipment {
         }
 
         this.assignedGridId = null;
+        this.picks = List.of();
         this.status = ShipmentStatus.RECEIVED;
     }
 

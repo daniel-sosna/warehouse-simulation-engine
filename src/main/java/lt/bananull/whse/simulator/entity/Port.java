@@ -25,7 +25,7 @@ public class Port {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
-    public Port(String id, Collection<String> handlingFlags, int queueCapacity) {
+    private Port(String id, Collection<String> handlingFlags, int queueCapacity) {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;
@@ -39,16 +39,20 @@ public class Port {
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
-    public boolean hasCapacity() {
-        return shipmentQueue.size() < queueCapacity;
-    }
-
     public int getQueueSize() {
         return shipmentQueue.size();
     }
 
-    public boolean canHandle(Set<String> shipmentHandlingFlags) {
+    public boolean hasCapacity() {
+        return getQueueSize() < queueCapacity;
+    }
+
+    public boolean canHandle(Collection<String> shipmentHandlingFlags) {
         return handlingFlags.containsAll(shipmentHandlingFlags);
+    }
+
+    public boolean canAcceptShipment(Collection<String> shipmentHandlingFlags) {
+        return (status == PortStatus.IDLE || status == PortStatus.BUSY) && hasCapacity() && canHandle(shipmentHandlingFlags);
     }
 
     public void open() {
@@ -105,14 +109,14 @@ public class Port {
         return completedShipmentId;
     }
 
-    public void enqueueShipment(String shipmentId, Set<String> shipmentHandlingFlags) {
+    public void enqueueShipment(String shipmentId, Collection<String> shipmentHandlingFlags) {
         if (status != PortStatus.IDLE && status != PortStatus.BUSY) {
             throw new IllegalStateException(
                     "Port %s cannot accept new shipments from status %s".formatted(id, status));
         }
         if (!hasCapacity()) {
             throw new IllegalStateException(
-                    "Port %s queue is full (%d/%d)".formatted(id, shipmentQueue.size(), queueCapacity));
+                    "Port %s queue is full (%d/%d)".formatted(id, getQueueSize(), queueCapacity));
         }
         if (!canHandle(shipmentHandlingFlags)) {
             throw new IllegalStateException(
@@ -125,6 +129,6 @@ public class Port {
     @Override
     public String toString() {
         return "Port{id='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(id, status, shipmentQueue.size(), queueCapacity, activeShipmentId);
+                .formatted(id, status, getQueueSize(), queueCapacity, activeShipmentId);
     }
 }

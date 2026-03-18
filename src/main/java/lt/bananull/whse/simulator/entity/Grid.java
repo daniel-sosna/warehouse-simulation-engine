@@ -15,10 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
-import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
-import static lt.bananull.whse.simulator.enums.PortStatus.BUSY;
 /**
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
@@ -32,7 +29,7 @@ public class Grid {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue = new ArrayDeque<>();
 
-    public Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
+    private Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
         this.id = id;
         this.shifts = List.copyOf(shifts);
         this.ports = Map.copyOf(ports);
@@ -48,23 +45,11 @@ public class Grid {
         return new Grid(dto.id(), dto.shifts(), ports);
     }
 
-
-    // TODO: include handling flags filter
-    public Port getAvailablePort(Set<String> shipmentHandlingFlags) {
-        Port chosen = ports.values().stream()
-                .filter(port -> port.hasCapacity() && (port.getStatus() == IDLE || port.getStatus() == BUSY) && port.canHandle(shipmentHandlingFlags))
+    public Port getAvailablePort(Collection<String> shipmentHandlingFlags) {
+        return ports.values().stream()
+                .filter(port -> port.canAcceptShipment(shipmentHandlingFlags))
                 .min(Comparator.comparingInt(Port::getQueueSize))
                 .orElse(null);
-
-        log.info("Grid {} chose port {} among: {}",
-                id,
-                chosen != null ? chosen.getId() : "none",
-                ports.values().stream()
-                        .map(p -> "%s(queue=%d,status=%s)".formatted(p.getId(), p.getQueueSize(), p.getStatus()))
-                        .toList()
-        );
-
-        return chosen;
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
