@@ -4,8 +4,12 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.Map;
+
+import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
 public class BeginShipmentPickingEvent extends Event {
 
@@ -24,17 +28,14 @@ public class BeginShipmentPickingEvent extends Event {
 
         Port port = state.getPort(gridId, portId);
         port.startNextShipment();
-        // TODO: add a way to ge the bins instantly
-        Map<String, Integer> items = simulator.getState().getShipment(port.getActiveShipmentId()).getItems();
-        for (String item : items.keySet()) {
-            Bin bin = simulator.getState().bins().values().stream()
-                    .filter(b -> b.getAvailableStock().containsKey(item))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No bin found for EAN %s".formatted(item)));
-            String binId = bin.getId();
-            // TODO: create and call the event BinRequestedAtPort
-            // TODO: also check the quantity and reduce the stock
-        }
+
+        Shipment shipment = state.getShipment(port.getActiveShipmentId());
+        Bin selectedBin = shipment.getPicks().stream()
+                .map(pickDto -> state.getBin(pickDto.binId()))
+                .filter(bin -> bin.getStatus() == AVAILABLE)
+                .findFirst()
+                .orElse(state.getBin(shipment.getPicks().getFirst().binId()));
+        // TODO: create and call the event BinRequestedAtPort
     }
 
     @Override

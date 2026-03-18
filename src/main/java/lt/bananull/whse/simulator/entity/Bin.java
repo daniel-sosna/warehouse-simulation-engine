@@ -32,7 +32,7 @@ public class Bin {
 
     public static Bin from(BinDto dto) {
         Map<String, Integer> stock = new HashMap<>();
-        dto.itemsInBin().forEach((ean, binItem) -> stock.put(ean, binItem.quantity()));
+        dto.itemsInBin().forEach((ean, binItemDto) -> stock.put(ean, binItemDto.quantity()));
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
     }
 
