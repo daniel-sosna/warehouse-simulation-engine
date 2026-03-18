@@ -2,8 +2,6 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.router.dto.AssignmentDto;
-import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
 
 import java.util.Map;
@@ -11,18 +9,15 @@ import java.util.Map;
 @Slf4j
 public class BinPickCompletedEvent extends Event {
 
-    private final AssignmentDto assignment;
     private final String binId;
-    private final String packingGrid;
-    private final long pickDurationSeconds;
+    private final String shipmentId;
+    private final long duration;
 
-    public BinPickCompletedEvent(long simTime, AssignmentDto assignment, long pickDurationSeconds) {
+    public BinPickCompletedEvent(long simTime, String shipmentId, String binId, long duration) {
         super(simTime);
-        this.assignment = assignment;
-        PickDto firstPick = assignment.picks().getFirst();
-        this.binId = firstPick.binId();
-        this.packingGrid = assignment.packingGrid();
-        this.pickDurationSeconds = pickDurationSeconds;
+        this.shipmentId = shipmentId;
+        this.binId = binId;
+        this.duration = duration;
     }
 
     @Override
@@ -36,21 +31,16 @@ public class BinPickCompletedEvent extends Event {
         // - trigger simulator.dispatch() to start next waiting assignment
         // - set port status to idle and then start next shipment again
 
-        String shipmentId = assignment.shipmentId();
 
-        long packingDurationSeconds = pickDurationSeconds;
-        long packedAt = getSimTime() + packingDurationSeconds;
-
-        simulator.enqueueEvent(new ShipmentPackedEvent(packedAt, shipmentId, packingDurationSeconds));
+        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId));
 
     }
 
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "shipmentId", assignment.shipmentId(),
-                "binId", binId,
-                "grid", packingGrid
+                "shipmentId", shipmentId,
+                "binId", binId
         );
     }
 }

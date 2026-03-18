@@ -31,8 +31,8 @@ public class BinArrivesAtPortEvent extends Event {
         long pickSeconds = Math.round((3600.0 / standardRate) * mult);
         long pickDoneAt = getSimTime() + pickSeconds;
         Port port = simulator.getState().getPort(gridId, portId);
-        Shipment shipment = simulator.getState().getShipment(port.)
-        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, , pickSeconds));
+        Shipment shipment = simulator.getState().getShipment(port.getActiveShipmentId());
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, shipment.getId(), binId, pickSeconds));
     }
 
     @Override
