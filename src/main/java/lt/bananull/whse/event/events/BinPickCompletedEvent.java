@@ -32,7 +32,7 @@ public class BinPickCompletedEvent extends Event {
         // - set port status to idle and then start next shipment again
 
 
-        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId));
+        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, duration));
 
     }
 
