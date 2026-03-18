@@ -33,7 +33,7 @@ public class BinArrivesAtPortEvent extends Event {
         Port port = simulator.getState().getPort(gridId, portId);
         Shipment shipment = simulator.getState().getShipment(port.getActiveShipmentId());
         shipment.startPicking();
-        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, shipment.getId(), binId, pickSeconds));
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, shipment.getId(), gridId, portId, binId, pickSeconds));
     }
 
     @Override
