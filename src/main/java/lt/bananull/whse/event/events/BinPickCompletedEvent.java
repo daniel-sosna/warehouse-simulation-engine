@@ -14,13 +14,15 @@ public class BinPickCompletedEvent extends Event {
     private final AssignmentDto assignment;
     private final String binId;
     private final String packingGrid;
+    private final long pickDurationSeconds;
 
-    public BinPickCompletedEvent(long simTime, AssignmentDto assignment) {
+    public BinPickCompletedEvent(long simTime, AssignmentDto assignment, long pickDurationSeconds) {
         super(simTime);
         this.assignment = assignment;
         PickDto firstPick = assignment.picks().getFirst();
         this.binId = firstPick.binId();
         this.packingGrid = assignment.packingGrid();
+        this.pickDurationSeconds = pickDurationSeconds;
     }
 
     @Override
@@ -33,6 +35,14 @@ public class BinPickCompletedEvent extends Event {
         // - set bin status Available
         // - trigger simulator.dispatch() to start next waiting assignment
         // - set port status to idle and then start next shipment again
+
+        String shipmentId = assignment.shipmentId();
+
+        long packingDurationSeconds = pickDurationSeconds;
+        long packedAt = getSimTime() + packingDurationSeconds;
+
+        simulator.enqueueEvent(new ShipmentPackedEvent(packedAt, shipmentId, packingDurationSeconds));
+
     }
 
     @Override
