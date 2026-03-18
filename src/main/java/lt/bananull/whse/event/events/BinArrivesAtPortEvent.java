@@ -2,8 +2,6 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.router.dto.AssignmentDto;
-import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
