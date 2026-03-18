@@ -2,26 +2,25 @@ package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
-import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
 public class ShipmentReceivedEvent extends Event {
 
-    private final Shipment shipment;
+    private final String shipmentId;
 
-    public ShipmentReceivedEvent(long simTime, Shipment shipment) {
+    public ShipmentReceivedEvent(long simTime, String shipmentId) {
         super(simTime);
-        this.shipment = shipment;
+        this.shipmentId = shipmentId;
     }
 
     @Override
     public void execute(Simulator simulator) {
-        shipment.markReceived();
+        simulator.getState().getShipment(shipmentId).markReceived();
     }
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of("shipmentId", shipment.getId());
+        return Map.of("shipmentId", shipmentId);
     }
 }
