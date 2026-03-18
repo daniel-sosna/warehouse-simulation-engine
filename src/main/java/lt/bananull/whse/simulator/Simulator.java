@@ -83,11 +83,6 @@ public class Simulator {
         }
     }
 
-    // This method draws one random multiplier from the range we get from params.json
-    public double sampleMultiplier(SimulationParameters.Randomness r) {
-        return r.min() + rng.nextDouble() * (r.max() - r.min());
-    }
-
     public void run() {
         while (!events.isEmpty()) {
             Event e = events.poll();

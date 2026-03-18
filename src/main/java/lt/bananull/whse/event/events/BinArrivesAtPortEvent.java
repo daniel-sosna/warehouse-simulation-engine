@@ -8,6 +8,8 @@ import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
+import static lt.bananull.whse.utils.RandomnessUtil.sampleMultiplier;
+
 @Slf4j
 public class BinArrivesAtPortEvent extends Event {
 
@@ -24,7 +26,7 @@ public class BinArrivesAtPortEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        double mult = simulator.sampleMultiplier(simulator.getParameters().pickingThroughput().randomness());
+        double mult = sampleMultiplier(simulator.getRng(), simulator.getParameters().pickingThroughput().randomness());
         int standardRate = simulator.getParameters().pickingThroughput().standard();
         long pickSeconds = Math.round((3600.0 / standardRate) * mult);
         long pickDoneAt = getSimTime() + pickSeconds;
