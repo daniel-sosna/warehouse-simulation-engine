@@ -2,6 +2,7 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
+import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
@@ -38,9 +39,9 @@ public class BinPickCompletedEvent extends Event {
         Port port = simulator.getState().getPort(gridId, portId);
         port.completeActiveShipment();
         if (0 < port.getQueueSize()) {
-            port.startNextShipment();
+            simulator.enqueueEvent(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
         }
-        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, duration));
+        EventHandler.getInstance(simulator).handle(new ShipmentPackedEvent(getSimTime(), shipmentId, duration));
 
     }
 
