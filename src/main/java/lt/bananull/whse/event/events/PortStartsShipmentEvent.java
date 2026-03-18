@@ -12,12 +12,12 @@ import java.util.Map;
 
 import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
-public class BeginShipmentPickingEvent extends Event {
+public class PortStartsShipmentEvent extends Event {
 
     private final String gridId;
     private final String portId;
 
-    public BeginShipmentPickingEvent(long simTime, String gridId, String portId) {
+    public PortStartsShipmentEvent(long simTime, String gridId, String portId) {
         super(simTime);
         this.gridId = gridId;
         this.portId = portId;
