@@ -1,7 +1,6 @@
 package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
@@ -48,7 +47,7 @@ public class RouterTickEvent extends Event {
                 .forEach(shipment -> {
                     long shipmentSimTime = shipment.getShipmentDate().getEpochSecond() - simulator.getSimulationStartTime().getEpochSecond();
                     ShipmentReceivedEvent event = new ShipmentReceivedEvent(shipmentSimTime, shipment.getId());
-                    EventHandler.getInstance(simulator).handle(event);
+                    simulator.getEventHandler().handle(event);
                 });
     }
 

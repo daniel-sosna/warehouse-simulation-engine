@@ -26,6 +26,7 @@ public class Simulator {
     @Getter private Instant now;
     @Getter private final SimulationState state;
     @Getter private final SimulationParameters parameters;
+    @Getter private final EventHandler eventHandler;
 
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
@@ -37,6 +38,7 @@ public class Simulator {
         this.now = startTime;
         this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
         this.parameters = parameters;
+        this.eventHandler = new EventHandler(this);
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
@@ -81,7 +83,7 @@ public class Simulator {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (simTime > simulationDurationSeconds) break;
-            EventHandler.getInstance(this).handle(e);
+            eventHandler.handle(e);
         }
     }
 }
