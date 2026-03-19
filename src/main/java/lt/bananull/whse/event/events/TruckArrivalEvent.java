@@ -6,6 +6,7 @@ import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static lt.bananull.whse.simulator.enums.ShipmentStatus.PACKED;
 
@@ -23,7 +24,7 @@ public class TruckArrivalEvent extends Event {
     public void execute(Simulator simulator) {
         List<Shipment> shipmentsToShip = simulator.getState().shipments().values().stream()
             .filter(shipment -> shipment.getStatus() == PACKED
-                    && shipment.getSortingDirection().equals(sortingDirection))
+                    && Objects.equals(shipment.getSortingDirection(), sortingDirection))
             .toList();
 
         shipmentsToShip.forEach(Shipment::markShipped);
