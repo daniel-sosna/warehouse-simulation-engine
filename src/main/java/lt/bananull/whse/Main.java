@@ -39,9 +39,9 @@ public class Main {
         try {
             LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
         } catch (Exception e) {
-            System.err.print("Failed to sort simulation.log by simTime");
+            System.err.print("Failed to sort log file by simTime");
             Logger log = LoggerFactory.getLogger(Main.class);
-            log.error("Failed to sort simulation.log by simTime", e);
+            log.error("Failed to sort log file by simTime", e);
         }
     }
 }
