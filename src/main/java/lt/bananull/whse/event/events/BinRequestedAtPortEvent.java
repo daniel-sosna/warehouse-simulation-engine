@@ -7,7 +7,6 @@ import lt.bananull.whse.simulator.entity.Bin;
 import java.util.Map;
 
 import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
-import static lt.bananull.whse.utils.RandomnessUtil.sampleMultiplier;
 
 public class BinRequestedAtPortEvent extends Event {
 
@@ -31,11 +30,13 @@ public class BinRequestedAtPortEvent extends Event {
         Bin bin = simulator.getState().getBin(binId);
         if (bin.getStatus() == AVAILABLE) {
             bin.reserveForPort(portId, Map.of(ean, qty));
-            double mult = sampleMultiplier(simulator.getRng(), simulator.getParameters().gridBinDelivery().randomness());
-            long estSimTime = getSimTime() +
-                Math.round((3600.0 / simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId).doubleValue()) * mult);
-            simulator.enqueueEvent(new BinArrivesAtPortEvent(estSimTime, gridId, portId, binId));
 
+            double mult = simulator.resolveMultiplier(simulator.getParameters().gridBinDelivery().randomness());
+            int standardRate = simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId);
+            long duration = Math.round((3600.0 / standardRate) * mult);
+            long arriveAt = getSimTime() +  duration;
+
+            simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, gridId, portId, binId));
         }
         // else: TODO: put into a queue of the bin
 
