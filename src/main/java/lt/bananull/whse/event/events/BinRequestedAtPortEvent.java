@@ -17,7 +17,7 @@ public class BinRequestedAtPortEvent extends Event {
     private final int qty;
 
     public BinRequestedAtPortEvent(long simTime, String binId, String gridId, String portId, String ean, int qty) {
-        super(simTime, 0);
+        super(simTime);
         this.binId = binId;
         this.gridId = gridId;
         this.portId = portId;

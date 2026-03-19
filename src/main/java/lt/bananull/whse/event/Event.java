@@ -1,7 +1,6 @@
 package lt.bananull.whse.event;
 
 import lombok.Getter;
-import lombok.Setter;
 import lt.bananull.whse.simulator.Simulator;
 
 import java.util.Map;
@@ -13,6 +12,11 @@ public abstract class Event implements Comparable<Event> {
 
     @Getter
     private final long duration;
+
+    public Event(long simTime) {
+        this.simTime = simTime;
+        this.duration = 0;
+    }
 
     public Event(long simTime, long duration) {
         this.simTime = simTime;
