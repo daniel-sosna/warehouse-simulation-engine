@@ -26,6 +26,10 @@ public class Simulator {
     @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
 
+    public Instant getSimulationEndTime() {
+        return simulationStartTime.plusSeconds(simulationDurationSeconds);
+    }
+
     @Getter private long simTime = 0;
     @Getter private Instant now;
     @Getter private final SimulationState state;

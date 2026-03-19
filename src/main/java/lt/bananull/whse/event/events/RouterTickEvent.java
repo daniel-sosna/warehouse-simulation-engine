@@ -25,7 +25,12 @@ public class RouterTickEvent extends Event {
         checkForReceivedShipments(simulator);
         // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
-        RouterRequestDto request = RouterRequestDto.from(simulator.getState(), simulator.getNow());
+        RouterRequestDto request = RouterRequestDto.from(
+                simulator.getState(),
+                simulator.getNow(),
+                simulator.getSimulationStartTime(),
+                simulator.getSimulationEndTime()
+        );
         RouterResponseDto response = routerClient.route(request);
 
         simulator.updateAssignments(response.assignments());
