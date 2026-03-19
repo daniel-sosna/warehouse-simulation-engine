@@ -134,7 +134,7 @@ public record RouterRequestDto(
 
         List<RouterShift> result = new ArrayList<>();
         LocalDate date = startDate;
-        while (date.isBefore(endDate)) {
+        while (!date.isAfter(endDate)) {
             final LocalDate currentDate = date;
             Instant start = dto.start().atDate(currentDate).atZone(zone).toInstant();
             LocalDate shiftEndDate = overnightShift ? currentDate.plusDays(1) : currentDate;
