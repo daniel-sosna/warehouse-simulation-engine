@@ -14,11 +14,11 @@ public class ShipmentPackedEvent extends Event {
     private final String portId;
     private final long duration;
 
-    public ShipmentPackedEvent(long simTime, String gridId, String portId, String shipmentId, long duration) {
+    public ShipmentPackedEvent(long simTime, String shipmentId, String gridId, String portId, long duration) {
         super(simTime);
+        this.shipmentId = shipmentId;
         this.gridId = gridId;
         this.portId = portId;
-        this.shipmentId = shipmentId;
         this.duration = duration;
     }
 
