@@ -8,7 +8,7 @@ public record AppConfig(
         Path eventLogFile
 ) {
 
-    public static final Path DEFAULT_DATA_DIR = Path.of("./data");
+    public static final Path DEFAULT_DATA_DIR = Path.of("./data/1");
     public static final String DEFAULT_ROUTER_COMMAND = "./build/router";
     public static final Path DEFAULT_EVENT_LOG_FILE = Path.of("./simulation.log");
 

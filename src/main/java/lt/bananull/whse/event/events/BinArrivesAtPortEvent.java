@@ -2,41 +2,40 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.router.dto.AssignmentDto;
-import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Port;
 
 import java.util.Map;
 
 @Slf4j
 public class BinArrivesAtPortEvent extends Event {
 
-    private final AssignmentDto assignment;
+    private final String gridId;
     private final String binId;
-    private final String packingGrid;
+    private final String portId;
 
-    public BinArrivesAtPortEvent(long simTime, AssignmentDto assignment) {
+    public BinArrivesAtPortEvent(long simTime, String gridId, String portId, String binId) {
         super(simTime);
-        this.assignment = assignment;
-        PickDto firstPick = assignment.picks().getFirst();
-        this.binId = firstPick.binId();
-        this.packingGrid = assignment.packingGrid();
+        this.gridId = gridId;
+        this.binId = binId;
+        this.portId = portId;
     }
 
     @Override
     public void execute(Simulator simulator) {
+        double mult = simulator.resolveMultiplier(simulator.getParameters().pickingThroughput().randomness());
         int standardRate = simulator.getParameters().pickingThroughput().standard();
-        long pickSeconds = (long) (3600.0 / standardRate);
-        long pickDoneAt = getSimTime() + pickSeconds;
-        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, assignment));
+        long duration = Math.round((3600.0 / standardRate) * mult);
+        long pickDoneAt = getSimTime() + duration;
+
+        Port port = simulator.getState().getPort(gridId, portId);
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, port.getActiveShipmentId(), gridId, portId, binId, duration));
     }
 
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "shipmentId", assignment.shipmentId(),
-                "binId", binId,
-                "grid", packingGrid
+                "binId", binId
         );
     }
 }

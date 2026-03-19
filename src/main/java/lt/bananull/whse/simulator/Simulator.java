@@ -11,13 +11,17 @@ import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
+import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.util.Collection;
 import java.util.PriorityQueue;
+import java.util.SplittableRandom;
 
 @Slf4j
 public class Simulator {
+
+    private static final long DEFAULT_RANDOM_SEED = 1L;
 
     @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
@@ -26,7 +30,9 @@ public class Simulator {
     @Getter private Instant now;
     @Getter private final SimulationState state;
     @Getter private final SimulationParameters parameters;
+    @Getter private final EventHandler eventHandler;
 
+    private final RandomnessResolver randomnessResolver;
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
@@ -37,11 +43,17 @@ public class Simulator {
         this.now = startTime;
         this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
         this.parameters = parameters;
+        this.eventHandler = new EventHandler(this);
+        this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
 
     public void enqueueEvent(Event e) {
+        if (e.getSimTime() < simTime) {
+            log.warn("Enqueueing event in the past: nowSimTime={}, eventSimTime={}, event={}",
+                simTime, e.getSimTime(), e);
+        }
         events.add(e);
     }
 
@@ -81,7 +93,11 @@ public class Simulator {
             Event e = events.poll();
             setSimTime(e.getSimTime());
             if (simTime > simulationDurationSeconds) break;
-            EventHandler.getInstance(this).handle(e);
+            eventHandler.handle(e);
         }
+    }
+
+    public double resolveMultiplier(SimulationParameters.Randomness randomness) {
+        return randomnessResolver.resolveMultiplier(randomness);
     }
 }
