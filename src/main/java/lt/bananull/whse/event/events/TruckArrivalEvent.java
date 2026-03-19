@@ -22,6 +22,7 @@ public class TruckArrivalEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
+        // Create a million separate events `ShipmentShipped` ?
         List<Shipment> shipmentsToShip = simulator.getState().shipments().values().stream()
             .filter(shipment -> shipment.getStatus() == PACKED
                     && Objects.equals(shipment.getSortingDirection(), sortingDirection))
