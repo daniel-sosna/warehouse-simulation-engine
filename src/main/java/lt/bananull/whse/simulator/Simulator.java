@@ -24,11 +24,8 @@ public class Simulator {
     private static final long DEFAULT_RANDOM_SEED = 1L;
 
     @Getter private final Instant simulationStartTime;
+    @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
-
-    public Instant getSimulationEndTime() {
-        return simulationStartTime.plusSeconds(simulationDurationSeconds);
-    }
 
     @Getter private long simTime = 0;
     @Getter private Instant now;
@@ -44,6 +41,7 @@ public class Simulator {
                      Instant startTime, Instant endTime, SimulationParameters parameters) {
         this.state = SimulationState.from(initialState, parameters);
         this.simulationStartTime = startTime;
+        this.simulationEndTime = endTime;
         this.now = startTime;
         this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
         this.parameters = parameters;
