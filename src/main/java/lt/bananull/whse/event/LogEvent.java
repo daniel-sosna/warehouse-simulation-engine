@@ -3,7 +3,7 @@ package lt.bananull.whse.event;
 import java.time.Instant;
 import java.util.Map;
 
-public record LogEvent (
+public record LogEvent(
     long simTime,
     String timestamp,
     String event,
