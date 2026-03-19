@@ -187,7 +187,7 @@ public final class LogFileSorter {
                     continue;
                 }
 
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
                 JsonToken valueToken = parser.nextToken();
 
                 if (!"simTime".equals(fieldName)) {
