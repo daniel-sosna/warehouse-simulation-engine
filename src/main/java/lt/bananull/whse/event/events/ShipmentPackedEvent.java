@@ -28,6 +28,9 @@ public class ShipmentPackedEvent extends Event {
         Port port = simulator.getState().getPort(gridId, portId);
         port.completeActiveShipment();
         shipment.markPacked();
+        if (0 < port.getQueueSize()) {
+            simulator.enqueueEvent(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
+        }
     }
 
     @Override

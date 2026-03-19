@@ -36,10 +36,6 @@ public class BinPickCompletedEvent extends Event {
 
         Bin bin = simulator.getState().getBin(binId);
         bin.release();
-        Port port = simulator.getState().getPort(gridId, portId);
-        if (0 < port.getQueueSize()) {
-            simulator.enqueueEvent(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
-        }
         EventHandler.getInstance(simulator).handle(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId,
             duration));
 
