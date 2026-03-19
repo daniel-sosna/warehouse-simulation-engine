@@ -3,11 +3,12 @@ package lt.bananull.whse.event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.utils.JacksonMapper;
 
 @Slf4j(topic = "EVENT_LOGGER")
 public class EventHandler {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JacksonMapper.create();
 
     private static EventHandler instance;
 
