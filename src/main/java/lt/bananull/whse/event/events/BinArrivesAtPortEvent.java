@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Port;
-import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
@@ -30,9 +29,7 @@ public class BinArrivesAtPortEvent extends Event {
         long pickDoneAt = getSimTime() + duration;
 
         Port port = simulator.getState().getPort(gridId, portId);
-        Shipment shipment = simulator.getState().getShipment(port.getActiveShipmentId());
-        shipment.startPicking();
-        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, shipment.getId(), gridId, portId, binId, duration));
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, port.getActiveShipmentId(), gridId, portId, binId, duration));
     }
 
     @Override

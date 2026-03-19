@@ -2,10 +2,8 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
-import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
-import lt.bananull.whse.simulator.entity.Port;
 
 import java.util.Map;
 
@@ -36,8 +34,7 @@ public class BinPickCompletedEvent extends Event {
 
         Bin bin = simulator.getState().getBin(binId);
         bin.release();
-        EventHandler.getInstance(simulator).handle(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId,
-            duration));
+        simulator.getEventHandler().handle(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, duration));
 
     }
 
