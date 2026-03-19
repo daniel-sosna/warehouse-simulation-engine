@@ -12,18 +12,9 @@ public class EventHandler {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static EventHandler instance;
-
     private final Simulator simulator;
 
-    public static EventHandler getInstance(Simulator simulator) {
-        if (instance == null) {
-            instance = new EventHandler(simulator);
-        }
-        return instance;
-    }
-
-    private EventHandler (Simulator simulator) {
+    public EventHandler(Simulator simulator) {
         this.simulator = simulator;
     }
 
