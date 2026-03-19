@@ -17,7 +17,7 @@ public class BinRequestedAtPortEvent extends Event {
     private final int qty;
 
     public BinRequestedAtPortEvent(long simTime, String binId, String gridId, String portId, String ean, int qty) {
-        super(simTime);
+        super(simTime, 0);
         this.binId = binId;
         this.gridId = gridId;
         this.portId = portId;
@@ -36,7 +36,7 @@ public class BinRequestedAtPortEvent extends Event {
             long duration = Math.round((3600.0 / standardRate) * mult);
             long arriveAt = getSimTime() +  duration;
 
-            simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, gridId, portId, binId));
+            simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
         }
         // else: TODO: put into a queue of the bin
 

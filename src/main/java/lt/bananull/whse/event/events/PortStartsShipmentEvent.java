@@ -18,7 +18,7 @@ public class PortStartsShipmentEvent extends Event {
     private final String portId;
 
     public PortStartsShipmentEvent(long simTime, String gridId, String portId) {
-        super(simTime);
+        super(simTime, 0);
         this.gridId = gridId;
         this.portId = portId;
     }

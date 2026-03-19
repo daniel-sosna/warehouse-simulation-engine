@@ -10,7 +10,7 @@ public class ShipmentReceivedEvent extends Event {
     private final String shipmentId;
 
     public ShipmentReceivedEvent(long simTime, String shipmentId) {
-        super(simTime);
+        super(simTime, 0);
         this.shipmentId = shipmentId;
     }
 

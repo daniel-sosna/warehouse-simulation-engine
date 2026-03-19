@@ -16,7 +16,7 @@ public class RouterTickEvent extends Event {
     private final RouterClient routerClient;
 
     public RouterTickEvent(long simTime, RouterClient routerClient) {
-        super(simTime);
+        super(simTime, 0);
         this.routerClient = routerClient;
     }
 

@@ -16,7 +16,7 @@ public class ShipmentIsReadyEvent extends Event {
     private final String shipmentId;
 
     public ShipmentIsReadyEvent(long simTime, String shipmentId) {
-        super(simTime);
+        super(simTime, 0);
         this.shipmentId = shipmentId;
     }
 
