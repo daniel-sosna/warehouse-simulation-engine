@@ -22,22 +22,30 @@ public class Shipment {
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
     private final Set<String> handlingFlags;
+    private final String sortingDirection;
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
     private List<PickDto> picks = List.of();
 
-    private Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
+    private Shipment(
+        String id,
+        Map<String, Integer> items,
+        Instant shipmentDate,
+        Collection<String> handlingFlags,
+        String sortingDirection
+    ) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
         this.handlingFlags = Set.copyOf(handlingFlags);
+        this.sortingDirection = sortingDirection;
         this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
         return new Shipment(dto.id(), dto.items(), dto.shipmentDate(),
-                dto.handlingFlags() != null ? dto.handlingFlags() : Set.of());
+                dto.handlingFlags() != null ? dto.handlingFlags() : Set.of(), dto.sortingDirection());
     }
 
     public boolean isAvailableForRerouting() {
