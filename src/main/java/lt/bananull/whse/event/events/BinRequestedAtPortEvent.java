@@ -33,7 +33,7 @@ public class BinRequestedAtPortEvent extends Event {
 
             double mult = simulator.resolveMultiplier(simulator.getParameters().gridBinDelivery().randomness());
             int standardRate = simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId);
-            long duration = Math.round((3600.0 / standardRate) * mult);
+            long duration = Math.round(standardRate * mult);
             long arriveAt = getSimTime() +  duration;
 
             simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
