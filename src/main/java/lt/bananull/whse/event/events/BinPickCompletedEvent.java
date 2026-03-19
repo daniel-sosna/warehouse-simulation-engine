@@ -32,7 +32,7 @@ public class BinPickCompletedEvent extends Event {
 
         Bin bin = simulator.getState().getBin(binId);
         bin.release();
-        simulator.getEventHandler().handle(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
 
     }
 

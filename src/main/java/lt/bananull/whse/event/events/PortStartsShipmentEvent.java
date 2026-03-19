@@ -42,7 +42,7 @@ public class PortStartsShipmentEvent extends Event {
         PickDto pick = shipment.getPicks().getFirst();
         BinRequestedAtPortEvent event = new BinRequestedAtPortEvent(getSimTime(), selectedBinId, gridId, portId,
             pick.ean(), pick.qty());
-        simulator.getEventHandler().handle(event);
+        simulator.enqueueEvent(event);
     }
 
     @Override
