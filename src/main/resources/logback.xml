@@ -1,22 +1,16 @@
 <configuration>
 
     <property name="EVENT_LOG_FILE" value="${eventLogFile:-./simulation.log}" />
+    <property name="PROGRAM_LOG_FILE" value="./program.log" />
 
-    <!-- Console -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="PROGRAM_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${PROGRAM_LOG_FILE}</file>
+        <append>false</append>
         <encoder>
             <pattern>%d{HH:mm:ss} %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Event log: Console -->
-    <appender name="EVENT_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss} %-5level %logger - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- Event log: File -->
     <appender name="EVENT_FILE" class="ch.qos.logback.core.FileAppender">
         <file>${EVENT_LOG_FILE}</file>
         <append>false</append>
@@ -25,15 +19,22 @@
         </encoder>
     </appender>
 
-    <!-- Event logger: set to DEBUG so the file appender receives DEBUG+;
-         EVENT_CONSOLE's ThresholdFilter limits console output to ${logLevel:-INFO}+ -->
-    <logger name="EVENT_LOGGER" level="DEBUG" additivity="false">
-        <appender-ref ref="EVENT_FILE"/>
-        <appender-ref ref="EVENT_CONSOLE"/>
-    </logger>
+    <if condition='property("logLevel").equals("DEBUG")'>
+        <then>
+            <logger name="EVENT_LOGGER" level="DEBUG" additivity="false">
+                <appender-ref ref="EVENT_FILE"/>
+                <appender-ref ref="PROGRAM_FILE"/>
+            </logger>
+        </then>
+        <else>
+            <logger name="EVENT_LOGGER" level="DEBUG" additivity="false">
+                <appender-ref ref="EVENT_FILE"/>
+            </logger>
+        </else>
+    </if>
 
-    <!-- Root logger -->
-    <root level="${logLevel:-INFO}">
-        <appender-ref ref="CONSOLE"/>
+    <root level="${logLevel:-ERROR}">
+        <appender-ref ref="PROGRAM_FILE"/>
     </root>
+
 </configuration>

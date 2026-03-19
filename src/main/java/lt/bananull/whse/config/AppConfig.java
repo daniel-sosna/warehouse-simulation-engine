@@ -43,6 +43,12 @@ public record AppConfig(
         // Propagate eventLogFile to system property for the logging framework
         System.setProperty("eventLogFile", eventLogFile.toString());
 
+        // Disable long logback message at start
+        System.setProperty(
+            "logback.statusListenerClass",
+            "ch.qos.logback.core.status.NopStatusListener"
+        );
+
         return new AppConfig(dataDir, routerCommand, eventLogFile);
     }
 }

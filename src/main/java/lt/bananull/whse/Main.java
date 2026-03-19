@@ -7,6 +7,9 @@ import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.utils.DateTimeResolver;
+import lt.bananull.whse.utils.LogFileSorter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -32,5 +35,13 @@ public class Main {
         // Main loop
         Simulator simulator = new Simulator(routerClient, state, startTime, endTime, parameters);
         simulator.run();
+
+        try {
+            LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
+        } catch (Exception e) {
+            System.err.print("Failed to sort log file by simTime");
+            Logger log = LoggerFactory.getLogger(Main.class);
+            log.error("Failed to sort log file by simTime", e);
+        }
     }
 }
