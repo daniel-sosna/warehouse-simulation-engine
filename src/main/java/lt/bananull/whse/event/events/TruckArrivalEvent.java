@@ -1,0 +1,39 @@
+package lt.bananull.whse.event.events;
+
+import lt.bananull.whse.event.Event;
+import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Shipment;
+
+import java.util.List;
+import java.util.Map;
+
+import static lt.bananull.whse.simulator.enums.ShipmentStatus.PACKED;
+
+public class TruckArrivalEvent extends Event {
+
+    private final String sortingDirection;
+    private int shippedItemCount;
+
+    public TruckArrivalEvent(long simTime, String sortingDirection) {
+        super(simTime);
+        this.sortingDirection = sortingDirection;
+    }
+
+    @Override
+    public void execute(Simulator simulator) {
+        List<Shipment> shipmentsToShip = simulator.getState().shipments().values().stream()
+            .filter(shipment -> shipment.getStatus() == PACKED
+                    && shipment.getSortingDirection().equals(sortingDirection))
+            .toList();
+
+        shipmentsToShip.forEach(Shipment::markShipped);
+        shippedItemCount = shipmentsToShip.size();
+    }
+
+    @Override
+    public Map<String, Object> getData() {
+        return Map.of(
+            "shippedItemCount", shippedItemCount
+        );
+    }
+}
