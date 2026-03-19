@@ -10,8 +10,17 @@ public abstract class Event implements Comparable<Event> {
     @Getter
     private final long simTime;
 
+    @Getter
+    private final long duration;
+
     public Event(long simTime) {
         this.simTime = simTime;
+        this.duration = 0;
+    }
+
+    public Event(long simTime, long duration) {
+        this.simTime = simTime;
+        this.duration = duration;
     }
 
     public abstract void execute(Simulator simulator);

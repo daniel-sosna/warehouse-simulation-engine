@@ -14,8 +14,8 @@ public class BinArrivesAtPortEvent extends Event {
     private final String binId;
     private final String portId;
 
-    public BinArrivesAtPortEvent(long simTime, String gridId, String portId, String binId) {
-        super(simTime);
+    public BinArrivesAtPortEvent(long simTime, long duration, String gridId, String portId, String binId) {
+        super(simTime, duration);
         this.gridId = gridId;
         this.binId = binId;
         this.portId = portId;
