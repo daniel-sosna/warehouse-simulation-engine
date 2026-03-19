@@ -2,7 +2,6 @@ package lt.bananull.whse.service;
 
 import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.simulator.SimulationParameters;
-import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.DayOfWeek;
