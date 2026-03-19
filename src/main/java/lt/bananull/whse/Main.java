@@ -1,6 +1,5 @@
 package lt.bananull.whse;
 
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.config.AppConfig;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.SimulationParameters;
@@ -9,11 +8,12 @@ import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.utils.DateTimeResolver;
 import lt.bananull.whse.utils.LogFileSorter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneId;
 
-@Slf4j
 public class Main {
 
     public static void main(String[] args) {
@@ -39,7 +39,9 @@ public class Main {
         try {
             LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
         } catch (Exception e) {
-            log.error("Failed to sort simulation.log by simTime");
+            System.err.print("Failed to sort simulation.log by simTime");
+            Logger log = LoggerFactory.getLogger(Main.class);
+            log.error("Failed to sort simulation.log by simTime", e);
         }
     }
 }
