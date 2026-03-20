@@ -27,9 +27,7 @@ public class RouterTickEvent extends Event {
 
         RouterRequestDto request = RouterRequestDto.from(
                 simulator.getState(),
-                simulator.getNow(),
-                simulator.getSimulationStartTime(),
-                simulator.getSimulationEndTime()
+                simulator.getNow()
         );
         RouterResponseDto response = routerClient.route(request);
 

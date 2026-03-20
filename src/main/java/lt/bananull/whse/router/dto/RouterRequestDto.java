@@ -1,19 +1,16 @@
 package lt.bananull.whse.router.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lt.bananull.whse.load.dto.BreakDto;
-import lt.bananull.whse.load.dto.PortDto;
-import lt.bananull.whse.load.dto.ShiftDto;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Grid;
+import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +21,12 @@ public record RouterRequestDto(
         @JsonProperty("state") RouterState state
 ) {
 
-    public static RouterRequestDto from(SimulationState simulationState, Instant simulationNow,
-                                        Instant simulationStartTime, Instant simulationEndTime) {
-        ZoneId zone = ZoneId.of("UTC");
-        LocalDate startDate = LocalDate.ofInstant(simulationStartTime, zone);
-        LocalDate endDate = LocalDate.ofInstant(simulationEndTime, zone);
+    public static RouterRequestDto from(SimulationState simulationState, Instant simulationNow) {
 
         List<Shipment> filteredShipments = filterShipmentsForRouting(simulationState.shipments().values());
         List<RouterShipment> shipmentsBacklog = mapShipments(filteredShipments);
         List<RouterStockBin> stockBins = mapBins(simulationState.bins().values());
-        List<RouterGrid> grids = mapGrids(simulationState.grids().values(), startDate, endDate, zone);
+        List<RouterGrid> grids = mapGrids(simulationState.grids().values());
 
         RouterState routerState = new RouterState(
                 simulationNow,
@@ -106,71 +99,48 @@ public record RouterRequestDto(
                 .toList();
     }
 
-    private static List<RouterGrid> mapGrids(Collection<Grid> entities,
-                                             LocalDate startDate,
-                                             LocalDate endDate,
-                                             ZoneId zone) {
+    private static List<RouterGrid> mapGrids(Collection<Grid> entities) {
         return entities.stream()
-                .map(entity -> {
-                    List<RouterShift> shifts = entity.getShifts().stream()
-                            .flatMap(shiftDto -> expandShift(shiftDto, startDate, endDate, zone).stream())
-                            .toList();
-                    return new RouterGrid(entity.getId(), shifts);
-                })
-                .toList();
+            .map(grid -> new RouterGrid(grid.getId(), mapShifts(grid)))
+            .toList();
     }
 
-    private static List<RouterShift> expandShift(ShiftDto dto,
-                                                  LocalDate startDate,
-                                                  LocalDate endDate,
-                                                  ZoneId zone) {
-        List<RouterPortConfig> ports =
-                dto.portConfig() == null ? List.of()
-                        : dto.portConfig().stream()
-                        .map(RouterRequestDto::mapPort)
-                        .toList();
+    private static List<RouterShift> mapShifts(Grid grid) {
+        return grid.getShifts().stream()
+            .map(shift -> new RouterShift(
+                shift.getStartAt(),
+                shift.getEndAt(),
+                mapBreaks(shift),
+                mapPorts(grid, shift)
+            ))
+            .toList();
+    }
 
-        boolean overnightShift = isOvernight(dto.start(), dto.end());
+    private static List<RouterBreak> mapBreaks(Shift shift) {
+        return shift.getBreaks().stream()
+            .map(b -> new RouterBreak(b.startAt(), b.endAt()))
+            .toList();
+    }
 
-        List<RouterShift> result = new ArrayList<>();
-        LocalDate date = startDate;
-        while (!date.isAfter(endDate)) {
-            final LocalDate currentDate = date;
-            Instant start = dto.start().atDate(currentDate).atZone(zone).toInstant();
-            LocalDate shiftEndDate = overnightShift ? currentDate.plusDays(1) : currentDate;
-            Instant end = dto.end().atDate(shiftEndDate).atZone(zone).toInstant();
+    private static List<RouterPortConfig> mapPorts(Grid grid, Shift shift) {
+        return shift.getPortIds().stream()
+            .map(portId -> mapPort(grid, portId))
+            .toList();
+    }
 
-            List<RouterBreak> breakSchedules =
-                    dto.breaks() == null ? List.of()
-                            : dto.breaks().stream()
-                            .map(b -> mapBreak(b, currentDate, zone))
-                            .toList();
-
-            result.add(new RouterShift(start, end, breakSchedules, ports));
-            date = date.plusDays(1);
+    private static RouterPortConfig mapPort(Grid grid, String portId) {
+        Port port = grid.getPorts().get(portId);
+        if (port == null) {
+            throw new IllegalStateException(
+                "Shift references port %s but grid %s does not contain that port"
+                    .formatted(portId, grid.getId()));
         }
-        return result;
-    }
 
-    private static RouterBreak mapBreak(BreakDto dto, LocalDate shiftDate, ZoneId zone) {
-        boolean overnightBreak = isOvernight(dto.start(), dto.end());
-        Instant start = dto.start().atDate(shiftDate).atZone(zone).toInstant();
-        LocalDate breakEndDate = overnightBreak ? shiftDate.plusDays(1) : shiftDate;
-        Instant end = dto.end().atDate(breakEndDate).atZone(zone).toInstant();
-        return new RouterBreak(start, end);
-    }
-
-    private static boolean isOvernight(LocalTime start, LocalTime end) {
-        return end.isBefore(start);
-    }
-
-    private static RouterPortConfig mapPort(PortDto dto) {
         return new RouterPortConfig(
-                dto.id(),
-                dto.handlingFlags()
+            port.getId(),
+            port.getHandlingFlags().stream().toList()
         );
     }
-
     private static List<Shipment> filterShipmentsForRouting(Collection<Shipment> shipments) {
         return shipments.stream()
                 .filter(shipment -> shipment.getStatus() == RECEIVED)

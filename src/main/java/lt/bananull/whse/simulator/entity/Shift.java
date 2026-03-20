@@ -23,16 +23,15 @@ public class Shift {
     private final Instant startAt;
     private final Instant endAt;
 
-    // Keep BreakDto for now
-    private final List<BreakDto> breaks;
+    /** Break windows expanded for this shift occurrence (Instant-based). */
+    private final List<BreakOccurrence> breaks;
 
-    // Ports that are active during this shift occurrence. Also, no need to save whole objects, they are saved within
-    // the grid entity
+    /** Ports active during this shift occurrence (IDs only; actual Port entities live in Grid). */
     private final Set<String> portIds;
 
     private Shift(Instant startAt,
                   Instant endAt,
-                  Collection<BreakDto> breaks,
+                  Collection<BreakOccurrence> breaks,
                   Collection<String> portIds) {
 
         if (startAt == null || endAt == null) throw new IllegalArgumentException("startAt/endAt must not be null");
@@ -75,9 +74,36 @@ public class Shift {
             dto.portConfig() == null ? Set.of()
                 : dto.portConfig().stream().map(p -> p.id()).collect(Collectors.toSet());
 
-        List<BreakDto> breaks = dto.breaks() == null ? List.of() : dto.breaks();
+        List<BreakOccurrence> breaks = expandBreaks(dto.breaks(), shiftDate, zone);
 
         return new Shift(startAt, endAt, breaks, portIds);
+    }
+
+    public record BreakOccurrence(Instant startAt, Instant endAt) {
+        public BreakOccurrence {
+            if (startAt == null || endAt == null) {
+                throw new IllegalArgumentException("BreakOccurrence startAt/endAt must not be null");
+            }
+            if (!endAt.isAfter(startAt)) {
+                throw new IllegalArgumentException("BreakOccurrence endAt must be after startAt");
+            }
+        }
+    }
+
+    private static List<BreakOccurrence> expandBreaks(List<BreakDto> breakDtos,
+                                                      LocalDate shiftDate,
+                                                      ZoneId zone) {
+        if (breakDtos == null || breakDtos.isEmpty()) return List.of();
+
+        return breakDtos.stream()
+            .map(b -> {
+                boolean overnightBreak = isOvernight(b.start(), b.end());
+                Instant start = b.start().atDate(shiftDate).atZone(zone).toInstant();
+                LocalDate breakEndDate = overnightBreak ? shiftDate.plusDays(1) : shiftDate;
+                Instant end = b.end().atDate(breakEndDate).atZone(zone).toInstant();
+                return new BreakOccurrence(start, end);
+            })
+            .toList();
     }
 
     private static boolean isOvernight(LocalTime start, LocalTime end) {
