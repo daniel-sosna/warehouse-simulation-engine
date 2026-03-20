@@ -1,0 +1,29 @@
+[
+  {
+    "id": "AS1",
+    "shifts": [
+      {
+        "start": "06:00",
+        "end": "00:00",
+        "breaks": [
+          {"start": "09:00", "end": "09:20"}
+        ],
+        "portConfig": [
+          {"id": "Port-1", "handlingFlags": []},
+          {"id": "Port-2", "handlingFlags": ["priority"]},
+          {"id": "Port-3", "handlingFlags": ["fragile"]}
+        ]
+      },
+      {
+        "start": "16:00",
+        "end": "00:30",
+        "breaks": [
+          {"start": "19:00", "end": "19:30"}
+        ],
+        "portConfig": [
+          {"id": "Port-1", "handlingFlags": []}
+        ]
+      }
+    ]
+  }
+]

@@ -1,5 +1,6 @@
 package lt.bananull.whse.event.events;
 
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
@@ -8,7 +9,7 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
-
+@Slf4j
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;
@@ -30,7 +31,7 @@ public class RouterTickEvent extends Event {
                 simulator.getNow()
         );
         RouterResponseDto response = routerClient.route(request);
-
+        log.info("Assignments size: " + response.assignments().size());
         simulator.updateAssignments(response.assignments());
         simulator.dispatchAll();
 
