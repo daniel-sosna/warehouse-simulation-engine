@@ -14,17 +14,36 @@ import java.util.Map;
 public record SimulationState(
         Map<String, Shipment> shipments,
         Map<String, Bin> bins,
-        Map<String, Grid> grids
+        Map<String, Grid> grids,
+        Map<String, Port> ports
 ) {
 
+    /** Canonical constructor — normalises and makes all maps immutable. */
+    public SimulationState(
+            Map<String, Shipment> shipments,
+            Map<String, Bin> bins,
+            Map<String, Grid> grids,
+            Map<String, Port> ports
+    ) {
+        this.shipments = new HashMap<>(shipments);
+        this.bins = Map.copyOf(bins);
+        this.grids = Map.copyOf(grids);
+        this.ports = Map.copyOf(ports);
+    }
+
+    /** Convenience constructor — computes the flat port map from the grids. */
     public SimulationState(
             Map<String, Shipment> shipments,
             Map<String, Bin> bins,
             Map<String, Grid> grids
     ) {
-        this.shipments = new HashMap<>(shipments);
-        this.bins = Map.copyOf(bins);
-        this.grids = Map.copyOf(grids);
+        this(shipments, bins, grids, flatPorts(grids));
+    }
+
+    private static Map<String, Port> flatPorts(Map<String, Grid> grids) {
+        Map<String, Port> ports = new HashMap<>();
+        grids.values().forEach(g -> ports.putAll(g.getPorts()));
+        return ports;
     }
 
     public static SimulationState from(SimulationStateDto dto, SimulationParameters parameters) {
@@ -57,6 +76,12 @@ public record SimulationState(
 
     public Port getPort(String gridId, String portId) {
         return grids.get(gridId).getPorts().get(portId);
+    }
+
+    public Port getPort(String portId) {
+        Port port = ports.get(portId);
+        if (port == null) throw new IllegalStateException("Port not found: " + portId);
+        return port;
     }
 
     @Override
