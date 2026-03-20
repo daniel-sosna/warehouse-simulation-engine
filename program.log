@@ -1,0 +1,330 @@
+23:48:39 DEBUG lt.bananull.whse.simulator.Simulator - im starting this from main at and opening at: 0
+23:48:39 DEBUG lt.bananull.whse.simulator.Simulator - im starting this from main at and opening at: 0
+23:48:39 DEBUG lt.bananull.whse.simulator.Simulator - im starting this from main at and opening at: 0
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"ShipmentReceived","duration":0,"data":{"shipmentId":"S001"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 0
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 0
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 0
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"ShipmentIsReady","duration":0,"data":{"shipmentId":"S001"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"PortStartsShipment","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":0,"timestamp":"2026-03-04T08:00:00Z","event":"BinRequestedAtPort","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":6,"timestamp":"2026-03-04T08:00:06Z","event":"BinArrivesAtPort","duration":6,"data":{"binId":"BIN-001"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":34,"timestamp":"2026-03-04T08:00:34Z","event":"BinPickCompleted","duration":28,"data":{"binId":"BIN-001","shipmentId":"S001"}}
+23:48:39 DEBUG lt.bananull.whse.simulator.entity.Port - Status before: BUSY
+23:48:39 DEBUG lt.bananull.whse.simulator.entity.Port - Status after: IDLE
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":34,"timestamp":"2026-03-04T08:00:34Z","event":"ShipmentPacked","duration":28,"data":{"shipmentId":"S001"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":900,"timestamp":"2026-03-04T08:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":1800,"timestamp":"2026-03-04T08:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":2700,"timestamp":"2026-03-04T08:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3600,"timestamp":"2026-03-04T09:00:00Z","event":"ShipmentReceived","duration":0,"data":{"shipmentId":"S002"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3600,"timestamp":"2026-03-04T09:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3600,"timestamp":"2026-03-04T09:00:00Z","event":"ShipmentIsReady","duration":0,"data":{"shipmentId":"S002"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3600,"timestamp":"2026-03-04T09:00:00Z","event":"PortStartsShipment","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3600,"timestamp":"2026-03-04T09:00:00Z","event":"BinRequestedAtPort","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3607,"timestamp":"2026-03-04T09:00:07Z","event":"BinArrivesAtPort","duration":7,"data":{"binId":"BIN-001"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3632,"timestamp":"2026-03-04T09:00:32Z","event":"BinPickCompleted","duration":25,"data":{"binId":"BIN-001","shipmentId":"S002"}}
+23:48:39 DEBUG lt.bananull.whse.simulator.entity.Port - Status before: BUSY
+23:48:39 DEBUG lt.bananull.whse.simulator.entity.Port - Status after: IDLE
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":3632,"timestamp":"2026-03-04T09:00:32Z","event":"ShipmentPacked","duration":25,"data":{"shipmentId":"S002"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":4500,"timestamp":"2026-03-04T09:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":5400,"timestamp":"2026-03-04T09:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":6300,"timestamp":"2026-03-04T09:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 7200
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":7200,"timestamp":"2026-03-04T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":7200,"timestamp":"2026-03-04T10:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":7200,"timestamp":"2026-03-04T10:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 7200
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":7200,"timestamp":"2026-03-04T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:39 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 7200
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":7200,"timestamp":"2026-03-04T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":8100,"timestamp":"2026-03-04T10:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":9000,"timestamp":"2026-03-04T10:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":9900,"timestamp":"2026-03-04T10:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":10800,"timestamp":"2026-03-04T11:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":11700,"timestamp":"2026-03-04T11:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":12600,"timestamp":"2026-03-04T11:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":13500,"timestamp":"2026-03-04T11:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":14400,"timestamp":"2026-03-04T12:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":15300,"timestamp":"2026-03-04T12:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":16200,"timestamp":"2026-03-04T12:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":17100,"timestamp":"2026-03-04T12:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":18000,"timestamp":"2026-03-04T13:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":18900,"timestamp":"2026-03-04T13:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":19800,"timestamp":"2026-03-04T13:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:39 DEBUG EVENT_LOGGER - {"simTime":20700,"timestamp":"2026-03-04T13:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":21600,"timestamp":"2026-03-04T14:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":22500,"timestamp":"2026-03-04T14:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":23400,"timestamp":"2026-03-04T14:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":24300,"timestamp":"2026-03-04T14:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":25200,"timestamp":"2026-03-04T15:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-2","shipmentsTakenForShipping":0}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":25200,"timestamp":"2026-03-04T15:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":25200,"timestamp":"2026-03-04T15:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":26100,"timestamp":"2026-03-04T15:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":27000,"timestamp":"2026-03-04T15:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":27900,"timestamp":"2026-03-04T15:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":28800,"timestamp":"2026-03-04T16:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":29700,"timestamp":"2026-03-04T16:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":30600,"timestamp":"2026-03-04T16:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":31500,"timestamp":"2026-03-04T16:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":32400,"timestamp":"2026-03-04T17:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":33300,"timestamp":"2026-03-04T17:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":34200,"timestamp":"2026-03-04T17:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":35100,"timestamp":"2026-03-04T17:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":36000,"timestamp":"2026-03-04T18:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":36900,"timestamp":"2026-03-04T18:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":37800,"timestamp":"2026-03-04T18:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":38700,"timestamp":"2026-03-04T18:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":39600,"timestamp":"2026-03-04T19:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":40500,"timestamp":"2026-03-04T19:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":41400,"timestamp":"2026-03-04T19:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":42300,"timestamp":"2026-03-04T19:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":43200,"timestamp":"2026-03-04T20:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":44100,"timestamp":"2026-03-04T20:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":45000,"timestamp":"2026-03-04T20:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":45900,"timestamp":"2026-03-04T20:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":46800,"timestamp":"2026-03-04T21:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":46800,"timestamp":"2026-03-04T21:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":47700,"timestamp":"2026-03-04T21:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":48600,"timestamp":"2026-03-04T21:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":49500,"timestamp":"2026-03-04T21:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":50400,"timestamp":"2026-03-04T22:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":51300,"timestamp":"2026-03-04T22:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":52200,"timestamp":"2026-03-04T22:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":53100,"timestamp":"2026-03-04T22:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":54000,"timestamp":"2026-03-04T23:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:40 DEBUG EVENT_LOGGER - {"simTime":54900,"timestamp":"2026-03-04T23:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":55800,"timestamp":"2026-03-04T23:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":56700,"timestamp":"2026-03-04T23:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":57600,"timestamp":"2026-03-05T00:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":58500,"timestamp":"2026-03-05T00:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":59400,"timestamp":"2026-03-05T00:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":60300,"timestamp":"2026-03-05T00:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":61200,"timestamp":"2026-03-05T01:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":62100,"timestamp":"2026-03-05T01:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":63000,"timestamp":"2026-03-05T01:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":63900,"timestamp":"2026-03-05T01:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":64800,"timestamp":"2026-03-05T02:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":65700,"timestamp":"2026-03-05T02:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":66600,"timestamp":"2026-03-05T02:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":67500,"timestamp":"2026-03-05T02:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":68400,"timestamp":"2026-03-05T03:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":69300,"timestamp":"2026-03-05T03:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":70200,"timestamp":"2026-03-05T03:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":71100,"timestamp":"2026-03-05T03:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":72000,"timestamp":"2026-03-05T04:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":72900,"timestamp":"2026-03-05T04:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":73800,"timestamp":"2026-03-05T04:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":74700,"timestamp":"2026-03-05T04:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":75600,"timestamp":"2026-03-05T05:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":76500,"timestamp":"2026-03-05T05:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":77400,"timestamp":"2026-03-05T05:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":78300,"timestamp":"2026-03-05T05:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":79200,"timestamp":"2026-03-05T06:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":80100,"timestamp":"2026-03-05T06:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":81000,"timestamp":"2026-03-05T06:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":81900,"timestamp":"2026-03-05T06:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 82800
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":82800,"timestamp":"2026-03-05T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:41 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 82800
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":82800,"timestamp":"2026-03-05T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":82800,"timestamp":"2026-03-05T07:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 82800
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":82800,"timestamp":"2026-03-05T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":83700,"timestamp":"2026-03-05T07:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":84600,"timestamp":"2026-03-05T07:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":85500,"timestamp":"2026-03-05T07:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":86400,"timestamp":"2026-03-05T08:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":87300,"timestamp":"2026-03-05T08:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":88200,"timestamp":"2026-03-05T08:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":89100,"timestamp":"2026-03-05T08:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":90000,"timestamp":"2026-03-05T09:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:41 DEBUG EVENT_LOGGER - {"simTime":90900,"timestamp":"2026-03-05T09:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":91800,"timestamp":"2026-03-05T09:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":92700,"timestamp":"2026-03-05T09:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":93600,"timestamp":"2026-03-05T10:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":93600,"timestamp":"2026-03-05T10:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 93600
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":93600,"timestamp":"2026-03-05T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:42 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 93600
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":93600,"timestamp":"2026-03-05T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:42 DEBUG lt.bananull.whse.event.events.PortClosesEvent - im closing: 93600
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":93600,"timestamp":"2026-03-05T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":94500,"timestamp":"2026-03-05T10:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":95400,"timestamp":"2026-03-05T10:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":96300,"timestamp":"2026-03-05T10:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":97200,"timestamp":"2026-03-05T11:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":98100,"timestamp":"2026-03-05T11:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":99000,"timestamp":"2026-03-05T11:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":99900,"timestamp":"2026-03-05T11:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":100800,"timestamp":"2026-03-05T12:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":101700,"timestamp":"2026-03-05T12:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":102600,"timestamp":"2026-03-05T12:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":103500,"timestamp":"2026-03-05T12:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":104400,"timestamp":"2026-03-05T13:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":105300,"timestamp":"2026-03-05T13:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":106200,"timestamp":"2026-03-05T13:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":107100,"timestamp":"2026-03-05T13:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":108000,"timestamp":"2026-03-05T14:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":108900,"timestamp":"2026-03-05T14:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":109800,"timestamp":"2026-03-05T14:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":110700,"timestamp":"2026-03-05T14:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":111600,"timestamp":"2026-03-05T15:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":111600,"timestamp":"2026-03-05T15:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":112500,"timestamp":"2026-03-05T15:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":113400,"timestamp":"2026-03-05T15:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":114300,"timestamp":"2026-03-05T15:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":115200,"timestamp":"2026-03-05T16:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":116100,"timestamp":"2026-03-05T16:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":117000,"timestamp":"2026-03-05T16:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":117900,"timestamp":"2026-03-05T16:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":118800,"timestamp":"2026-03-05T17:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":119700,"timestamp":"2026-03-05T17:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":120600,"timestamp":"2026-03-05T17:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":121500,"timestamp":"2026-03-05T17:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":122400,"timestamp":"2026-03-05T18:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":123300,"timestamp":"2026-03-05T18:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":124200,"timestamp":"2026-03-05T18:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":125100,"timestamp":"2026-03-05T18:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":126000,"timestamp":"2026-03-05T19:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:42 DEBUG EVENT_LOGGER - {"simTime":126900,"timestamp":"2026-03-05T19:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":127800,"timestamp":"2026-03-05T19:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":128700,"timestamp":"2026-03-05T19:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":129600,"timestamp":"2026-03-05T20:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":130500,"timestamp":"2026-03-05T20:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":131400,"timestamp":"2026-03-05T20:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":132300,"timestamp":"2026-03-05T20:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":133200,"timestamp":"2026-03-05T21:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":133200,"timestamp":"2026-03-05T21:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":134100,"timestamp":"2026-03-05T21:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":135000,"timestamp":"2026-03-05T21:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":135900,"timestamp":"2026-03-05T21:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":136800,"timestamp":"2026-03-05T22:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":137700,"timestamp":"2026-03-05T22:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":138600,"timestamp":"2026-03-05T22:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":139500,"timestamp":"2026-03-05T22:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":140400,"timestamp":"2026-03-05T23:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":141300,"timestamp":"2026-03-05T23:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":142200,"timestamp":"2026-03-05T23:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":143100,"timestamp":"2026-03-05T23:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":144000,"timestamp":"2026-03-06T00:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":144900,"timestamp":"2026-03-06T00:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":145800,"timestamp":"2026-03-06T00:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":146700,"timestamp":"2026-03-06T00:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":147600,"timestamp":"2026-03-06T01:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":148500,"timestamp":"2026-03-06T01:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":149400,"timestamp":"2026-03-06T01:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":150300,"timestamp":"2026-03-06T01:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":151200,"timestamp":"2026-03-06T02:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":152100,"timestamp":"2026-03-06T02:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":153000,"timestamp":"2026-03-06T02:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":153900,"timestamp":"2026-03-06T02:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":154800,"timestamp":"2026-03-06T03:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":155700,"timestamp":"2026-03-06T03:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":156600,"timestamp":"2026-03-06T03:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":157500,"timestamp":"2026-03-06T03:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":158400,"timestamp":"2026-03-06T04:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":159300,"timestamp":"2026-03-06T04:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":160200,"timestamp":"2026-03-06T04:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":161100,"timestamp":"2026-03-06T04:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":162000,"timestamp":"2026-03-06T05:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:43 DEBUG EVENT_LOGGER - {"simTime":162900,"timestamp":"2026-03-06T05:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":163800,"timestamp":"2026-03-06T05:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":164700,"timestamp":"2026-03-06T05:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":165600,"timestamp":"2026-03-06T06:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":166500,"timestamp":"2026-03-06T06:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":167400,"timestamp":"2026-03-06T06:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":168300,"timestamp":"2026-03-06T06:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 169200
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":169200,"timestamp":"2026-03-06T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":169200,"timestamp":"2026-03-06T07:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 169200
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":169200,"timestamp":"2026-03-06T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:44 DEBUG lt.bananull.whse.event.events.PortOpensEvent - sim time of open: 169200
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":169200,"timestamp":"2026-03-06T07:00:00Z","event":"PortOpens","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":170100,"timestamp":"2026-03-06T07:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":171000,"timestamp":"2026-03-06T07:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":171900,"timestamp":"2026-03-06T07:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":172800,"timestamp":"2026-03-06T08:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":173700,"timestamp":"2026-03-06T08:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":174600,"timestamp":"2026-03-06T08:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":175500,"timestamp":"2026-03-06T08:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":176400,"timestamp":"2026-03-06T09:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":177300,"timestamp":"2026-03-06T09:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":178200,"timestamp":"2026-03-06T09:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":179100,"timestamp":"2026-03-06T09:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180000,"timestamp":"2026-03-06T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-2"}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180000,"timestamp":"2026-03-06T10:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180000,"timestamp":"2026-03-06T10:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180000,"timestamp":"2026-03-06T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-3"}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180000,"timestamp":"2026-03-06T10:00:00Z","event":"PortCloses","duration":0,"data":{"gridId":"AS1","portId":"Port-1"}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":180900,"timestamp":"2026-03-06T10:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":181800,"timestamp":"2026-03-06T10:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":182700,"timestamp":"2026-03-06T10:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":183600,"timestamp":"2026-03-06T11:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":184500,"timestamp":"2026-03-06T11:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":185400,"timestamp":"2026-03-06T11:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":186300,"timestamp":"2026-03-06T11:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":187200,"timestamp":"2026-03-06T12:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":188100,"timestamp":"2026-03-06T12:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":189000,"timestamp":"2026-03-06T12:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":189900,"timestamp":"2026-03-06T12:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":190800,"timestamp":"2026-03-06T13:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":191700,"timestamp":"2026-03-06T13:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":192600,"timestamp":"2026-03-06T13:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":193500,"timestamp":"2026-03-06T13:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":194400,"timestamp":"2026-03-06T14:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":195300,"timestamp":"2026-03-06T14:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":196200,"timestamp":"2026-03-06T14:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":197100,"timestamp":"2026-03-06T14:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":198000,"timestamp":"2026-03-06T15:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:44 DEBUG EVENT_LOGGER - {"simTime":198000,"timestamp":"2026-03-06T15:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":198900,"timestamp":"2026-03-06T15:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":199800,"timestamp":"2026-03-06T15:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":200700,"timestamp":"2026-03-06T15:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":201600,"timestamp":"2026-03-06T16:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":202500,"timestamp":"2026-03-06T16:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":203400,"timestamp":"2026-03-06T16:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":204300,"timestamp":"2026-03-06T16:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":205200,"timestamp":"2026-03-06T17:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":206100,"timestamp":"2026-03-06T17:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":207000,"timestamp":"2026-03-06T17:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":207900,"timestamp":"2026-03-06T17:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":208800,"timestamp":"2026-03-06T18:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":209700,"timestamp":"2026-03-06T18:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":210600,"timestamp":"2026-03-06T18:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":211500,"timestamp":"2026-03-06T18:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":212400,"timestamp":"2026-03-06T19:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":213300,"timestamp":"2026-03-06T19:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":214200,"timestamp":"2026-03-06T19:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":215100,"timestamp":"2026-03-06T19:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":216000,"timestamp":"2026-03-06T20:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":216900,"timestamp":"2026-03-06T20:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":217800,"timestamp":"2026-03-06T20:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":218700,"timestamp":"2026-03-06T20:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":219600,"timestamp":"2026-03-06T21:00:00Z","event":"TruckArrival","duration":0,"data":{"sortingDirection":"dir-1","shipmentsTakenForShipping":0}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":219600,"timestamp":"2026-03-06T21:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":220500,"timestamp":"2026-03-06T21:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":221400,"timestamp":"2026-03-06T21:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":222300,"timestamp":"2026-03-06T21:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":223200,"timestamp":"2026-03-06T22:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":224100,"timestamp":"2026-03-06T22:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":225000,"timestamp":"2026-03-06T22:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":225900,"timestamp":"2026-03-06T22:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":226800,"timestamp":"2026-03-06T23:00:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":227700,"timestamp":"2026-03-06T23:15:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":228600,"timestamp":"2026-03-06T23:30:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 DEBUG EVENT_LOGGER - {"simTime":229500,"timestamp":"2026-03-06T23:45:00Z","event":"RouterTick","duration":0,"data":{}}
+23:48:45 ERROR lt.bananull.whse.Main - Failed to sort log file by simTime
+java.nio.file.FileSystemException: .\simulation.log: The process cannot access the file because it is being used by another process
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:92)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103)
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108)
+	at java.base/sun.nio.fs.WindowsFileCopy.move(WindowsFileCopy.java:403)
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.move(WindowsFileSystemProvider.java:291)
+	at java.base/java.nio.file.Files.move(Files.java:1431)
+	at lt.bananull.whse.utils.LogFileSorter.sortSimulationLogBySimTime(LogFileSorter.java:51)
+	at lt.bananull.whse.Main.main(Main.java:31)

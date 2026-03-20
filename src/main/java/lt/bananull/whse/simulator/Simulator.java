@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.PortClosesEvent;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
@@ -22,6 +23,7 @@ import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -99,24 +101,8 @@ public class Simulator {
 
     public void run() {
         enqueueTruckEvents();
-        for (Grid grid : state.grids().values()) {
-            String gridId = grid.getId();
-            for (Shift shift : grid.getShifts()) {
-                long simTimeOfOpen;
-                if (!shift.getStartAt().isBefore(parameters.simulationStartTime())) {
-                    simTimeOfOpen = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt(),
-                        parameters.simulationStartTime());
-                } else simTimeOfOpen = 0;
 
-                long simTimeOfClose = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
-                    parameters.simulationStartTime());
-                long durationOfOpen = simTimeOfClose - simTimeOfOpen;
-
-                for (String portId : shift.getPortIds()) {
-                    enqueueEvent(new PortOpensEvent(simTimeOfOpen, gridId, portId, durationOfOpen));
-                }
-            }
-        }
+        startPorts();
 
         while (!events.isEmpty()) {
             Event e = events.poll();
@@ -136,4 +122,26 @@ public class Simulator {
             parameters.truckArrivalSchedules());
         truckEvents.forEach(this::enqueueEvent);
     }
+
+    private void startPorts() {
+        for (Grid grid : state.grids().values()) {
+            String gridId = grid.getId();
+            List<String> pIds = new ArrayList<>();
+            for (Shift shift : grid.getShifts()) {
+                long simTimeOfOpen;
+                if (!shift.getStartAt().isBefore(parameters.simulationStartTime())) {
+                    simTimeOfOpen = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt(),
+                        parameters.simulationStartTime());
+                } else simTimeOfOpen = 0;
+                for (String portId : shift.getPortIds()) {
+                    if (pIds.contains(portId)) return;
+                    pIds.add(portId);
+                    log.debug("im starting this from main at and opening at: " + simTimeOfOpen);
+                    enqueueEvent(new PortOpensEvent(simTimeOfOpen, gridId, portId, shift.getStartAt(),
+                        shift.getEndAt()));
+                }
+            }
+        }
+    }
+
 }

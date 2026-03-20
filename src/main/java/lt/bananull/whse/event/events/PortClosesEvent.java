@@ -1,25 +1,30 @@
 package lt.bananull.whse.event.events;
 
+import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.utils.DateTimeResolver;
 
+import java.time.Instant;
 import java.util.Map;
-
+@Slf4j
 public class PortClosesEvent extends Event {
 
     private final String gridId;
     private final String portId;
     private final long openSimTime;
-    private final long durationOfOpen;
+    private final Instant startsAt;
+    private final Instant endsAt;
 
-    public PortClosesEvent(long simTime, String gridId, String portId, long openSimTime, long durationOfOpen){
+    public PortClosesEvent(long simTime, String gridId, String portId, long openSimTime, Instant startsAt,
+                           Instant endsAt){
         super(simTime);
         this.gridId = gridId;
         this.portId = portId;
         this.openSimTime = openSimTime;
-        this.durationOfOpen = durationOfOpen;
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
     }
 
     @Override
@@ -29,7 +34,8 @@ public class PortClosesEvent extends Event {
         long simEndTime = DateTimeResolver.resolveSimTimeFromTimestamp(simulator.getParameters().simulationEndTime(),
             simulator.getParameters().simulationStartTime());
         if (openSimTime < simEndTime) {
-            Event event = new PortOpensEvent(openSimTime, gridId, portId, durationOfOpen);
+            log.debug("im closing: " + getSimTime());
+            Event event = new PortOpensEvent(openSimTime, gridId, portId, startsAt, endsAt);
             simulator.enqueueEvent(event);
         }
     }
