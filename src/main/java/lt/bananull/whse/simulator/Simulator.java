@@ -102,11 +102,16 @@ public class Simulator {
         for (Grid grid : state.grids().values()) {
             String gridId = grid.getId();
             for (Shift shift : grid.getShifts()) {
-                long simTimeOfOpen = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt(),
-                    parameters.simulationStartTime());
+                long simTimeOfOpen;
+                if (!shift.getStartAt().isBefore(parameters.simulationStartTime())) {
+                    simTimeOfOpen = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt(),
+                        parameters.simulationStartTime());
+                } else simTimeOfOpen = 0;
+
                 long simTimeOfClose = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
                     parameters.simulationStartTime());
                 long durationOfOpen = simTimeOfClose - simTimeOfOpen;
+
                 for (String portId : shift.getPortIds()) {
                     enqueueEvent(new PortOpensEvent(simTimeOfOpen, gridId, portId, durationOfOpen));
                 }

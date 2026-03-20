@@ -26,12 +26,15 @@ public class PortOpensEvent extends Event {
         port.open();
         long closingSimTime = getSimTime() + durationOfOpen;
         long nextDayOpen = getSimTime() + simSecsInADay;
-        Event event = new PortClosesEvent(closingSimTime, gridId, portId, nextDayOpen);
+        Event event = new PortClosesEvent(closingSimTime, gridId, portId, nextDayOpen, durationOfOpen);
         simulator.enqueueEvent(event);
     }
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of();
+        return Map.of(
+            "gridId", gridId,
+            "portId", portId
+        );
     }
 }
