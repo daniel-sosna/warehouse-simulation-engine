@@ -18,21 +18,7 @@ public record SimulationState(
         Map<String, Port> ports
 ) {
 
-    /** Canonical constructor — normalises and makes all maps immutable. */
-    public SimulationState(
-            Map<String, Shipment> shipments,
-            Map<String, Bin> bins,
-            Map<String, Grid> grids,
-            Map<String, Port> ports
-    ) {
-        this.shipments = new HashMap<>(shipments);
-        this.bins = Map.copyOf(bins);
-        this.grids = Map.copyOf(grids);
-        this.ports = Map.copyOf(ports);
-    }
-
-    /** Convenience constructor — computes the flat port map from the grids. */
-    public SimulationState(
+    private SimulationState(
             Map<String, Shipment> shipments,
             Map<String, Bin> bins,
             Map<String, Grid> grids
@@ -74,14 +60,8 @@ public record SimulationState(
         return grids.get(id);
     }
 
-    public Port getPort(String gridId, String portId) {
-        return grids.get(gridId).getPorts().get(portId);
-    }
-
-    public Port getPort(String portId) {
-        Port port = ports.get(portId);
-        if (port == null) throw new IllegalStateException("Port not found: " + portId);
-        return port;
+    public Port getPort(String id) {
+        return ports.get(id);
     }
 
     @Override

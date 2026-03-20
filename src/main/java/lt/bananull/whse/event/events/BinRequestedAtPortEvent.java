@@ -45,7 +45,7 @@ public class BinRequestedAtPortEvent extends Event {
      */
     public static void tryScheduleFor(String gridId, String portId, long simTime, Simulator simulator) {
         SimulationState state = simulator.getState();
-        Port port = state.getPort(gridId, portId);
+        Port port = state.getPort(portId);
         String nextShipmentId = port.peekNextShipmentId();
         if (nextShipmentId == null) return;
 
@@ -62,7 +62,7 @@ public class BinRequestedAtPortEvent extends Event {
             simulator.enqueueEvent(new BinRequestedAtPortEvent(simTime, binId, gridId, portId, pick.ean(), pick.qty()));
         } else {
             for (PickDto pick : shipment.getPicks()) {
-                state.getBin(pick.binId()).enqueuePort(gridId, portId);
+                state.getBin(pick.binId()).enqueuePort(portId);
             }
         }
     }
@@ -71,7 +71,7 @@ public class BinRequestedAtPortEvent extends Event {
     public void execute(Simulator simulator) {
         SimulationState state = simulator.getState();
         Bin bin = state.getBin(binId);
-        Port port = state.getPort(gridId, portId);
+        Port port = state.getPort(portId);
 
         if (bin.getStatus() == AVAILABLE && port.getStatus() == IDLE) {
             port.startNextShipment();
@@ -88,7 +88,7 @@ public class BinRequestedAtPortEvent extends Event {
             simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
         } else if (bin.getStatus() != AVAILABLE && port.getStatus() == IDLE) {
             // Bin was claimed by another port between scheduling and execution; wait in bin's queue.
-            bin.enqueuePort(gridId, portId);
+            bin.enqueuePort(portId);
         }
         // else: port is no longer IDLE (it already received another bin) – nothing to do.
     }

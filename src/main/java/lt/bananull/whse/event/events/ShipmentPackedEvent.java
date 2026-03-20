@@ -23,7 +23,7 @@ public class ShipmentPackedEvent extends Event {
     @Override
     public void execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
-        Port port = simulator.getState().getPort(gridId, portId);
+        Port port = simulator.getState().getPort(portId);
         port.completeActiveShipment();
         shipment.markPacked();
         if (0 < port.getQueueSize()) {

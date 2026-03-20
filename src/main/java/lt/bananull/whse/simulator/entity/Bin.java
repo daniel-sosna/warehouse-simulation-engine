@@ -17,11 +17,6 @@ import java.util.Queue;
 @Getter
 public class Bin {
 
-    /**
-     * Reference to a port that is waiting for this bin.
-     */
-    public record PortRef(String gridId, String portId) {}
-
     private final String id;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
@@ -31,7 +26,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
     @Getter(AccessLevel.NONE)
-    private final Queue<PortRef> portQueue = new ArrayDeque<>();
+    private final Queue<String> portQueue = new ArrayDeque<>();
 
     private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
@@ -169,16 +164,12 @@ public class Bin {
         this.status = BinStatus.AVAILABLE;
     }
 
-    public void enqueuePort(String gridId, String portId) {
-        portQueue.add(new PortRef(gridId, portId));
+    public void enqueuePort(String portId) {
+        portQueue.add(portId);
     }
 
-    public PortRef pollPort() {
+    public String pollPort() {
         return portQueue.poll();
-    }
-
-    public boolean hasPortsInQueue() {
-        return !portQueue.isEmpty();
     }
 
     @Override
