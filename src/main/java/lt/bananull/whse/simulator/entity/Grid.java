@@ -7,6 +7,9 @@ import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,29 +23,40 @@ import java.util.Queue;
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
 @Getter
-@Slf4j
 public class Grid {
 
     private final String id;
-    private final List<ShiftDto> shifts;
+    private final List<Shift> shifts;
     private final Map<String, Port> ports;
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue = new ArrayDeque<>();
 
-    private Grid(String id, Collection<ShiftDto> shifts, Map<String, Port> ports) {
+    private Grid(String id, Collection<Shift> shifts, Map<String, Port> ports) {
         this.id = id;
         this.shifts = List.copyOf(shifts);
         this.ports = Map.copyOf(ports);
     }
 
-    public static Grid from(GridDto dto, int portQueueCapacity) {
+    public static Grid from(GridDto dto,
+                            int portQueueCapacity,
+                            Instant simulationStartTime,
+                            Instant simulationEndTime,
+                            ZoneId zone) {
         Map<String, Port> ports = new HashMap<>();
         for (ShiftDto shift : dto.shifts()) {
             for (PortDto port : shift.portConfig()) {
                 ports.put(port.id(), Port.from(port, portQueueCapacity));
             }
         }
-        return new Grid(dto.id(), dto.shifts(), ports);
+        LocalDate startDate = LocalDate.ofInstant(simulationStartTime, zone);
+        LocalDate endDateExclusive = LocalDate.ofInstant(simulationEndTime, zone).plusDays(1); // before it was not
+        // creating any shifts because we only had one day of shifts and the date was exclusive
+
+        List<Shift> expandedShifts = dto.shifts().stream()
+            .flatMap(shiftDto -> Shift.expandRecurring(shiftDto, startDate, endDateExclusive, zone).stream())
+            .toList();
+
+        return new Grid(dto.id(), expandedShifts, ports);
     }
 
     public Port getAvailablePort(Collection<String> shipmentHandlingFlags) {

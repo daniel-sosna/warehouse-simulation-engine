@@ -1,0 +1,9 @@
+[
+  {
+    "id": "BIN-001",
+    "currentGridLocation": "AS1",
+    "itemsInBin": {
+      "EAN-123": {"quantity": 100}
+    }
+  }
+]
