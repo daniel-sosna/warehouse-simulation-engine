@@ -43,7 +43,7 @@ public class BinPickCompletedEvent extends Event {
             Bin.PortRef portRef = bin.pollPort();
             Port waitingPort = state.getPort(portRef.gridId(), portRef.portId());
             if (waitingPort.getStatus() == IDLE) {
-                simulator.requestNextBinForPort(portRef.gridId(), portRef.portId(), getSimTime());
+                BinRequestedAtPortEvent.tryScheduleFor(portRef.gridId(), portRef.portId(), getSimTime(), simulator);
                 break;
             }
             // Port is no longer IDLE (already being served or closed) – drop it.

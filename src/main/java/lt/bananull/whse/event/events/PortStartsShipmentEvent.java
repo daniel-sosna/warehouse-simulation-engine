@@ -18,7 +18,7 @@ public class PortStartsShipmentEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        simulator.requestNextBinForPort(gridId, portId, getSimTime());
+        BinRequestedAtPortEvent.tryScheduleFor(gridId, portId, getSimTime(), simulator);
     }
 
     @Override
