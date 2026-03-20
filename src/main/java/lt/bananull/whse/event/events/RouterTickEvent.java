@@ -47,7 +47,8 @@ public class RouterTickEvent extends Event {
                 .filter(shipment -> shipment.getStatus() == null &&
                         !shipment.getShipmentDate().isAfter(simulator.getNow()))
                 .forEach(shipment -> {
-                    long shipmentSimTime = shipment.getShipmentDate().getEpochSecond() - simulator.getSimulationStartTime().getEpochSecond();
+                    long shipmentSimTime =
+                        shipment.getShipmentDate().getEpochSecond() - simulator.getParameters().simulationStartTime().getEpochSecond();
                     ShipmentReceivedEvent event = new ShipmentReceivedEvent(shipmentSimTime, shipment.getId());
                     simulator.getEventHandler().handle(event); // No need to enqueue cause simTime is not in order
                 });

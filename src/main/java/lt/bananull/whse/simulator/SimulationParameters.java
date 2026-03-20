@@ -2,6 +2,7 @@ package lt.bananull.whse.simulator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import java.util.Map;
  * Missing JSON fields are null-coalesced to defaults in each record's compact constructor.
  */
 public record SimulationParameters(
+        @JsonProperty("simulationStartTime") Instant simulationStartTime,
+        @JsonProperty("simulationEndTime") Instant simulationEndTime,
         @JsonProperty("pickingThroughput") PickingThroughput pickingThroughput,
         @JsonProperty("gridBinDelivery") GridBinDelivery gridBinDelivery,
         @JsonProperty("transfersConveyors") TransfersConveyors transfersConveyors,
@@ -28,7 +31,7 @@ public record SimulationParameters(
      * Null arguments are intentional: each nested record's compact constructor fills in its own defaults.
      */
     public static SimulationParameters defaults() {
-        return new SimulationParameters(null, null, null, null);
+        return new SimulationParameters(null, null, null, null, null, null);
     }
 
     // -------------------------------------------------------------------------
