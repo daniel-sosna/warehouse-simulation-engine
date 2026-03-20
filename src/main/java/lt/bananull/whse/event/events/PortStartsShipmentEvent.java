@@ -34,10 +34,8 @@ public class PortStartsShipmentEvent extends Event {
         shipment.startPicking();
 
         for (PickDto pick : shipment.getPicks()) {
-            Bin bin = state.getBin(pick.binId());
-            if (!shipment.getPickedBins().contains(bin.getId())) {
-                simulator.enqueueEvent(new BinRequestedAtPortEvent(getSimTime(), bin.getId(), gridId, portId, pick.ean(), pick.qty()));
-            }
+            simulator.enqueueEvent(new BinRequestedAtPortEvent(getSimTime(), pick.binId(), gridId, portId, pick.ean(),
+                pick.qty()));
         }
     }
 
