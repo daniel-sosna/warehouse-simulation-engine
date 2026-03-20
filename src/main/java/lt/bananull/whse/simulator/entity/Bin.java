@@ -8,6 +8,8 @@ import lt.bananull.whse.simulator.enums.BinStatus;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Simulation entity representing a physical storage bin.
@@ -23,6 +25,7 @@ public class Bin {
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
+    private final Queue<WaitingPortTask> waitingPorts = new LinkedList<>();
 
     private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
@@ -34,6 +37,21 @@ public class Bin {
         Map<String, Integer> stock = new HashMap<>();
         dto.itemsInBin().forEach((ean, binItemDto) -> stock.put(ean, binItemDto.quantity()));
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
+    }
+
+    public static class WaitingPortTask {
+        public final String portId;
+        public final String shipmentId;
+        public final String gridId;
+        public final String ean;
+        public final int qty;
+        public WaitingPortTask(String portId, String shipmentId, String gridId, String ean, int qty) {
+            this.portId = portId;
+            this.shipmentId = shipmentId;
+            this.gridId = gridId;
+            this.ean = ean;
+            this.qty = qty;
+        }
     }
 
     public Map<String, Integer> getStock() { return Collections.unmodifiableMap(stock); }
@@ -164,5 +182,9 @@ public class Bin {
     public String toString() {
         return "Bin{id='%s', grid='%s', status=%s, stock=%s, reservedItems=%s}"
                 .formatted(id, currentGridId, status, stock, reservedItems);
+    }
+
+    public void addWaitingPort(String portId, String shipmentId, String gridId, String ean, int qty) {
+        waitingPorts.add(new WaitingPortTask(portId, shipmentId, gridId, ean, qty));
     }
 }

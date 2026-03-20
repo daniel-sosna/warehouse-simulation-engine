@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
+
 /**
  * Simulation entity representing a customer order.
  * Mutable throughout the shipment lifecycle.
@@ -26,6 +28,7 @@ public class Shipment {
     private String assignedGridId;
     private String assignedPortId;
     private List<PickDto> picks = List.of();
+    private int currentPickIndex = 0;
 
     private Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
         this.id = id;
@@ -160,4 +163,17 @@ public class Shipment {
         return "Shipment{id='%s', status=%s, grid='%s', port='%s'}"
                 .formatted(id, status, assignedGridId, assignedPortId);
     }
+
+    public PickDto getNextUnpickedPick(SimulationState state) {
+        for (int i = currentPickIndex; i < picks.size(); i++) {
+            PickDto pick = picks.get(i);
+            Bin bin = state.getBin(pick.binId());
+            if (bin.getStatus() == AVAILABLE) {
+                return pick;
+            }
+        }
+        return null;
+    }
+    public void incrementPickIndex() { currentPickIndex++; }
+    public boolean isFullyPicked() { return currentPickIndex >= picks.size(); }
 }
