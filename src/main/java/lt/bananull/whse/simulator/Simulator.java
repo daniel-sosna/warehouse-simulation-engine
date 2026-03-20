@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.event.events.TruckArrivalEvent;
@@ -11,8 +12,12 @@ import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.service.TruckArrivalService;
+import lt.bananull.whse.simulator.entity.Grid;
+import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
+import lt.bananull.whse.utils.DateTimeResolver;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
@@ -94,6 +99,19 @@ public class Simulator {
 
     public void run() {
         enqueueTruckEvents();
+        for (Grid grid : state.grids().values()) {
+            String gridId = grid.getId();
+            for (Shift shift : grid.getShifts()) {
+                long simTimeOfOpen = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt(),
+                    parameters.simulationStartTime());
+                long simTimeOfClose = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
+                    parameters.simulationStartTime());
+                long durationOfOpen = simTimeOfClose - simTimeOfOpen;
+                for (String portId : shift.getPortIds()) {
+                    enqueueEvent(new PortOpensEvent(simTimeOfOpen, gridId, portId, durationOfOpen));
+                }
+            }
+        }
 
         while (!events.isEmpty()) {
             Event e = events.poll();
