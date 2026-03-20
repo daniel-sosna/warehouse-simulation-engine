@@ -47,16 +47,18 @@ public record SimulationParameters(
     public record PickingThroughput(
             @JsonProperty("standard") Integer standard,
             @JsonProperty("fragile") Integer fragile,
+            @JsonProperty("dropp") Integer dropp,
             @JsonProperty("randomness") Randomness randomness
     ) {
         public PickingThroughput {
             if (standard == null)   standard  = 140;
             if (fragile == null)    fragile   = 70;
+            if (dropp == null)      dropp     = 100;
             if (randomness == null) randomness = new Randomness(0.8, 1.2);
         }
 
         public static PickingThroughput defaults() {
-            return new PickingThroughput(null, null, null);
+            return new PickingThroughput(null, null,null, null);
         }
     }
 
