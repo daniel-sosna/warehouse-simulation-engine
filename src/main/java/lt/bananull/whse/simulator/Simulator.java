@@ -27,8 +27,6 @@ public class Simulator {
 
     private static final long DEFAULT_RANDOM_SEED = 1L;
 
-    @Getter private final Instant simulationStartTime;
-    @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
     @Getter private final ZoneId zoneId = ZoneId.of("UTC"); // for now just hardcoded the zone
 
@@ -42,17 +40,14 @@ public class Simulator {
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState,
-                     Instant startTime, Instant endTime, SimulationParameters parameters) {
-        this.simulationStartTime = startTime;
-        this.simulationEndTime = endTime;
-        this.now = startTime;
-        this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
+        this.now = parameters.simulationStartTime();
+        this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
 
-        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
+        this.state = SimulationState.from(initialState, parameters, parameters.simulationStartTime(), parameters.simulationEndTime(),
             zoneId);
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
@@ -77,7 +72,7 @@ public class Simulator {
 
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
-        this.now = simulationStartTime.plusSeconds(simTime);
+        this.now = parameters.simulationStartTime().plusSeconds(simTime);
     }
 
     public void dispatchAll() {
@@ -113,8 +108,8 @@ public class Simulator {
     }
 
     private void enqueueTruckEvents() {
-        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(simulationStartTime,
-            simulationEndTime,
+        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(parameters.simulationStartTime(),
+            parameters.simulationEndTime(),
             parameters.truckArrivalSchedules());
         truckEvents.forEach(this::enqueueEvent);
     }
