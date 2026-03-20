@@ -41,8 +41,6 @@ public class Simulator {
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState,
                      Instant startTime, Instant endTime, SimulationParameters parameters) {
-        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
-            zoneId);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
@@ -50,6 +48,9 @@ public class Simulator {
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
+
+        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
+            zoneId);
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
