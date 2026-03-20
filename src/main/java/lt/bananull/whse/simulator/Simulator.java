@@ -23,7 +23,6 @@ public class Simulator {
 
     private static final long DEFAULT_RANDOM_SEED = 1L;
 
-    @Getter private final Instant simulationStartTime;
     @Getter private final long simulationDurationSeconds;
 
     @Getter private long simTime = 0;
@@ -36,12 +35,10 @@ public class Simulator {
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    public Simulator(RouterClient routerClient, SimulationStateDto initialState,
-                     Instant startTime, Instant endTime, SimulationParameters parameters) {
+    public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
         this.state = SimulationState.from(initialState, parameters);
-        this.simulationStartTime = startTime;
-        this.now = startTime;
-        this.simulationDurationSeconds = endTime.getEpochSecond() - simulationStartTime.getEpochSecond();
+        this.now = parameters.simulationStartTime();
+        this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
@@ -68,7 +65,7 @@ public class Simulator {
 
     private void setSimTime(long newSimTimeSeconds) {
         this.simTime = newSimTimeSeconds;
-        this.now = simulationStartTime.plusSeconds(simTime);
+        this.now = parameters.simulationStartTime().plusSeconds(simTime);
     }
 
     public void dispatchAll() {

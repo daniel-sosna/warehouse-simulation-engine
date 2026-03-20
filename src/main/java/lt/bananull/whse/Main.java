@@ -27,13 +27,8 @@ public class Main {
         // Create router client
         RouterClient routerClient = new RouterClient(config.routerCommand());
 
-        // Resolve time
-        ZoneId zone = ZoneId.of("UTC");
-        Instant startTime = DateTimeResolver.resolveSimulationStart(state, zone);
-        Instant endTime = DateTimeResolver.resolveSimulationEnd(state, zone);
-
         // Main loop
-        Simulator simulator = new Simulator(routerClient, state, startTime, endTime, parameters);
+        Simulator simulator = new Simulator(routerClient, state, parameters);
         simulator.run();
 
         try {
