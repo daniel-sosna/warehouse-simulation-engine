@@ -3,6 +3,7 @@ package lt.bananull.whse.simulator.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lt.bananull.whse.load.dto.PortDto;
+import lt.bananull.whse.simulator.enums.BinStatus;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
 import java.util.ArrayDeque;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Simulation entity representing a packing station.
@@ -124,6 +126,32 @@ public class Port {
         }
 
         shipmentQueue.add(shipmentId);
+    }
+
+    /**
+     * Returns the next queued shipment ID without removing it from the queue.
+     *
+     * @return next shipment ID, or {@code null} if the queue is empty.
+     */
+    public String peekNextShipmentId() {
+        return shipmentQueue.peek();
+    }
+
+    /**
+     * Scans the given shipment's picks and returns the first bin ID whose status is
+     * {@link BinStatus#AVAILABLE}, or {@code null} if none are available.
+     *
+     * @param shipment the shipment whose picks should be scanned.
+     * @param getBin   function that resolves a bin ID to a {@link Bin} instance.
+     * @return an available bin ID, or {@code null}.
+     */
+    public String findAvailableBin(Shipment shipment, Function<String, Bin> getBin) {
+        return shipment.getPicks().stream()
+                .map(pick -> getBin.apply(pick.binId()))
+                .filter(bin -> bin.getStatus() == BinStatus.AVAILABLE)
+                .map(Bin::getId)
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

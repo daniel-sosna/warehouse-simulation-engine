@@ -5,15 +5,22 @@ import lombok.Getter;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.simulator.enums.BinStatus;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Simulation entity representing a physical storage bin.
  */
 @Getter
 public class Bin {
+
+    /**
+     * Reference to a port that is waiting for this bin.
+     */
+    public record PortRef(String gridId, String portId) {}
 
     private final String id;
     @Getter(AccessLevel.NONE)
@@ -23,6 +30,8 @@ public class Bin {
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
+    @Getter(AccessLevel.NONE)
+    private final Queue<PortRef> portQueue = new ArrayDeque<>();
 
     private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
@@ -158,6 +167,18 @@ public class Bin {
 
         this.currentGridId = gridId;
         this.status = BinStatus.AVAILABLE;
+    }
+
+    public void enqueuePort(String gridId, String portId) {
+        portQueue.add(new PortRef(gridId, portId));
+    }
+
+    public PortRef pollPort() {
+        return portQueue.poll();
+    }
+
+    public boolean hasPortsInQueue() {
+        return !portQueue.isEmpty();
     }
 
     @Override

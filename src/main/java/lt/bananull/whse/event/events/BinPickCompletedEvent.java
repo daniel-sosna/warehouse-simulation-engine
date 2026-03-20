@@ -4,8 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
+import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.Map;
+
+import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 
 @Slf4j
 public class BinPickCompletedEvent extends Event {
@@ -30,10 +34,22 @@ public class BinPickCompletedEvent extends Event {
         // - decrement stock in state
         // - mark shipment Packed if all items picked
 
-        Bin bin = simulator.getState().getBin(binId);
+        SimulationState state = simulator.getState();
+        Bin bin = state.getBin(binId);
         bin.release();
-        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
 
+        // Check the bin's port queue: poll until an IDLE port is found; skip non-IDLE ports.
+        while (bin.hasPortsInQueue()) {
+            Bin.PortRef portRef = bin.pollPort();
+            Port waitingPort = state.getPort(portRef.gridId(), portRef.portId());
+            if (waitingPort.getStatus() == IDLE) {
+                simulator.requestNextBinForPort(portRef.gridId(), portRef.portId(), getSimTime());
+                break;
+            }
+            // Port is no longer IDLE (already being served or closed) – drop it.
+        }
+
+        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
     }
 
     @Override

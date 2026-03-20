@@ -4,11 +4,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.BinRequestedAtPortEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.router.dto.PickDto;
+import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.RandomnessResolver;
@@ -99,5 +102,41 @@ public class Simulator {
 
     public double resolveMultiplier(SimulationParameters.Randomness randomness) {
         return randomnessResolver.resolveMultiplier(randomness);
+    }
+
+    /**
+     * Tries to find an available bin for the next queued shipment of the given port.
+     * <ul>
+     *   <li>If an available bin is found, {@link BinRequestedAtPortEvent} is scheduled.</li>
+     *   <li>If no bin is currently available, the port is enqueued in every bin from the
+     *       shipment's picks so that it will be notified when one becomes free.</li>
+     * </ul>
+     * The port must be {@link lt.bananull.whse.simulator.enums.PortStatus#IDLE} and have at
+     * least one shipment in its queue when this method is called.
+     *
+     * @param gridId  grid that the port belongs to.
+     * @param portId  port waiting for a bin.
+     * @param simTime current simulation time to use when scheduling the event.
+     */
+    public void requestNextBinForPort(String gridId, String portId, long simTime) {
+        Port port = state.getPort(gridId, portId);
+        String nextShipmentId = port.peekNextShipmentId();
+        if (nextShipmentId == null) return;
+
+        Shipment shipment = state.getShipment(nextShipmentId);
+        String binId = port.findAvailableBin(shipment, state::getBin);
+
+        if (binId != null) {
+            PickDto pick = shipment.getPicks().stream()
+                    .filter(p -> p.binId().equals(binId))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Bin %s not found in picks of shipment %s".formatted(binId, nextShipmentId)));
+            enqueueEvent(new BinRequestedAtPortEvent(simTime, binId, gridId, portId, pick.ean(), pick.qty()));
+        } else {
+            for (PickDto pick : shipment.getPicks()) {
+                state.getBin(pick.binId()).enqueuePort(gridId, portId);
+            }
+        }
     }
 }
