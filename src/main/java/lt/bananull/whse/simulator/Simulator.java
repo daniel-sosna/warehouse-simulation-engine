@@ -41,14 +41,13 @@ public class Simulator {
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
-        this.state = SimulationState.from(initialState, parameters);
         this.now = parameters.simulationStartTime();
         this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
 
-        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
+        this.state = SimulationState.from(initialState, parameters, parameters.simulationStartTime(), parameters.simulationEndTime(),
             zoneId);
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
@@ -109,8 +108,8 @@ public class Simulator {
     }
 
     private void enqueueTruckEvents() {
-        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(simulationStartTime,
-            simulationEndTime,
+        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(parameters.simulationStartTime(),
+            parameters.simulationEndTime(),
             parameters.truckArrivalSchedules());
         truckEvents.forEach(this::enqueueEvent);
     }
