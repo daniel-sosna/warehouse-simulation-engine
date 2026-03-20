@@ -14,6 +14,7 @@ import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.PriorityQueue;
 import java.util.SplittableRandom;
@@ -26,6 +27,7 @@ public class Simulator {
     @Getter private final Instant simulationStartTime;
     @Getter private final Instant simulationEndTime;
     @Getter private final long simulationDurationSeconds;
+    @Getter private final ZoneId zoneId = ZoneId.of("UTC"); // for now just hardcoded the zone
 
     @Getter private long simTime = 0;
     @Getter private Instant now;
@@ -39,7 +41,8 @@ public class Simulator {
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState,
                      Instant startTime, Instant endTime, SimulationParameters parameters) {
-        this.state = SimulationState.from(initialState, parameters);
+        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
+            zoneId);
         this.simulationStartTime = startTime;
         this.simulationEndTime = endTime;
         this.now = startTime;
