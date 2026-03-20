@@ -13,7 +13,7 @@ import static lt.bananull.whse.simulator.enums.ShipmentStatus.PACKED;
 public class TruckArrivalEvent extends Event {
 
     private final String sortingDirection;
-    private int shippedItemCount;
+    private int shippedShipmentCount;
 
     public TruckArrivalEvent(long simTime, String sortingDirection) {
         super(simTime);
@@ -22,20 +22,21 @@ public class TruckArrivalEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-        // Create a million separate events `ShipmentShipped` ?
         List<Shipment> shipmentsToShip = simulator.getState().shipments().values().stream()
             .filter(shipment -> shipment.getStatus() == PACKED
                     && Objects.equals(shipment.getSortingDirection(), sortingDirection))
             .toList();
 
-        shipmentsToShip.forEach(Shipment::markShipped);
-        shippedItemCount = shipmentsToShip.size();
+        shipmentsToShip.forEach(shipment ->
+            simulator.enqueueEvent(new ShipmentShippedEvent(getSimTime(), shipment.getId())));
+        shippedShipmentCount = shipmentsToShip.size();
     }
 
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-            "shippedItemCount", shippedItemCount
+            "shipmentsTakenForShipping", shippedShipmentCount,
+            "sortingDirection", sortingDirection
         );
     }
 }
