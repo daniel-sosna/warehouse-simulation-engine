@@ -14,15 +14,13 @@ public class BinPickCompletedEvent extends Event {
     private final String portId;
     private final String binId;
     private final String shipmentId;
-    private final long duration;
 
     public BinPickCompletedEvent(long simTime, String shipmentId, String gridId,  String portId, String binId, long duration) {
-        super(simTime);
+        super(simTime, duration);
         this.shipmentId = shipmentId;
         this.binId = binId;
         this.portId = portId;
         this.gridId = gridId;
-        this.duration = duration;
     }
 
     @Override
@@ -34,7 +32,7 @@ public class BinPickCompletedEvent extends Event {
 
         Bin bin = simulator.getState().getBin(binId);
         bin.release();
-        simulator.getEventHandler().handle(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, duration));
+        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
 
     }
 

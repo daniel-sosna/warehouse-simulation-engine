@@ -7,12 +7,14 @@ public record LogEvent(
     long simTime,
     String timestamp,
     String event,
+    long duration,
     Map<String, Object> data
 ) {
     public LogEvent(Event event, Instant simulationStartTime) {
         this(event.getSimTime(),
             simulationStartTime.plusSeconds(event.getSimTime()).toString(),
             event.getClass().getSimpleName().split("Event")[0],
+            event.getDuration(),
             event.getData());
     }
 }

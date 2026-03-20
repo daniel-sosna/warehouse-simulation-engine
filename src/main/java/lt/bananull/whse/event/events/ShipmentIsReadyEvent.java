@@ -39,7 +39,7 @@ public class ShipmentIsReadyEvent extends Event {
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
                 PortStartsShipmentEvent event = new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getId());
-                simulator.getEventHandler().handle(event);
+                simulator.enqueueEvent(event);
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);

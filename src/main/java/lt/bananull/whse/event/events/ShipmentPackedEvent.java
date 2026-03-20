@@ -12,14 +12,12 @@ public class ShipmentPackedEvent extends Event {
     private final String shipmentId;
     private final String gridId;
     private final String portId;
-    private final long duration;
 
     public ShipmentPackedEvent(long simTime, String shipmentId, String gridId, String portId, long duration) {
-        super(simTime);
+        super(simTime, duration);
         this.shipmentId = shipmentId;
         this.gridId = gridId;
         this.portId = portId;
-        this.duration = duration;
     }
 
     @Override
@@ -36,8 +34,7 @@ public class ShipmentPackedEvent extends Event {
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "shipmentId", shipmentId,
-                "Duration", duration
+                "shipmentId", shipmentId
         );
     }
 }
