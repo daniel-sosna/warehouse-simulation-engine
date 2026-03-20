@@ -22,7 +22,7 @@ public class EventHandler {
     }
 
     private String toJson(Event event) {
-        LogEvent logEvent = new LogEvent(event, simulator.getSimulationStartTime());
+        LogEvent logEvent = new LogEvent(event, simulator.getParameters().simulationStartTime());
         try {
             return MAPPER.writeValueAsString(logEvent);
         } catch (Exception e) {

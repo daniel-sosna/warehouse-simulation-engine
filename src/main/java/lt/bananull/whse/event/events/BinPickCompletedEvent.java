@@ -6,6 +6,7 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.SimulationState;
+import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
@@ -29,14 +30,16 @@ public class BinPickCompletedEvent extends Event {
 
     @Override
     public void execute(Simulator simulator) {
-
-        // Todo:
-        // - decrement stock in state
-        // - mark shipment Packed if all items picked
+        Shipment shipment = simulator.getState().getShipment(shipmentId);
+        shipment.addPickedBin(binId);
 
         SimulationState state = simulator.getState();
         Bin bin = state.getBin(binId);
+        bin.deductStock(bin.getReservedItems());
         bin.release();
+        if (shipment.isFullyPicked()) {
+            simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+        }
 
         // Check the bin's port queue: poll until an IDLE port is found; skip non-IDLE ports.
         String nextPortId = bin.pollPort();
@@ -48,8 +51,6 @@ public class BinPickCompletedEvent extends Event {
             }
             nextPortId = bin.pollPort();
         }
-
-        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
     }
 
     @Override

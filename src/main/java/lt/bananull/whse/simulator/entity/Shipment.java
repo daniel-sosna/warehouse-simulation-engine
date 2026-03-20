@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,22 +23,31 @@ public class Shipment {
     private final Map<String, Integer> items;
     private final Instant shipmentDate;
     private final Set<String> handlingFlags;
+    private final String sortingDirection;
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
     private List<PickDto> picks = List.of();
+    private final Set<String> pickedBins = new HashSet<>();
 
-    private Shipment(String id, Map<String, Integer> items, Instant shipmentDate, Collection<String> handlingFlags) {
+    private Shipment(
+        String id,
+        Map<String, Integer> items,
+        Instant shipmentDate,
+        Collection<String> handlingFlags,
+        String sortingDirection
+    ) {
         this.id = id;
         this.items = Map.copyOf(items);
         this.shipmentDate = shipmentDate;
         this.handlingFlags = Set.copyOf(handlingFlags);
+        this.sortingDirection = sortingDirection;
         this.status = null;
     }
 
     public static Shipment from(ShipmentDto dto) {
         return new Shipment(dto.id(), dto.items(), dto.shipmentDate(),
-                dto.handlingFlags() != null ? dto.handlingFlags() : Set.of());
+                dto.handlingFlags() != null ? dto.handlingFlags() : Set.of(), dto.sortingDirection());
     }
 
     public boolean isAvailableForRerouting() {
@@ -159,5 +169,13 @@ public class Shipment {
     public String toString() {
         return "Shipment{id='%s', status=%s, grid='%s', port='%s'}"
                 .formatted(id, status, assignedGridId, assignedPortId);
+    }
+
+    public void addPickedBin(String binId) {
+        pickedBins.add(binId);
+    }
+
+    public boolean isFullyPicked() {
+        return pickedBins.containsAll(picks.stream().map(PickDto::binId).toList());
     }
 }

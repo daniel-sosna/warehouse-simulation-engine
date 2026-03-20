@@ -2,6 +2,7 @@ package lt.bananull.whse.simulator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import java.util.Map;
  * Missing JSON fields are null-coalesced to defaults in each record's compact constructor.
  */
 public record SimulationParameters(
+        @JsonProperty("simulationStartTime") Instant simulationStartTime,
+        @JsonProperty("simulationEndTime") Instant simulationEndTime,
         @JsonProperty("pickingThroughput") PickingThroughput pickingThroughput,
         @JsonProperty("gridBinDelivery") GridBinDelivery gridBinDelivery,
         @JsonProperty("transfersConveyors") TransfersConveyors transfersConveyors,
@@ -28,7 +31,7 @@ public record SimulationParameters(
      * Null arguments are intentional: each nested record's compact constructor fills in its own defaults.
      */
     public static SimulationParameters defaults() {
-        return new SimulationParameters(null, null, null, null);
+        return new SimulationParameters(null, null, null, null, null, null);
     }
 
     // -------------------------------------------------------------------------
@@ -44,16 +47,18 @@ public record SimulationParameters(
     public record PickingThroughput(
             @JsonProperty("standard") Integer standard,
             @JsonProperty("fragile") Integer fragile,
+            @JsonProperty("dropp") Integer dropp,
             @JsonProperty("randomness") Randomness randomness
     ) {
         public PickingThroughput {
             if (standard == null)   standard  = 140;
             if (fragile == null)    fragile   = 70;
+            if (dropp == null)      dropp     = 100;
             if (randomness == null) randomness = new Randomness(0.8, 1.2);
         }
 
         public static PickingThroughput defaults() {
-            return new PickingThroughput(null, null, null);
+            return new PickingThroughput(null, null,null, null);
         }
     }
 
