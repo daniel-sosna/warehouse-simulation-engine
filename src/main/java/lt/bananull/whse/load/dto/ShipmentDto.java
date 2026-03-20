@@ -10,5 +10,6 @@ public record ShipmentDto(
         @JsonProperty("id") String id,
         @JsonProperty("items") Map<String, Integer> items,
         @JsonProperty("shipmentDate") Instant shipmentDate,
-        @JsonProperty("handlingFlags") List<String> handlingFlags
+        @JsonProperty("handlingFlags") List<String> handlingFlags,
+        @JsonProperty("sortingDirection") String sortingDirection
 ) {}

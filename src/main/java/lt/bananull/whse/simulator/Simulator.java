@@ -6,15 +6,19 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
+import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.SplittableRandom;
 
@@ -24,6 +28,7 @@ public class Simulator {
     private static final long DEFAULT_RANDOM_SEED = 1L;
 
     @Getter private final long simulationDurationSeconds;
+    @Getter private final ZoneId zoneId = ZoneId.of("UTC"); // for now just hardcoded the zone
 
     @Getter private long simTime = 0;
     @Getter private Instant now;
@@ -42,6 +47,9 @@ public class Simulator {
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
+
+        this.state = SimulationState.from(initialState, parameters, getSimulationStartTime(), getSimulationEndTime(),
+            zoneId);
 
         enqueueEvent(new RouterTickEvent(0, routerClient));
     }
@@ -86,6 +94,8 @@ public class Simulator {
     }
 
     public void run() {
+        enqueueTruckEvents();
+
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
@@ -96,5 +106,12 @@ public class Simulator {
 
     public double resolveMultiplier(SimulationParameters.Randomness randomness) {
         return randomnessResolver.resolveMultiplier(randomness);
+    }
+
+    private void enqueueTruckEvents() {
+        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(simulationStartTime,
+            simulationEndTime,
+            parameters.truckArrivalSchedules());
+        truckEvents.forEach(this::enqueueEvent);
     }
 }
