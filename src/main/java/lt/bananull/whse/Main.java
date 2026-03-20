@@ -8,7 +8,6 @@ import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.utils.LogFileSorter;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Main {
@@ -36,8 +35,6 @@ public class Main {
             LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
         } catch (Exception e) {
             System.err.print("Failed to sort log file by simTime");
-            Logger log = LoggerFactory.getLogger(Main.class);
-            log.error("Failed to sort log file by simTime", e);
         }
     }
 }
