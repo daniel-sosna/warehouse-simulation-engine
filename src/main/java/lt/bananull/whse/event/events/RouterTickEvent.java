@@ -31,7 +31,6 @@ public class RouterTickEvent extends Event {
                 simulator.getNow()
         );
         RouterResponseDto response = routerClient.route(request);
-        log.info("Assignments size: " + response.assignments().size());
         simulator.updateAssignments(response.assignments());
         simulator.dispatchAll();
 

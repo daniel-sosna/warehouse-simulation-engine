@@ -57,11 +57,6 @@ public class Grid {
             .flatMap(shiftDto -> Shift.expandRecurring(shiftDto, startDate, endDateExclusive, zone).stream())
             .toList();
 
-        log.info("Grid {} expanded shifts: {}", dto.id(), expandedShifts.size());
-        expandedShifts.stream().limit(3).forEach(s ->
-            log.info("Shift {} -> {}, ports={}, breaks={}",
-                s.getStartAt(), s.getEndAt(), s.getPortIds(), s.getBreaks())
-        );
         return new Grid(dto.id(), expandedShifts, ports);
     }
 
