@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ public class Shipment {
     private String assignedGridId;
     private String assignedPortId;
     private List<PickDto> picks = List.of();
+    private final Set<String> pickedBins = new HashSet<>();
 
     private Shipment(
         String id,
@@ -167,5 +169,13 @@ public class Shipment {
     public String toString() {
         return "Shipment{id='%s', status=%s, grid='%s', port='%s'}"
                 .formatted(id, status, assignedGridId, assignedPortId);
+    }
+
+    public void addPickedBin(String binId) {
+        pickedBins.add(binId);
+    }
+
+    public boolean isFullyPicked() {
+        return pickedBins.containsAll(picks.stream().map(PickDto::binId).toList());
     }
 }

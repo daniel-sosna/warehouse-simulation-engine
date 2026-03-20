@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
+import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
 
@@ -30,9 +31,15 @@ public class BinPickCompletedEvent extends Event {
         // - decrement stock in state
         // - mark shipment Packed if all items picked
 
+        Shipment shipment = simulator.getState().getShipment(shipmentId);
+
+        shipment.addPickedBin(binId);
+
         Bin bin = simulator.getState().getBin(binId);
         bin.release();
-        simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+        if (shipment.isFullyPicked()) {
+            simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+        }
 
     }
 
