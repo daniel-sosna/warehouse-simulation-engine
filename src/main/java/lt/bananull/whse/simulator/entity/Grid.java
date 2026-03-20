@@ -50,7 +50,8 @@ public class Grid {
             }
         }
         LocalDate startDate = LocalDate.ofInstant(simulationStartTime, zone);
-        LocalDate endDateExclusive = LocalDate.ofInstant(simulationEndTime, zone);
+        LocalDate endDateExclusive = LocalDate.ofInstant(simulationEndTime, zone).plusDays(1); // before it was not
+        // creating any shifts because we only had one day of shifts and the date was exclusive
 
         List<Shift> expandedShifts = dto.shifts().stream()
             .flatMap(shiftDto -> Shift.expandRecurring(shiftDto, startDate, endDateExclusive, zone).stream())
