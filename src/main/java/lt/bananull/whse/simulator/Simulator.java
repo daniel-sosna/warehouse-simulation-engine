@@ -6,9 +6,11 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
+import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.RandomnessResolver;
@@ -16,6 +18,7 @@ import lt.bananull.whse.utils.RandomnessResolver;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.SplittableRandom;
 
@@ -95,6 +98,8 @@ public class Simulator {
     }
 
     public void run() {
+        enqueueTruckEvents();
+
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
@@ -105,5 +110,12 @@ public class Simulator {
 
     public double resolveMultiplier(SimulationParameters.Randomness randomness) {
         return randomnessResolver.resolveMultiplier(randomness);
+    }
+
+    private void enqueueTruckEvents() {
+        List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(simulationStartTime,
+            simulationEndTime,
+            parameters.truckArrivalSchedules());
+        truckEvents.forEach(this::enqueueEvent);
     }
 }

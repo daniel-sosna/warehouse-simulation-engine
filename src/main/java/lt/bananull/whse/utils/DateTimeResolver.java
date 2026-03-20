@@ -14,14 +14,6 @@ public class DateTimeResolver {
 
     private DateTimeResolver() {}
 
-    public static LocalDate resolveSimulationDate(SimulationStateDto state, ZoneId zone) {
-        return state.shipments().stream()
-                .map(ShipmentDto::shipmentDate)
-                .min(Comparator.naturalOrder())
-                .map(instant -> instant.atZone(zone).toLocalDate())
-                .orElseThrow(() -> new IllegalStateException("No shipments available to resolve simulation date"));
-    }
-
     public static Instant resolveSimulationStart(SimulationStateDto state, ZoneId zone) {
         LocalDate date = resolveSimulationDate(state, zone);
         return resolveSimulationStartTime(state)
@@ -36,6 +28,22 @@ public class DateTimeResolver {
                 .atDate(date)
                 .atZone(zone)
                 .toInstant();
+    }
+
+    public static long resolveSimTimeFromTimestamp(Instant timestamp, Instant simulationStart) {
+        if (timestamp.getEpochSecond() < simulationStart.getEpochSecond()) {
+            throw new IllegalArgumentException("Timestamp can't be older than simulation start");
+        }
+
+        return timestamp.getEpochSecond() - simulationStart.getEpochSecond();
+    }
+
+    private static LocalDate resolveSimulationDate(SimulationStateDto state, ZoneId zone) {
+        return state.shipments().stream()
+            .map(ShipmentDto::shipmentDate)
+            .min(Comparator.naturalOrder())
+            .map(instant -> instant.atZone(zone).toLocalDate())
+            .orElseThrow(() -> new IllegalStateException("No shipments available to resolve simulation date"));
     }
 
     private static LocalTime resolveSimulationStartTime(SimulationStateDto state) {
