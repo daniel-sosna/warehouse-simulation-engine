@@ -9,7 +9,6 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
-@Slf4j
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;

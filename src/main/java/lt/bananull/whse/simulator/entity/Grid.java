@@ -23,7 +23,6 @@ import java.util.Queue;
  * Simulation entity representing an AutoStore grid (or any self-contained storage area).
  */
 @Getter
-@Slf4j
 public class Grid {
 
     private final String id;
