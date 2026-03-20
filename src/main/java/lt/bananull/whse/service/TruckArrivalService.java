@@ -59,7 +59,7 @@ public class TruckArrivalService {
         LocalDate startDate = startZdt.toLocalDate();
         LocalDate endDate = endZdt.toLocalDate();
 
-        Set<Instant> result = new HashSet<>();
+        List<Instant> result = new ArrayList<>();
 
         Set<DayOfWeek> allowedDays = parseWeekdays(schedule.weekdays());
         List<LocalTime> pullTimes = parsePullTimes(schedule.pullTimes());
