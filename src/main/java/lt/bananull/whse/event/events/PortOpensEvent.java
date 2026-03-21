@@ -59,7 +59,8 @@ public class PortOpensEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
             "gridId", gridId,
-            "portId", portId
+            "portId", portId,
+            "fromBreak", fromBreak
         );
     }
 }

@@ -65,7 +65,8 @@ public class PortClosesEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
             "gridId", gridId,
-            "portId", portId
+            "portId", portId,
+            "intoBreak", portBreak != null
         );
     }
 }
