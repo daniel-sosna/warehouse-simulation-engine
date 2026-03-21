@@ -1,19 +1,19 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-.kotlin
+simulator/target/
+simulator/!.mvn/wrapper/maven-wrapper.jar
+simulator/!**/src/main/**/target/
+simulator/!**/src/test/**/target/
+simulator/.kotlin
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-.idea/encodings.xml
-.idea/misc.xml
-*.iws
-*.iml
-*.ipr
+simulator/.idea/modules.xml
+simulator/.idea/jarRepositories.xml
+simulator/.idea/compiler.xml
+simulator/.idea/libraries/
+simulator/.idea/encodings.xml
+simulator/.idea/misc.xml
+simulator/*.iws
+simulator/*.iml
+simulator/*.ipr
 
 ### Eclipse ###
 .apt_generated
