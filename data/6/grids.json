@@ -21,7 +21,7 @@
           {"start": "19:00", "end": "19:30"}
         ],
         "portConfig": [
-          {"id": "Port-1", "handlingFlags": []}
+          {"portIndex": "Port-1", "handlingFlags": []}
         ]
       }
     ]
