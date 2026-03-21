@@ -9,9 +9,9 @@
           {"start": "09:00", "end": "09:20"}
         ],
         "portConfig": [
-          {"id": "Port-1", "handlingFlags": []},
-          {"id": "Port-2", "handlingFlags": ["priority"]},
-          {"id": "Port-3", "handlingFlags": ["fragile"]}
+          {"portIndex": "Port-1", "handlingFlags": []},
+          {"portIndex": "Port-2", "handlingFlags": ["priority"]},
+          {"portIndex": "Port-3", "handlingFlags": ["fragile"]}
         ]
       },
       {
