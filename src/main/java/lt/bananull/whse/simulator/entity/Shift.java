@@ -2,6 +2,7 @@ package lt.bananull.whse.simulator.entity;
 
 import lombok.Getter;
 import lt.bananull.whse.load.dto.BreakDto;
+import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
 
 import java.time.Instant;
@@ -72,7 +73,7 @@ public class Shift {
 
         Set<String> portIds =
             dto.portConfig() == null ? Set.of()
-                : dto.portConfig().stream().map(p -> p.id()).collect(Collectors.toSet());
+                : dto.portConfig().stream().map(PortDto::portIndex).collect(Collectors.toSet());
 
         List<BreakOccurrence> breaks = expandBreaks(dto.breaks(), shiftDate, zone);
 

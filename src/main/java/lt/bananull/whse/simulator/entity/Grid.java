@@ -2,7 +2,6 @@ package lt.bananull.whse.simulator.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.load.dto.ShiftDto;
@@ -45,7 +44,7 @@ public class Grid {
         Map<String, Port> ports = new HashMap<>();
         for (ShiftDto shift : dto.shifts()) {
             for (PortDto port : shift.portConfig()) {
-                ports.put(port.id(), Port.from(port, portQueueCapacity));
+                ports.put(port.portIndex(), Port.from(port, portQueueCapacity));
             }
         }
         LocalDate startDate = LocalDate.ofInstant(simulationStartTime, zone);
