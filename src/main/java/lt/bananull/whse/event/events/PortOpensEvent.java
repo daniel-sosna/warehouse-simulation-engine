@@ -15,11 +15,13 @@ public class PortOpensEvent extends Event {
 
     private final String gridId;
     private final String portId;
+    private final boolean fromBreak;
 
-    public PortOpensEvent(long simTime, String gridId, String portId) {
+    public PortOpensEvent(long simTime, String gridId, String portId, boolean fromBreak) {
         super(simTime);
         this.gridId = gridId;
         this.portId = portId;
+        this.fromBreak = fromBreak;
     }
 
     @Override
@@ -43,6 +45,22 @@ public class PortOpensEvent extends Event {
         Event next = new PortClosesEvent(closeAt, shift.getEndAt(), gridId, portId);
         simulator.enqueueEvent(next);
 
+        if (!fromBreak) {
+            long closeAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
+                simulator.getParameters().simulationStartTime());
+            Event next = new PortClosesEvent(closeAt, shift.getEndAt(), gridId, portId, null);
+            simulator.enqueueEvent(next);
+        }
+
+        // Enqueue next break event
+        Shift.BreakOccurrence portBreak = PortShiftService.findNextBreak(shift.getBreaks(), now);
+
+        if (portBreak != null) {
+            long closeForBreakAt = DateTimeResolver.resolveSimTimeFromTimestamp(portBreak.startAt(),
+                simulator.getParameters().simulationStartTime());
+            simulator.enqueueEvent(new PortClosesEvent(closeForBreakAt, null, gridId, portId, portBreak));
+        }
+
         return List.of();
     }
 
@@ -50,7 +68,8 @@ public class PortOpensEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
             "gridId", gridId,
-            "portId", portId
+            "portId", portId,
+            "fromBreak", fromBreak
         );
     }
 }

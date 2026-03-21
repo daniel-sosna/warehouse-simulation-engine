@@ -16,12 +16,15 @@ public class PortClosesEvent extends Event {
     private final String gridId;
     private final String portId;
     private final Instant endsAt;
+    private final Shift.BreakOccurrence portBreak;
 
-    public PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId){
+    public PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId,
+                            Shift.BreakOccurrence portBreak){
         super(simTime);
         this.endsAt = endsAt;
         this.gridId = gridId;
         this.portId = portId;
+        this.portBreak = portBreak;
     }
 
     @Override
@@ -29,28 +32,45 @@ public class PortClosesEvent extends Event {
         Port port = simulator.getState().getPort(portId);
         port.requestClose();
 
+        if (portBreak != null) {
+            handleBreak(simulator);
+        } else {
+            handleShift(simulator);
+        }
+
+        return List.of();
+    }
+
+    private void handleShift(Simulator simulator) {
         Shift nextShift = PortShiftService.findNextShiftAfter(
             simulator.getState().getGrid(gridId),
             portId,
             endsAt
         );
-        if (nextShift == null) return List.of(); // no more shifts
+        if (nextShift == null) return; // no more shifts
 
         long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(
             nextShift.getStartAt(),
             simulator.getParameters().simulationStartTime()
         );
-        Event next =  new PortOpensEvent(openAt, gridId, portId);
+        Event next = new PortOpensEvent(openAt, gridId, portId, false);
         simulator.enqueueEvent(next);
+    }
 
-        return List.of();
+    private void handleBreak(Simulator simulator) {
+        long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(
+            portBreak.endAt(),
+            simulator.getParameters().simulationStartTime()
+        );
+        simulator.enqueueEvent(new PortOpensEvent(openAt, gridId, portId, true));
     }
 
     @Override
     public Map<String, Object> getData() {
         return Map.of(
             "gridId", gridId,
-            "portId", portId
+            "portId", portId,
+            "intoBreak", portBreak != null
         );
     }
 }

@@ -12,6 +12,7 @@ import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
@@ -101,7 +102,6 @@ public class Simulator {
 
     public void run() {
         enqueueTruckEvents();
-
         startPorts();
 
         while (!events.isEmpty()) {
@@ -127,8 +127,18 @@ public class Simulator {
         state.grids().values().forEach(grid -> {
             String gridId = grid.getId();
             grid.getPorts().keySet().forEach(portId -> {
-                enqueueEvent(new PortOpensEvent(0, gridId, portId)); // THIS DOES NOT OPEN THE PORT IMMEDIATELY
-                // WE JUST KICK OFF THE CHAIN HERE
+                Shift shift = PortShiftService.findCurrentOrNextShift(state.getGrid(gridId), portId, now);
+
+                try {
+                    long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
+                        , parameters.simulationStartTime());
+                    enqueueEvent(new PortOpensEvent(openAt, gridId, portId, false));
+                } catch (IllegalArgumentException e) {
+                    // IllegalArgumentException thrown when getStartAt is older than simulation start time meaning
+                    // port was already running when simulation started
+                    enqueueEvent(new PortOpensEvent(0, gridId, portId, false));
+                }
+
             });
         });
     }
