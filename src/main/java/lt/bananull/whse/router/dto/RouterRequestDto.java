@@ -9,8 +9,6 @@ import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +135,7 @@ public record RouterRequestDto(
         }
 
         return new RouterPortConfig(
-            port.getId(),
+            port.getPortIndex(),
             port.getHandlingFlags().stream().toList()
         );
     }

@@ -7,7 +7,7 @@
         "end": "12:00",
         "portConfig": [
           {
-            "id": "port-1",
+            "portIndex": "port-1",
             "handlingFlags": []
           }
         ]
@@ -17,7 +17,7 @@
         "end": "02:00",
         "portConfig": [
           {
-            "id": "port-1",
+            "portIndex": "port-1",
             "handlingFlags": []
           }
         ]
@@ -32,7 +32,7 @@
         "end": "23:59",
         "portConfig": [
           {
-            "id": "port-1",
+            "portIndex": "port-1",
             "handlingFlags": []
           }
         ],

@@ -18,7 +18,7 @@ import java.util.Set;
 @Getter
 public class Port {
 
-    private final String id;
+    private final String portIndex;
     private final Set<String> handlingFlags;
     private final int queueCapacity;
     private PortStatus status;
@@ -26,8 +26,8 @@ public class Port {
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
-    private Port(String id, Collection<String> handlingFlags, int queueCapacity) {
-        this.id = id;
+    private Port(String portIndex, Collection<String> handlingFlags, int queueCapacity) {
+        this.portIndex = portIndex;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;
         this.status = PortStatus.CLOSED;
@@ -35,7 +35,7 @@ public class Port {
     }
 
     public static Port from(PortDto dto, int queueCapacity) {
-        return new Port(dto.id(), dto.handlingFlags(), queueCapacity);
+        return new Port(dto.portIndex(), dto.handlingFlags(), queueCapacity);
     }
 
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
@@ -58,7 +58,7 @@ public class Port {
 
     public void open() {
         if (status != PortStatus.CLOSED) {
-            throw new IllegalStateException("Port %s cannot open from status %s".formatted(id, status));
+            throw new IllegalStateException("Port %s cannot open from status %s".formatted(portIndex, status));
         }
 
         this.status = PortStatus.IDLE;
@@ -66,7 +66,7 @@ public class Port {
 
     public void requestClose() {
         if (status != PortStatus.IDLE && status != PortStatus.BUSY) {
-            throw new IllegalStateException("Port %s cannot be closed from status %s".formatted(id, status));
+            throw new IllegalStateException("Port %s cannot be closed from status %s".formatted(portIndex, status));
         }
 
         this.status = status == PortStatus.BUSY ? PortStatus.PENDING_CLOSE : PortStatus.CLOSED;
@@ -88,12 +88,12 @@ public class Port {
     public String startNextShipment() {
         if (status != PortStatus.IDLE) {
             throw new IllegalStateException(
-                    "Port %s cannot start a shipment from status %s".formatted(id, status));
+                    "Port %s cannot start a shipment from status %s".formatted(portIndex, status));
         }
 
         String nextShipmentId = shipmentQueue.poll();
         if (nextShipmentId == null) {
-            throw new IllegalStateException("Port %s has no queued shipments to start".formatted(id));
+            throw new IllegalStateException("Port %s has no queued shipments to start".formatted(portIndex));
         }
 
         this.activeShipmentId = nextShipmentId;
@@ -109,7 +109,7 @@ public class Port {
     public String completeActiveShipment() {
         if (status != PortStatus.BUSY && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException(
-                    "Port %s cannot complete shipment from status %s".formatted(id, status));
+                    "Port %s cannot complete shipment from status %s".formatted(portIndex, status));
         }
 
         String completedShipmentId = activeShipmentId;
@@ -121,15 +121,15 @@ public class Port {
     public void enqueueShipment(String shipmentId, Collection<String> shipmentHandlingFlags) {
         if (status != PortStatus.IDLE && status != PortStatus.BUSY) {
             throw new IllegalStateException(
-                    "Port %s cannot accept new shipments from status %s".formatted(id, status));
+                    "Port %s cannot accept new shipments from status %s".formatted(portIndex, status));
         }
         if (!hasCapacity()) {
             throw new IllegalStateException(
-                    "Port %s queue is full (%d/%d)".formatted(id, getQueueSize(), queueCapacity));
+                    "Port %s queue is full (%d/%d)".formatted(portIndex, getQueueSize(), queueCapacity));
         }
         if (!canHandle(shipmentHandlingFlags)) {
             throw new IllegalStateException(
-                    "Port %s cannot handle shipment %s with flags %s".formatted(id, shipmentId, shipmentHandlingFlags));
+                    "Port %s cannot handle shipment %s with flags %s".formatted(portIndex, shipmentId, shipmentHandlingFlags));
         }
 
         shipmentQueue.add(shipmentId);
@@ -137,7 +137,7 @@ public class Port {
 
     @Override
     public String toString() {
-        return "Port{id='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(id, status, getQueueSize(), queueCapacity, activeShipmentId);
+        return "Port{portIndex='%s', status=%s, queueSize=%d/%d, active='%s'}"
+                .formatted(portIndex, status, getQueueSize(), queueCapacity, activeShipmentId);
     }
 }
