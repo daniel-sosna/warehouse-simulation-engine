@@ -38,7 +38,9 @@ public class ShipmentPackedEvent extends Event {
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "shipmentId", shipmentId
+                "shipmentId", shipmentId,
+                "gridId", gridId,
+                "portId", portId
         );
     }
 }

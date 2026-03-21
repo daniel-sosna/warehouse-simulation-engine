@@ -1,0 +1,11 @@
+[
+  {
+    "id": "bin-1",
+    "currentGridLocation": "AS1",
+    "itemsInBin": {
+      "ean-1": {
+        "quantity": 100
+      }
+    }
+  }
+]
