@@ -3,7 +3,6 @@ package lt.bananull.whse.event.events;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
-import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;

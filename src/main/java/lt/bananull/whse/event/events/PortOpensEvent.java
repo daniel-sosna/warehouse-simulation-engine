@@ -8,6 +8,7 @@ import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 public class PortOpensEvent extends Event {
@@ -22,26 +23,27 @@ public class PortOpensEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
+        Port port = simulator.getState().getPort(portId);
+        port.open();
+
         Instant now = simulator.getNow();
         Shift shift = PortShiftService.findCurrentOrNextShift(simulator.getState().getGrid(gridId), portId, now);
-        if (shift == null) return; // no more shifts left
+        if (shift == null) return List.of(); // no more shifts left
         if (now.isBefore(shift.getStartAt())) {
             long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
                 , simulator.getParameters().simulationStartTime());
             simulator.enqueueEvent(new PortOpensEvent(openAt, gridId, portId));
             // schedule the opening at the correct time
-            return;
+            return List.of();
         }
-        Port port = simulator.getState().getPort(gridId, portId);
-        switch (port.getStatus()) {
-            case CLOSED -> port.open();
-            case PENDING_CLOSE -> port.reopenIfPendingClose(); // guard against pending close
-        }
+
         long closeAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
             simulator.getParameters().simulationStartTime());
         Event next = new PortClosesEvent(closeAt, shift.getEndAt(), gridId, portId);
         simulator.enqueueEvent(next);
+
+        return List.of();
     }
 
     @Override

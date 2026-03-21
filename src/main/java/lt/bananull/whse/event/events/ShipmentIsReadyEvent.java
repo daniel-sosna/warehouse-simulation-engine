@@ -32,10 +32,10 @@ public class ShipmentIsReadyEvent extends Event {
         Port availablePort = currentGrid.getAvailablePort(handlingFlags);
 
         if (availablePort != null) {
-            shipment.assignToPort(availablePort.getId());
+            shipment.assignToPort(availablePort.getPortIndex());
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
-                return List.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getId()));
+                return List.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getPortIndex()));
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);

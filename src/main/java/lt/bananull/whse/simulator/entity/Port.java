@@ -58,11 +58,11 @@ public class Port {
     }
 
     public void open() {
-        if (status != PortStatus.CLOSED) {
+        if (status != PortStatus.CLOSED && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException("Port %s cannot open from status %s".formatted(portIndex, status));
         }
 
-        this.status = PortStatus.IDLE;
+        this.status = status == PortStatus.CLOSED ? PortStatus.IDLE : PortStatus.BUSY;
     }
 
     public void requestClose() {
@@ -71,14 +71,6 @@ public class Port {
         }
 
         this.status = status == PortStatus.BUSY ? PortStatus.PENDING_CLOSE : PortStatus.CLOSED;
-    }
-
-    // Fail-safe against the pending close glitch
-    // at least until we fix the same time event glitches
-    public void reopenIfPendingClose() {
-        if (status == PortStatus.PENDING_CLOSE) {
-            status = PortStatus.BUSY; // it still has activeShipmentId
-        }
     }
 
     /**
@@ -108,11 +100,11 @@ public class Port {
     public void assignBin(String binId) {
         if (status != PortStatus.BUSY) {
             throw new IllegalStateException(
-                    "Port %s cannot be assigned a bin from status %s".formatted(id, status));
+                    "Port %s cannot be assigned a bin from status %s".formatted(portIndex, status));
         }
         if (currentBinId != null) {
             throw new IllegalStateException(
-                    "Port %s already has an assigned bin %s".formatted(id, currentBinId));
+                    "Port %s already has an assigned bin %s".formatted(portIndex, currentBinId));
         }
 
         this.currentBinId = binId;
@@ -124,10 +116,10 @@ public class Port {
     public void releaseBin() {
         if (status != PortStatus.BUSY) {
             throw new IllegalStateException(
-                    "Port %s cannot release a bin from status %s".formatted(id, status));
+                    "Port %s cannot release a bin from status %s".formatted(portIndex, status));
         }
         if (currentBinId == null) {
-            throw new IllegalStateException("Port %s has no assigned bin to release".formatted(id));
+            throw new IllegalStateException("Port %s has no assigned bin to release".formatted(portIndex));
         }
 
         this.currentBinId = null;

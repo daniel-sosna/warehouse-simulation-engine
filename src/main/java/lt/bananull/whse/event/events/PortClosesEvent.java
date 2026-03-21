@@ -8,6 +8,7 @@ import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 public class PortClosesEvent extends Event {
@@ -24,21 +25,25 @@ public class PortClosesEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
-        Port port = simulator.getState().getPort(gridId, portId);
+    public List<Event> execute(Simulator simulator) {
+        Port port = simulator.getState().getPort(portId);
         port.requestClose();
+
         Shift nextShift = PortShiftService.findNextShiftAfter(
             simulator.getState().getGrid(gridId),
             portId,
             endsAt
         );
-        if (nextShift == null) return; // no more shifts
+        if (nextShift == null) return List.of(); // no more shifts
+
         long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(
             nextShift.getStartAt(),
             simulator.getParameters().simulationStartTime()
         );
         Event next =  new PortOpensEvent(openAt, gridId, portId);
         simulator.enqueueEvent(next);
+
+        return List.of();
     }
 
     @Override
