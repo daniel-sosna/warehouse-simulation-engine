@@ -29,7 +29,7 @@ public class PortOpensEvent extends Event {
         Port port = simulator.getState().getPort(portId);
         port.open();
 
-        Instant now = simulator.getNow();
+        Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
         Shift shift = PortShiftService.findCurrentOrNextShift(simulator.getState().getGrid(gridId), portId, now);
         if (shift == null) return List.of(); // no more shifts left
 

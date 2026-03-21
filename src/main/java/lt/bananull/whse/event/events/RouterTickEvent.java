@@ -7,6 +7,7 @@ import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +24,11 @@ public class RouterTickEvent extends Event {
 
     @Override
     public List<Event> execute(Simulator simulator) {
-        checkForReceivedShipments(simulator);
+        Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
+        checkForReceivedShipments(simulator, now);
         // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
-        RouterRequestDto request = RouterRequestDto.from(
-                simulator.getState(),
-                simulator.getNow()
-        );
+        RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
         RouterResponseDto response = routerClient.route(request);
         simulator.updateAssignments(response.assignments());
         simulator.dispatchAll();
@@ -45,10 +44,10 @@ public class RouterTickEvent extends Event {
     /**
      * Finds all new shipments, changes their status to RECEIVED and logs ShipmentReceivedEvent
      */
-    private void checkForReceivedShipments(Simulator simulator) {
+    private void checkForReceivedShipments(Simulator simulator, Instant now) {
         simulator.getState().shipments().values().stream()
                 .filter(shipment -> shipment.getStatus() == null &&
-                        !shipment.getShipmentDate().isAfter(simulator.getNow()))
+                        !shipment.getShipmentDate().isAfter(now))
                 .forEach(shipment -> {
                     long shipmentSimTime =
                         shipment.getShipmentDate().getEpochSecond() - simulator.getParameters().simulationStartTime().getEpochSecond();

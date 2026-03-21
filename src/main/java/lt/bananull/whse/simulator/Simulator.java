@@ -32,11 +32,11 @@ public class Simulator {
 
     private static final long DEFAULT_RANDOM_SEED = 1L;
 
+    @Getter private final Instant simulationStart;
     @Getter private final long simulationDurationSeconds;
     @Getter private final ZoneId zoneId = ZoneId.of("UTC"); // for now just hardcoded the zone
 
     @Getter private long simTime = 0;
-    @Getter private Instant now;
     @Getter private final SimulationState state;
     @Getter private final SimulationParameters parameters;
     @Getter private final EventHandler eventHandler;
@@ -46,8 +46,9 @@ public class Simulator {
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
-        this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.parameters = parameters;
+        this.simulationStart = parameters.simulationStartTime();
+        this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.eventHandler = new EventHandler(this);
         this.randomnessResolver = new RandomnessResolver(new SplittableRandom(DEFAULT_RANDOM_SEED));
 
@@ -103,7 +104,7 @@ public class Simulator {
             long eventSimTime = e.getSimTime();
             if (simTime != eventSimTime) {
                 if (eventSimTime % (3600 * 6) == 0) {
-                    System.out.printf("Sim time: %s hours\t| scheduled events: %d\t| progress: %.1f%%%n",
+                    System.out.printf("Sim time: %s hours\t| scheduled events: %d\t| progress: ~%.1f%%%n",
                         eventSimTime / 3600, events.size(), simTime * 100.0 / simulationDurationSeconds);
                 }
                 simTime = eventSimTime;
@@ -129,7 +130,8 @@ public class Simulator {
         for (Grid grid : state.grids().values()) {
             String gridId = grid.getId();
             for (String portId : grid.getPorts().keySet()) {
-                Shift shift = PortShiftService.findCurrentOrNextShift(state.getGrid(gridId), portId, now);
+                Shift shift = PortShiftService.findCurrentOrNextShift(state.getGrid(gridId), portId,
+                    simulationStart.plusSeconds(simTime));
 
                 long openAt = 0;
                 try {
