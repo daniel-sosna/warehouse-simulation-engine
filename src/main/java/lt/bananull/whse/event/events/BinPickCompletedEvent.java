@@ -42,7 +42,7 @@ public class BinPickCompletedEvent extends Event {
 
         List<Event> events = new ArrayList<>();
 
-        // Check the bin's port queue: poll until one without an assigned bin is found.
+        // Check the bin's port queue: poll until a waiting port without an assigned bin is found.
         String nextPortId = bin.pollPort();
         while (nextPortId != null) {
             Port waitingPort = state.getPort(nextPortId);
@@ -53,11 +53,11 @@ public class BinPickCompletedEvent extends Event {
             nextPortId = bin.pollPort();
         }
 
-        // Check the port's shipment progress: if fully picked, schedule packing; otherwise, request next bin for this port.
+        // Check the port's shipment progress: if not fully packed, request next bin for this port.
         if (shipment.isFullyPicked()) {
             events.add(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
         } else {
-            BinRequestedAtPortEvent event = BinRequestedAtPortEvent.getForPort(gridId, portId, getSimTime(), simulator);
+            BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
             if (event != null) {
                 events.add(event);
             }

@@ -26,7 +26,7 @@ public class BinRequestedAtPortEvent extends Event {
         this.portId = portId;
     }
 
-    public static BinRequestedAtPortEvent getForPort(String gridId, String portId, long simTime, Simulator simulator) {
+    public static BinRequestedAtPortEvent scheduleForPort(String gridId, String portId, long simTime, Simulator simulator) {
         SimulationState state = simulator.getState();
         Port port = state.getPort(portId);
         Shipment shipment = state.getShipment(port.getActiveShipmentId());

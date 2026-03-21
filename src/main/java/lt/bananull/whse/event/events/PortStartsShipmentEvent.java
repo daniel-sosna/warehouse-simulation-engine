@@ -23,13 +23,14 @@ public class PortStartsShipmentEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         SimulationState state = simulator.getState();
-        Port port = state.getPort(portId);
-        Shipment shipment = state.getShipment(port.getActiveShipmentId());
 
+        Port port = state.getPort(portId);
         port.startNextShipment();
+
+        Shipment shipment = state.getShipment(port.getActiveShipmentId());
         shipment.startPicking();
 
-        BinRequestedAtPortEvent event = BinRequestedAtPortEvent.getForPort(gridId, portId, getSimTime(), simulator);
+        BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
         if (event != null) {
             return List.of(event);
         }

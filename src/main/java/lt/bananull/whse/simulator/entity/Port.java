@@ -10,9 +10,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.Function;
-
-import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
 /**
  * Simulation entity representing a packing station.
@@ -48,7 +45,7 @@ public class Port {
     }
 
     public boolean hasCapacity() {
-        return getQueueSize() < queueCapacity;
+        return getQueueSize() + 1 < queueCapacity;
     }
 
     public boolean canHandle(Collection<String> shipmentHandlingFlags) {
