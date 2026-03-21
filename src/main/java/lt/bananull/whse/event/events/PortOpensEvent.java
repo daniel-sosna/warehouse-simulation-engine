@@ -27,14 +27,9 @@ public class PortOpensEvent extends Event {
     public void execute(Simulator simulator) {
         Instant now = simulator.getNow();
         Shift shift = PortShiftService.findCurrentOrNextShift(simulator.getState().getGrid(gridId), portId, now);
+
         if (shift == null) return; // no more shifts left
-        if (now.isBefore(shift.getStartAt()) && !fromBreak) {
-            long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
-                , simulator.getParameters().simulationStartTime());
-            // schedule the opening at the correct time
-            simulator.enqueueEvent(new PortOpensEvent(openAt, gridId, portId, false));
-            return;
-        }
+
         Port port = simulator.getState().getPort(gridId, portId);
         switch (port.getStatus()) {
             case CLOSED -> port.open();
