@@ -19,7 +19,7 @@ public class PortShiftService {
     public static Shift findNextShiftAfter(Grid grid, String portId, Instant after) {
         return grid.getShifts().stream()
             .filter(s -> s.getPortIds().contains(portId))
-            .filter(s -> s.getStartAt().isAfter(after)) // STRICT
+            .filter(s -> !s.getStartAt().isBefore(after)) // NOT STRICT
             .min(Comparator.comparing(Shift::getStartAt))
             .orElse(null);
     }

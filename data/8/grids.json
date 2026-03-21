@@ -4,14 +4,23 @@
     "shifts": [
       {
         "start": "00:00",
-        "end": "23:59",
+        "end": "12:00",
         "portConfig": [
           {
-            "portIndex": "port-1",
+            "id": "port-1",
             "handlingFlags": []
           }
-        ],
-        "breaks": []
+        ]
+      },
+      {
+        "start": "12:02",
+        "end": "02:00",
+        "portConfig": [
+          {
+            "id": "port-1",
+            "handlingFlags": []
+          }
+        ]
       }
     ]
   },
@@ -23,7 +32,7 @@
         "end": "23:59",
         "portConfig": [
           {
-            "portIndex": "port-1",
+            "id": "port-1",
             "handlingFlags": []
           }
         ],
