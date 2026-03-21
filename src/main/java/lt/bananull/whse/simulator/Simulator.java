@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.PortClosesEvent;
+import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.event.events.TruckArrivalEvent;
@@ -11,12 +13,17 @@ import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.service.TruckArrivalService;
+import lt.bananull.whse.simulator.entity.Grid;
+import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
+import lt.bananull.whse.utils.DateTimeResolver;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -95,6 +102,8 @@ public class Simulator {
     public void run() {
         enqueueTruckEvents();
 
+        startPorts();
+
         while (!events.isEmpty()) {
             Event e = events.poll();
             setSimTime(e.getSimTime());
@@ -112,5 +121,15 @@ public class Simulator {
             parameters.simulationEndTime(),
             parameters.truckArrivalSchedules());
         truckEvents.forEach(this::enqueueEvent);
+    }
+
+    private void startPorts() {
+        state.grids().values().forEach(grid -> {
+            String gridId = grid.getId();
+            grid.getPorts().keySet().forEach(portId -> {
+                enqueueEvent(new PortOpensEvent(0, gridId, portId)); // THIS DOES NOT OPEN THE PORT IMMEDIATELY
+                // WE JUST KICK OFF THE CHAIN HERE
+            });
+        });
     }
 }

@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record PortDto(
-        @JsonProperty("id") String id,
+        @JsonProperty("portIndex") String portIndex,
         @JsonProperty("handlingFlags") List<String> handlingFlags
 ) {}
