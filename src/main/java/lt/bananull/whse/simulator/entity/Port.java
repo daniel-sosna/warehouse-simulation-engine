@@ -30,7 +30,7 @@ public class Port {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;
-        this.status = PortStatus.CLOSED; // TODO: for now it will be open to test how the queues work
+        this.status = PortStatus.CLOSED;
         this.shipmentQueue = new ArrayDeque<>(queueCapacity);
     }
 
