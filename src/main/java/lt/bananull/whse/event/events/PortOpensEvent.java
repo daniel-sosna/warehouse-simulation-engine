@@ -27,8 +27,10 @@ public class PortOpensEvent extends Event {
         Shift shift = PortShiftService.findCurrentOrNextShift(simulator.getState().getGrid(gridId), portId, now);
         if (shift == null) return; // no more shifts left
         if (now.isBefore(shift.getStartAt())) {
-            simulator.enqueueEvent(new PortOpensEvent(DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
-                , simulator.getParameters().simulationStartTime()), gridId, portId));
+            long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
+                , simulator.getParameters().simulationStartTime());
+            simulator.enqueueEvent(new PortOpensEvent(openAt, gridId, portId)); // schedule the opening at a correct
+            // time
             return;
         }
         Port port = simulator.getState().getPort(gridId, portId);
@@ -36,8 +38,9 @@ public class PortOpensEvent extends Event {
             case CLOSED -> port.open();
             case PENDING_CLOSE -> port.reopenIfPendingClose(); // guard against pending close
         }
-        Event next = new PortClosesEvent(DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
-            simulator.getParameters().simulationStartTime()), shift.getEndAt(), gridId, portId);
+        long closeAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
+            simulator.getParameters().simulationStartTime());
+        Event next = new PortClosesEvent(closeAt, shift.getEndAt(), gridId, portId);
         simulator.enqueueEvent(next);
     }
 

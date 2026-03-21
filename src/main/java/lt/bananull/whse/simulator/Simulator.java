@@ -127,7 +127,8 @@ public class Simulator {
         state.grids().values().forEach(grid -> {
             String gridId = grid.getId();
             grid.getPorts().keySet().forEach(portId -> {
-                enqueueEvent(new PortOpensEvent(0, gridId, portId));
+                enqueueEvent(new PortOpensEvent(0, gridId, portId)); // THIS DOES NOT OPEN THE PORT IMMEDIATELY
+                // WE JUST KICK OFF THE CHAIN HERE
             });
         });
     }
