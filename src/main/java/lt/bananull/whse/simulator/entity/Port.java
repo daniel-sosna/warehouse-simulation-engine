@@ -14,6 +14,7 @@ import java.util.Set;
 /**
  * Simulation entity representing a packing station.
  */
+
 @Getter
 public class Port {
 
@@ -29,7 +30,7 @@ public class Port {
         this.id = id;
         this.handlingFlags = Set.copyOf(handlingFlags);
         this.queueCapacity = queueCapacity;
-        this.status = PortStatus.IDLE; // TODO: for now it will be open to test how the queues work
+        this.status = PortStatus.CLOSED;
         this.shipmentQueue = new ArrayDeque<>(queueCapacity);
     }
 
@@ -69,6 +70,14 @@ public class Port {
         }
 
         this.status = status == PortStatus.BUSY ? PortStatus.PENDING_CLOSE : PortStatus.CLOSED;
+    }
+
+    // Fail-safe against the pending close glitch
+    // at least until we fix the same time event glitches
+    public void reopenIfPendingClose() {
+        if (status == PortStatus.PENDING_CLOSE) {
+            status = PortStatus.BUSY; // it still has activeShipmentId
+        }
     }
 
     /**

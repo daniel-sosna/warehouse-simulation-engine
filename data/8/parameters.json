@@ -1,0 +1,21 @@
+{
+  "simulationStartTime": "2026-03-01T06:00:00Z",
+  "simulationEndTime": "2026-03-02T23:59:00Z",
+  "truckArrivalSchedules": {
+    "schedules": [
+      {
+        "sortingDirection": "dir-2",
+        "pullTimes": [
+          "10:00", "15:00", "21:00"
+        ],
+        "weekdays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ]
+      }
+    ]
+  }
+}

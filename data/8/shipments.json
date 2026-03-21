@@ -1,0 +1,11 @@
+[
+  {
+    "id": "multi-grid-ship",
+    "items": {
+      "ean-1": 1,
+      "ean-2": 1
+    },
+    "shipmentDate": "2026-03-01T09:00:00Z",
+    "sortingDirection": "dir-1"
+  }
+]

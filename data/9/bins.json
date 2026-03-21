@@ -1,0 +1,38 @@
+[
+  {
+    "id": "bin-as1",
+    "currentGridLocation": "AS1",
+    "itemsInBin": {
+      "ean-1": {
+        "quantity": 100
+      }
+    }
+  },
+  {
+    "id": "bin-as2",
+    "currentGridLocation": "AS2",
+    "itemsInBin": {
+      "ean-2": {
+        "quantity": 100
+      }
+    }
+  },
+  {
+    "id": "extra-bin-as1",
+    "currentGridLocation": "AS1",
+    "itemsInBin": {
+      "ean-3": {
+        "quantity": 100
+      }
+    }
+  },
+  {
+    "id": "extra-bin-as2",
+    "currentGridLocation": "AS2",
+    "itemsInBin": {
+      "ean-4": {
+        "quantity": 100
+      }
+    }
+  }
+]
