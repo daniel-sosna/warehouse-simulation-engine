@@ -1,7 +1,9 @@
 package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
+import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
@@ -29,6 +31,12 @@ public class PortStartsShipmentEvent extends Event {
 
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
         shipment.startPicking();
+
+        shipment.getPicks().stream()
+                .map(PickDto::binId)
+                .distinct()
+                .map(state::getBin)
+                .forEach(bin -> bin.reserveItems(shipment.getItemsForBin(bin.getId())));
 
         BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
         if (event != null) {

@@ -36,7 +36,7 @@ public class BinPickCompletedEvent extends Event {
         Port port = state.getPort(portId);
 
         shipment.addPickedBin(binId);
-        bin.deductStock(bin.getReservedItems());
+        bin.deductStock(shipment.getItemsForBin(binId));
         bin.release();
         port.releaseBin();
 

@@ -63,11 +63,15 @@ public class BinRequestedAtPortEvent extends Event {
         long duration = Math.round(standardRate * mult);
         long arriveAt = getSimTime() + duration;
 
-        return List.of(new BinRequestedAtPortEvent(arriveAt, binId, gridId, portId));
+        return List.of(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
     }
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of();
+        return Map.of(
+                "binId", binId,
+                "gridId", gridId,
+                "portId", portId
+        );
     }
 }
