@@ -41,6 +41,6 @@ build/
 .DS_Store
 
 ### Warehouse Simulator ###
-simulation.log
-program.log
-data/big
+simulator/simulation.log
+simulator/program.log
+simulator/data/big

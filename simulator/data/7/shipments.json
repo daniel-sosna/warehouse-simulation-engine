@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ship-1",
+    "items": {
+      "ean-1": 1
+    },
+    "shipmentDate": "2026-03-01T09:00:00Z",
+    "handlingFlags": null,
+    "sortingDirection": "dir-1"
+  },
+  {
+    "id": "ship-2",
+    "items": {
+      "ean-1": 1
+    },
+    "shipmentDate": "2026-03-01T09:00:00Z",
+    "handlingFlags": null,
+    "sortingDirection": "dir-2"
+  }
+]
