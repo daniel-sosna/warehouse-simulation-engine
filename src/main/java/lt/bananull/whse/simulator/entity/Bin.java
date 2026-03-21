@@ -63,7 +63,6 @@ public class Bin {
 
     /**
      * Deducts multiple EAN quantities from this bin's stock.
-     * All deductions are validated first and then applied.
      *
      * @throws IllegalArgumentException if requested quantities are invalid.
      */
@@ -91,6 +90,25 @@ public class Bin {
         }
     }
 
+    /**
+     * Reserves a specified quantity of a single EAN in this bin for a port.
+     *
+     * @throws IllegalArgumentException if the requested reservation is invalid or exceeds available stock.
+     */
+    public void reserveItem(String ean, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Reserved quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
+        }
+
+        reserve(ean, quantity);
+    }
+
+    /**
+     * Reserves specified quantities of EANs in this bin for a port.
+     *
+     * @throws IllegalArgumentException if requested reservations are invalid or exceed available stock.
+     */
     public void reserveItems(Map<String, Integer> itemsToReserve) {
         if (itemsToReserve == null || itemsToReserve.isEmpty()) {
             throw new IllegalArgumentException("Reserved items must be provided for bin %s".formatted(id));
@@ -105,21 +123,22 @@ public class Bin {
                         "Reserved quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
             }
 
-            int availableQty = stock.get(ean);
-            int currentlyReserved = reservedItems.getOrDefault(ean, 0);
-            if (qty + currentlyReserved > availableQty) {
-                throw new IllegalArgumentException(
-                        "Bin %s has only %d units of EAN %s; cannot reserve additional %d"
-                                .formatted(id, availableQty - currentlyReserved, ean, qty));
-            }
-
-            reservedItems.put(ean, currentlyReserved + qty);
+            reserve(ean, qty);
         }
     }
 
-    /**
-     * Reserves this bin for a port.
-     */
+    private void reserve(String ean, int quantity) {
+        int availableQty = stock.get(ean);
+        int currentlyReserved = reservedItems.getOrDefault(ean, 0);
+        if (quantity + currentlyReserved > availableQty) {
+            throw new IllegalArgumentException(
+                "Bin %s has only %d units of EAN %s; cannot reserve additional %d"
+                    .formatted(id, availableQty - currentlyReserved, ean, quantity));
+        }
+
+        reservedItems.put(ean, currentlyReserved + quantity);
+    }
+
     public void reserveForPort(String portId) {
         if (portId == null || portId.isEmpty()) {
             throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));

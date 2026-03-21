@@ -32,11 +32,9 @@ public class PortStartsShipmentEvent extends Event {
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
         shipment.startPicking();
 
-        shipment.getPicks().stream()
-                .map(PickDto::binId)
-                .distinct()
-                .map(state::getBin)
-                .forEach(bin -> bin.reserveItems(shipment.getItemsForBin(bin.getId())));
+        for (PickDto pick : shipment.getPicks()) {
+            state.getBin(pick.binId()).reserveItem(pick.ean(), pick.qty());
+        }
 
         BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
         if (event != null) {
