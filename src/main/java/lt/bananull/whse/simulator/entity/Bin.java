@@ -74,7 +74,7 @@ public class Bin {
         for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
             String ean = entry.getKey();
             int remainingStock = stock.get(ean) - entry.getValue();
-            int remainingReserved = reservedItems.get(ean) - entry.getValue();
+            int remainingReserved = reservedItems.getOrDefault(ean, 0) - entry.getValue();
 
             if (remainingStock == 0) {
                 stock.remove(ean);

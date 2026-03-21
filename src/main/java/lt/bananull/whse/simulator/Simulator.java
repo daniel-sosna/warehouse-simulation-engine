@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
-import lt.bananull.whse.event.events.PortClosesEvent;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
@@ -15,7 +14,6 @@ import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Grid;
-import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
@@ -24,7 +22,6 @@ import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -49,7 +46,6 @@ public class Simulator {
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
-        this.now = parameters.simulationStartTime();
         this.simulationDurationSeconds = parameters.simulationEndTime().getEpochSecond() - parameters.simulationStartTime().getEpochSecond();
         this.parameters = parameters;
         this.eventHandler = new EventHandler(this);
@@ -62,11 +58,13 @@ public class Simulator {
     }
 
     public void enqueueEvent(Event e) {
-        if (e.getSimTime() < simTime) {
-            log.warn("Enqueueing event in the past: nowSimTime={}, eventSimTime={}, event={}",
-                simTime, e.getSimTime(), e);
+        if (e.getSimTime() <= simulationDurationSeconds) {
+            if (e.getSimTime() < simTime) {
+                log.warn("Enqueueing event in the past: nowSimTime={}, eventSimTime={}, event={}",
+                    simTime, e.getSimTime(), e);
+            }
+            events.add(e);
         }
-        events.add(e);
     }
 
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
@@ -76,11 +74,6 @@ public class Simulator {
             Shipment shipment = state.getShipment(assignment.shipmentId());
             shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
         }
-    }
-
-    private void setSimTime(long newSimTimeSeconds) {
-        this.simTime = newSimTimeSeconds;
-        this.now = parameters.simulationStartTime().plusSeconds(simTime);
     }
 
     public void dispatchAll() {
@@ -101,15 +94,24 @@ public class Simulator {
     }
 
     public void run() {
+        System.out.println("Simulator started");
         enqueueTruckEvents();
         startPorts();
 
         while (!events.isEmpty()) {
             Event e = events.poll();
-            setSimTime(e.getSimTime());
+            long eventSimTime = e.getSimTime();
+            if (simTime != eventSimTime) {
+                if (eventSimTime % (3600 * 6) == 0) {
+                    System.out.printf("Sim time: %s hours\t| scheduled events: %d\t| progress: %.1f%%%n",
+                        eventSimTime / 3600, events.size(), simTime * 100.0 / simulationDurationSeconds);
+                }
+                simTime = eventSimTime;
+            }
             if (simTime > simulationDurationSeconds) break;
             eventHandler.handle(e);
         }
+        System.out.println("Simulator finished");
     }
 
     public double resolveMultiplier(SimulationParameters.Randomness randomness) {
@@ -124,22 +126,22 @@ public class Simulator {
     }
 
     private void startPorts() {
-        state.grids().values().forEach(grid -> {
+        for (Grid grid : state.grids().values()) {
             String gridId = grid.getId();
-            grid.getPorts().keySet().forEach(portId -> {
+            for (String portId : grid.getPorts().keySet()) {
                 Shift shift = PortShiftService.findCurrentOrNextShift(state.getGrid(gridId), portId, now);
 
+                long openAt = 0;
                 try {
-                    long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
+                    openAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getStartAt()
                         , parameters.simulationStartTime());
-                    enqueueEvent(new PortOpensEvent(openAt, gridId, portId, false));
                 } catch (IllegalArgumentException e) {
                     // IllegalArgumentException thrown when getStartAt is older than simulation start time meaning
                     // port was already running when simulation started
-                    enqueueEvent(new PortOpensEvent(0, gridId, portId, false));
+                } finally {
+                    enqueueEvent(new PortOpensEvent(openAt, gridId, portId, false));
                 }
-
-            });
-        });
+            };
+        };
     }
 }
