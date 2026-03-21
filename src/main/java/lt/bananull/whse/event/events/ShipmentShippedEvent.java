@@ -4,8 +4,8 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class ShipmentShippedEvent extends Event {
 
@@ -17,11 +17,11 @@ public class ShipmentShippedEvent extends Event {
     }
 
     @Override
-    public Optional<Event> execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.markShipped();
 
-        return Optional.empty();
+        return List.of();
     }
 
     @Override

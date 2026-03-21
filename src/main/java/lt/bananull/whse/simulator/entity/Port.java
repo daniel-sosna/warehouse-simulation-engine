@@ -3,7 +3,6 @@ package lt.bananull.whse.simulator.entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lt.bananull.whse.load.dto.PortDto;
-import lt.bananull.whse.simulator.enums.BinStatus;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
 import java.util.ArrayDeque;
@@ -12,6 +11,8 @@ import java.util.Collections;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
+
+import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
 /**
  * Simulation entity representing a packing station.
@@ -24,6 +25,7 @@ public class Port {
     private final int queueCapacity;
     private PortStatus status;
     private String activeShipmentId;
+    private String currentBinId;
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
 
@@ -95,6 +97,38 @@ public class Port {
     }
 
     /**
+     * Assigns a bin to the port for active processing.
+     */
+    public void assignBin(String binId) {
+        if (status != PortStatus.BUSY) {
+            throw new IllegalStateException(
+                    "Port %s cannot be assigned a bin from status %s".formatted(id, status));
+        }
+        if (currentBinId != null) {
+            throw new IllegalStateException(
+                    "Port %s already has an assigned bin %s".formatted(id, currentBinId));
+        }
+
+        this.currentBinId = binId;
+    }
+
+    /**
+     * Releases the currently assigned bin from the port.
+     */
+    public void releaseBin() {
+        if (status != PortStatus.BUSY) {
+            throw new IllegalStateException(
+                    "Port %s cannot release a bin from status %s".formatted(id, status));
+        }
+        if (currentBinId == null) {
+            throw new IllegalStateException("Port %s has no assigned bin to release".formatted(id));
+        }
+
+        this.currentBinId = null;
+    }
+
+
+    /**
      * Completes the currently active shipment and transitions the port back to the next valid status.
      *
      * @return completed shipment ID.
@@ -126,32 +160,6 @@ public class Port {
         }
 
         shipmentQueue.add(shipmentId);
-    }
-
-    /**
-     * Returns the next queued shipment ID without removing it from the queue.
-     *
-     * @return next shipment ID, or {@code null} if the queue is empty.
-     */
-    public String peekNextShipmentId() {
-        return shipmentQueue.peek();
-    }
-
-    /**
-     * Scans the given shipment's picks and returns the first bin ID whose status is
-     * {@link BinStatus#AVAILABLE}, or {@code null} if none are available.
-     *
-     * @param shipment the shipment whose picks should be scanned.
-     * @param getBin   function that resolves a bin ID to a {@link Bin} instance.
-     * @return an available bin ID, or {@code null}.
-     */
-    public String findAvailableBin(Shipment shipment, Function<String, Bin> getBin) {
-        return shipment.getPicks().stream()
-                .map(pick -> getBin.apply(pick.binId()))
-                .filter(bin -> bin.getStatus() == BinStatus.AVAILABLE)
-                .map(Bin::getId)
-                .findFirst()
-                .orElse(null);
     }
 
     @Override

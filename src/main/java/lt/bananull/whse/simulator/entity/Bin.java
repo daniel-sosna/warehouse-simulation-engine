@@ -106,37 +106,37 @@ public class Bin {
      *
      * @throws IllegalArgumentException if reserved quantities are invalid or exceed stock.
      */
-    public void reserveForPort(String portId, Map<String, Integer> itemsToReserve) {
+    public void reserveForPort(String portId) {
         // TODO: find out when to reserve a bin. If when shipment goes to port queue (no rerouting), then we need to reserve items earlier
         if (portId == null || portId.isEmpty()) {
             throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));
         }
-        if (itemsToReserve == null || itemsToReserve.isEmpty()) {
-            throw new IllegalArgumentException("Reserved items must be provided when reserving bin %s".formatted(id));
-        }
+//        if (itemsToReserve == null || itemsToReserve.isEmpty()) {
+//            throw new IllegalArgumentException("Reserved items must be provided when reserving bin %s".formatted(id));
+//        }
         if (status == BinStatus.RESERVED) {
             throw new IllegalStateException("Bin %s is already reserved for port %s".formatted(id, reservedForPortId));
         }
 
         Map<String, Integer> validatedReservedItems = new HashMap<>();
-        for (Map.Entry<String, Integer> entry : itemsToReserve.entrySet()) {
-            String ean = entry.getKey();
-            Integer qty = entry.getValue();
-
-            if (qty == null || qty <= 0) {
-                throw new IllegalArgumentException(
-                        "Reserved quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
-            }
-
-            int availableQty = stock.getOrDefault(ean, 0);
-            if (qty > availableQty) {
-                throw new IllegalArgumentException(
-                        "Bin %s has only %d units of EAN %s; cannot reserve %d"
-                                .formatted(id, availableQty, ean, qty));
-            }
-
-            validatedReservedItems.put(ean, qty);
-        }
+//        for (Map.Entry<String, Integer> entry : itemsToReserve.entrySet()) {
+//            String ean = entry.getKey();
+//            Integer qty = entry.getValue();
+//
+//            if (qty == null || qty <= 0) {
+//                throw new IllegalArgumentException(
+//                        "Reserved quantity must be > 0 for EAN %s in bin %s".formatted(ean, id));
+//            }
+//
+//            int availableQty = stock.getOrDefault(ean, 0);
+//            if (qty > availableQty) {
+//                throw new IllegalArgumentException(
+//                        "Bin %s has only %d units of EAN %s; cannot reserve %d"
+//                                .formatted(id, availableQty, ean, qty));
+//            }
+//
+//            validatedReservedItems.put(ean, qty);
+//        }
 
         this.reservedForPortId = portId;
         this.reservedItems.clear();

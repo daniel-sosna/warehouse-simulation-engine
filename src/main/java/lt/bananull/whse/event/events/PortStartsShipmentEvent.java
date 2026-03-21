@@ -2,9 +2,12 @@ package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Port;
+import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class PortStartsShipmentEvent extends Event {
 
@@ -18,9 +21,20 @@ public class PortStartsShipmentEvent extends Event {
     }
 
     @Override
-    public Optional<Event> execute(Simulator simulator) {
-        BinRequestedAtPortEvent.tryScheduleFor(gridId, portId, getSimTime(), simulator);
-        return Optional.empty();
+    public List<Event> execute(Simulator simulator) {
+        SimulationState state = simulator.getState();
+        Port port = state.getPort(portId);
+        Shipment shipment = state.getShipment(port.getActiveShipmentId());
+
+        port.startNextShipment();
+        shipment.startPicking();
+
+        BinRequestedAtPortEvent event = BinRequestedAtPortEvent.getForPort(gridId, portId, getSimTime(), simulator);
+        if (event != null) {
+            return List.of(event);
+        }
+
+        return List.of();
     }
 
     @Override

@@ -7,8 +7,8 @@ import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class RouterTickEvent extends Event {
 
@@ -22,7 +22,7 @@ public class RouterTickEvent extends Event {
     }
 
     @Override
-    public Optional<Event> execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         checkForReceivedShipments(simulator);
         // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
@@ -39,7 +39,7 @@ public class RouterTickEvent extends Event {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
         }
 
-        return Optional.empty();
+        return List.of();
     }
 
     /**

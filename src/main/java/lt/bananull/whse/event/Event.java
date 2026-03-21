@@ -3,8 +3,8 @@ package lt.bananull.whse.event;
 import lombok.Getter;
 import lt.bananull.whse.simulator.Simulator;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public abstract class Event implements Comparable<Event> {
 
@@ -23,7 +23,7 @@ public abstract class Event implements Comparable<Event> {
         this.duration = duration;
     }
 
-    public abstract Optional<Event> execute(Simulator simulator);
+    public abstract List<Event> execute(Simulator simulator);
 
     public abstract Map<String, Object> getData();
 

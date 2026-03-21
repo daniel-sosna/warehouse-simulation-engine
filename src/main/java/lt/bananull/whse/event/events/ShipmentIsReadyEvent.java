@@ -6,8 +6,8 @@ import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
@@ -22,7 +22,7 @@ public class ShipmentIsReadyEvent extends Event {
     }
 
     @Override
-    public Optional<Event> execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.startConsolidation();
         shipment.markReady();
@@ -35,14 +35,13 @@ public class ShipmentIsReadyEvent extends Event {
             shipment.assignToPort(availablePort.getId());
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
-                return Optional.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(),
-                    availablePort.getId()));
+                return List.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getId()));
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);
         }
 
-        return Optional.empty();
+        return List.of();
     }
 
     @Override

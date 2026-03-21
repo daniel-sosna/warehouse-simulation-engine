@@ -8,10 +8,9 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 
 @Slf4j
 public class BinPickCompletedEvent extends Event {
@@ -30,21 +29,25 @@ public class BinPickCompletedEvent extends Event {
     }
 
     @Override
-    public Optional<Event> execute(Simulator simulator) {
-        Shipment shipment = simulator.getState().getShipment(shipmentId);
-        shipment.addPickedBin(binId);
-
+    public List<Event> execute(Simulator simulator) {
         SimulationState state = simulator.getState();
+        Shipment shipment = state.getShipment(shipmentId);
         Bin bin = state.getBin(binId);
+        Port port = state.getPort(portId);
+
+        shipment.addPickedBin(binId);
         bin.deductStock(bin.getReservedItems());
         bin.release();
+        port.releaseBin();
 
-        // Check the bin's port queue: poll until an IDLE port is found; skip non-IDLE ports.
+        List<Event> events = new ArrayList<>();
+
+        // Check the bin's port queue: poll until one without an assigned bin is found.
         String nextPortId = bin.pollPort();
         while (nextPortId != null) {
             Port waitingPort = state.getPort(nextPortId);
-            if (waitingPort.getStatus() == IDLE) {
-                BinRequestedAtPortEvent.tryScheduleFor(gridId, nextPortId, getSimTime(), simulator);
+            if (waitingPort.getCurrentBinId() == null) {
+                events.add(new BinRequestedAtPortEvent(getSimTime(), binId, gridId, nextPortId));
                 break;
             }
             nextPortId = bin.pollPort();
@@ -52,12 +55,15 @@ public class BinPickCompletedEvent extends Event {
 
         // Check the port's shipment progress: if fully picked, schedule packing; otherwise, request next bin for this port.
         if (shipment.isFullyPicked()) {
-            return Optional.of(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+            events.add(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
         } else {
-            BinRequestedAtPortEvent.tryScheduleFor(gridId, portId, getSimTime(), simulator);
+            BinRequestedAtPortEvent event = BinRequestedAtPortEvent.getForPort(gridId, portId, getSimTime(), simulator);
+            if (event != null) {
+                events.add(event);
+            }
         }
 
-        return Optional.empty();
+        return events;
     }
 
     @Override
