@@ -9,6 +9,7 @@ import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 
@@ -29,7 +30,7 @@ public class BinPickCompletedEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.addPickedBin(binId);
 
@@ -37,9 +38,6 @@ public class BinPickCompletedEvent extends Event {
         Bin bin = state.getBin(binId);
         bin.deductStock(bin.getReservedItems());
         bin.release();
-        if (shipment.isFullyPicked()) {
-            simulator.enqueueEvent(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
-        }
 
         // Check the bin's port queue: poll until an IDLE port is found; skip non-IDLE ports.
         String nextPortId = bin.pollPort();
@@ -51,6 +49,15 @@ public class BinPickCompletedEvent extends Event {
             }
             nextPortId = bin.pollPort();
         }
+
+        // Check the port's shipment progress: if fully picked, schedule packing; otherwise, request next bin for this port.
+        if (shipment.isFullyPicked()) {
+            return Optional.of(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
+        } else {
+            BinRequestedAtPortEvent.tryScheduleFor(gridId, portId, getSimTime(), simulator);
+        }
+
+        return Optional.empty();
     }
 
     @Override

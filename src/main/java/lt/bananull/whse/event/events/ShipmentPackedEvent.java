@@ -6,6 +6,7 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class ShipmentPackedEvent extends Event {
 
@@ -21,14 +22,17 @@ public class ShipmentPackedEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         Port port = simulator.getState().getPort(portId);
         port.completeActiveShipment();
         shipment.markPacked();
+
         if (0 < port.getQueueSize()) {
-            simulator.enqueueEvent(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
+            return Optional.of(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
         }
+
+        return Optional.empty();
     }
 
     @Override

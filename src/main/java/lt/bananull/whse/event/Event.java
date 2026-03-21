@@ -4,12 +4,12 @@ import lombok.Getter;
 import lt.bananull.whse.simulator.Simulator;
 
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class Event implements Comparable<Event> {
 
     @Getter
     private final long simTime;
-
     @Getter
     private final long duration;
 
@@ -23,7 +23,7 @@ public abstract class Event implements Comparable<Event> {
         this.duration = duration;
     }
 
-    public abstract void execute(Simulator simulator);
+    public abstract Optional<Event> execute(Simulator simulator);
 
     public abstract Map<String, Object> getData();
 

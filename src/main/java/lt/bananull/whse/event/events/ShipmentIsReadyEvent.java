@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
@@ -21,15 +22,11 @@ public class ShipmentIsReadyEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.startConsolidation();
         shipment.markReady();
 
-        enqueueShipment(simulator, shipment);
-    }
-
-    private void enqueueShipment(Simulator simulator, Shipment shipment) {
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
         Set<String> handlingFlags = shipment.getHandlingFlags();
         Port availablePort = currentGrid.getAvailablePort(handlingFlags);
@@ -38,12 +35,14 @@ public class ShipmentIsReadyEvent extends Event {
             shipment.assignToPort(availablePort.getId());
             availablePort.enqueueShipment(shipmentId, handlingFlags);
             if (availablePort.getStatus() == IDLE) {
-                PortStartsShipmentEvent event = new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getId());
-                simulator.enqueueEvent(event);
+                return Optional.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(),
+                    availablePort.getId()));
             }
         } else {
             currentGrid.enqueueShipment(shipmentId);
         }
+
+        return Optional.empty();
     }
 
     @Override

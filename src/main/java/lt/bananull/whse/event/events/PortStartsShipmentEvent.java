@@ -4,6 +4,7 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class PortStartsShipmentEvent extends Event {
 
@@ -17,8 +18,9 @@ public class PortStartsShipmentEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         BinRequestedAtPortEvent.tryScheduleFor(gridId, portId, getSimTime(), simulator);
+        return Optional.empty();
     }
 
     @Override

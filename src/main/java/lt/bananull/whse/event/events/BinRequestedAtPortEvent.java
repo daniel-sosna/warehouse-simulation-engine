@@ -9,6 +9,7 @@ import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
@@ -30,19 +31,6 @@ public class BinRequestedAtPortEvent extends Event {
         this.qty = qty;
     }
 
-    /**
-     * Tries to find an available bin for the next queued shipment of the given port and schedule
-     * this event. If no bin is currently available, the port is enqueued on every candidate bin so
-     * that it is notified when one becomes free.
-     *
-     * <p>The port must be {@link lt.bananull.whse.simulator.enums.PortStatus#IDLE} and have at
-     * least one shipment in its queue when this method is called.
-     *
-     * @param gridId  grid the port belongs to.
-     * @param portId  port waiting for a bin.
-     * @param simTime current simulation time to use when scheduling the event.
-     * @param simulator the active simulator instance.
-     */
     public static void tryScheduleFor(String gridId, String portId, long simTime, Simulator simulator) {
         SimulationState state = simulator.getState();
         Port port = state.getPort(portId);
@@ -68,29 +56,33 @@ public class BinRequestedAtPortEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         SimulationState state = simulator.getState();
         Bin bin = state.getBin(binId);
         Port port = state.getPort(portId);
 
-        if (bin.getStatus() == AVAILABLE && port.getStatus() == IDLE) {
-            port.startNextShipment();
-            Shipment shipment = state.getShipment(port.getActiveShipmentId());
-            shipment.startPicking();
+        if (port.getStatus() == IDLE) {
+            if (bin.getStatus() == AVAILABLE) {
+                port.startNextShipment();
+                Shipment shipment = state.getShipment(port.getActiveShipmentId());
+                shipment.startPicking();
 
-            bin.reserveForPort(portId, Map.of(ean, qty));
+                bin.reserveForPort(portId, Map.of(ean, qty));
 
-            double mult = simulator.resolveMultiplier(simulator.getParameters().gridBinDelivery().randomness());
-            int standardRate = simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId);
-            long duration = Math.round(standardRate * mult);
-            long arriveAt = getSimTime() + duration;
+                double mult = simulator.resolveMultiplier(simulator.getParameters().gridBinDelivery().randomness());
+                int standardRate = simulator.getParameters().gridBinDelivery().deliveryTimes().get(gridId);
+                long duration = Math.round(standardRate * mult);
+                long arriveAt = getSimTime() + duration;
 
-            simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
-        } else if (bin.getStatus() != AVAILABLE && port.getStatus() == IDLE) {
-            // Bin was claimed by another port between scheduling and execution; wait in bin's queue.
-            bin.enqueuePort(portId);
+                simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
+            } else {
+                // Bin was claimed by another port between scheduling and execution; wait in bin's queue.
+                bin.enqueuePort(portId);
+            }
         }
         // else: port is no longer IDLE (it already received another bin) – nothing to do.
+
+        return Optional.empty();
     }
 
     @Override

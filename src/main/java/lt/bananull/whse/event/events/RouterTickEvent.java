@@ -1,6 +1,5 @@
 package lt.bananull.whse.event.events;
 
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.RouterRequestDto;
@@ -9,6 +8,8 @@ import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.Map;
+import java.util.Optional;
+
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;
@@ -21,7 +22,7 @@ public class RouterTickEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public Optional<Event> execute(Simulator simulator) {
         checkForReceivedShipments(simulator);
         // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
@@ -37,6 +38,8 @@ public class RouterTickEvent extends Event {
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
         }
+
+        return Optional.empty();
     }
 
     /**

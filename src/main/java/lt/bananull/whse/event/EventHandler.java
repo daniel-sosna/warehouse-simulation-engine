@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.utils.JacksonMapper;
 
+import java.util.Optional;
+
 @Slf4j(topic = "EVENT_LOGGER")
 public class EventHandler {
 
@@ -17,8 +19,9 @@ public class EventHandler {
     }
 
     public void handle(Event event) {
-        event.execute(simulator);
+        Optional<Event> result = event.execute(simulator);
         log.debug(toJson(event));
+        result.ifPresent(this::handle);
     }
 
     private String toJson(Event event) {
