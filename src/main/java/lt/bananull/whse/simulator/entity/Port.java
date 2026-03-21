@@ -2,7 +2,6 @@ package lt.bananull.whse.simulator.entity;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.PortDto;
 import lt.bananull.whse.simulator.enums.PortStatus;
 
@@ -15,7 +14,7 @@ import java.util.Set;
 /**
  * Simulation entity representing a packing station.
  */
-@Slf4j
+
 @Getter
 public class Port {
 
@@ -115,9 +114,7 @@ public class Port {
 
         String completedShipmentId = activeShipmentId;
         this.activeShipmentId = null;
-        log.debug("Status before: " + status);
         this.status = status == PortStatus.PENDING_CLOSE ? PortStatus.CLOSED : PortStatus.IDLE;
-        log.debug("Status after: " + status);
         return completedShipmentId;
     }
 
