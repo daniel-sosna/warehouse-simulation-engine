@@ -73,6 +73,14 @@ public class Port {
         this.status = status == PortStatus.BUSY ? PortStatus.PENDING_CLOSE : PortStatus.CLOSED;
     }
 
+    // Fail-safe against the pending close glitch
+    // at least until we fix the same time event glitches
+    public void reopenIfPendingClose() {
+        if (status == PortStatus.PENDING_CLOSE) {
+            status = PortStatus.BUSY; // it still has activeShipmentId
+        }
+    }
+
     /**
      * Starts processing the next queued shipment.
      *

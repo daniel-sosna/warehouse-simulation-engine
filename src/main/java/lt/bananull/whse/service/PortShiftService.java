@@ -11,7 +11,7 @@ public class PortShiftService {
     public static Shift findCurrentOrNextShift(Grid grid, String portId, Instant now) {
         return grid.getShifts().stream()
             .filter(s -> s.getPortIds().contains(portId))
-            .filter(s -> !s.getEndAt().isBefore(now)) // endAt >= now
+            .filter(s -> s.getEndAt().isAfter(now)) // endAt > now
             .min(Comparator.comparing(Shift::getStartAt))
             .orElse(null);
     }

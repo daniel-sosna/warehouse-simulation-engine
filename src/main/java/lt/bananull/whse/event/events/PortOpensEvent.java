@@ -38,7 +38,10 @@ public class PortOpensEvent extends Event {
             return;
         }
         Port port = simulator.getState().getPort(gridId, portId);
-        port.open();
+        switch (port.getStatus()) {
+            case CLOSED -> port.open();
+            case PENDING_CLOSE -> port.reopenIfPendingClose(); // guard against pending close
+        }
         Event next = new PortClosesEvent(DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
             simulator.getParameters().simulationStartTime()), shift.getEndAt(), gridId, portId);
         simulator.enqueueEvent(next);
