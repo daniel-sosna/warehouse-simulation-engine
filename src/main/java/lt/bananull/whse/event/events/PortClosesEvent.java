@@ -17,6 +17,7 @@ public class PortClosesEvent extends Event {
     private final String portId;
     private final Instant endsAt;
     private final Shift.BreakOccurrence portBreak;
+    private Port port;
 
     public PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId,
                             Shift.BreakOccurrence portBreak){
@@ -29,7 +30,7 @@ public class PortClosesEvent extends Event {
 
     @Override
     public List<Event> execute(Simulator simulator) {
-        Port port = simulator.getState().getPort(portId);
+        port = simulator.getState().getPort(portId);
         port.requestClose();
 
         if (portBreak != null) {
@@ -70,7 +71,8 @@ public class PortClosesEvent extends Event {
         return Map.of(
             "gridId", gridId,
             "portId", portId,
-            "intoBreak", portBreak != null
+            "intoBreak", portBreak != null,
+            "handlingFlags", port.getHandlingFlags()
         );
     }
 }

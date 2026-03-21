@@ -16,6 +16,7 @@ public class PortOpensEvent extends Event {
     private final String gridId;
     private final String portId;
     private final boolean fromBreak;
+    private Port port;
 
     public PortOpensEvent(long simTime, String gridId, String portId, boolean fromBreak) {
         super(simTime);
@@ -26,7 +27,7 @@ public class PortOpensEvent extends Event {
 
     @Override
     public List<Event> execute(Simulator simulator) {
-        Port port = simulator.getState().getPort(portId);
+        port = simulator.getState().getPort(portId);
         port.open();
 
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
@@ -57,7 +58,8 @@ public class PortOpensEvent extends Event {
         return Map.of(
             "gridId", gridId,
             "portId", portId,
-            "fromBreak", fromBreak
+            "fromBreak", fromBreak,
+            "handlingFlags", port.getHandlingFlags()
         );
     }
 }
