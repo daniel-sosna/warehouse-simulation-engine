@@ -38,7 +38,9 @@ public class BinArrivesAtPortEvent extends Event {
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "binId", binId
+                "binId", binId,
+                "gridId", gridId,
+                "portId", portId
         );
     }
 }

@@ -70,7 +70,9 @@ public class BinPickCompletedEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
                 "shipmentId", shipmentId,
-                "binId", binId
+                "binId", binId,
+                "gridId", gridId,
+                "portId", portId
         );
     }
 }
