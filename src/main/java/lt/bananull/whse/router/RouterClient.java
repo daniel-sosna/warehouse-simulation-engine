@@ -1,14 +1,13 @@
 package lt.bananull.whse.router;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lt.bananull.whse.utils.JacksonMapper;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
+import lt.bananull.whse.utils.JacksonMapper;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,22 +28,31 @@ public class RouterClient {
     public RouterResponseDto route(RouterRequestDto request) {
         Process process = startProcess();
 
-        try (BufferedWriter stdin = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8))) {
-            String requestJson = mapper.writeValueAsString(request);
+        try {
+            // Stream JSON directly into child stdin
+            try (OutputStream out = process.getOutputStream()) {
+                mapper.writeValue(out, request);
+                out.flush();
+            }
 
-            stdin.write(requestJson);
-            stdin.flush();
-            stdin.close();
+            // Stream JSON directly from child stdout
+            RouterResponseDto response;
+            try (InputStream in = process.getInputStream()) {
+                response = mapper.readValue(in, RouterResponseDto.class);
+            }
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("Router process failed with exit code " + exitCode);
+                throw new RuntimeException("Router failed, exit=" + exitCode);
             }
 
-            return mapper.readValue(process.getInputStream(), RouterResponseDto.class);
-        } catch (IOException | InterruptedException e) {
+            return response;
+        } catch (IOException e) {
             throw new RuntimeException("Communication with router failed", e);
-        }  finally {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Communication with router was interrupted", e);
+        } finally {
             process.destroy();
         }
     }
@@ -52,7 +60,7 @@ public class RouterClient {
     private Process startProcess() {
         try {
             ProcessBuilder pb = new ProcessBuilder(new ArrayList<>(command));
-            pb.redirectErrorStream(false);
+            pb.redirectErrorStream(true);
             return pb.start();
         } catch (IOException e) {
             throw new RuntimeException("Failed to start router process: " + String.join(" ", command), e);
