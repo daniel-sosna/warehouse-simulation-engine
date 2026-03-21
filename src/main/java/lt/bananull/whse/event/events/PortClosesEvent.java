@@ -17,7 +17,7 @@ public class PortClosesEvent extends Event {
     private final Instant endsAt;
     private final Shift.BreakOccurrence portBreak;
 
-    public  PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId,
+    public PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId,
                             Shift.BreakOccurrence portBreak){
         super(simTime);
         this.endsAt = endsAt;
@@ -49,7 +49,7 @@ public class PortClosesEvent extends Event {
             nextShift.getStartAt(),
             simulator.getParameters().simulationStartTime()
         );
-        Event next =  new PortOpensEvent(openAt, gridId, portId, false);
+        Event next = new PortOpensEvent(openAt, gridId, portId, false);
         simulator.enqueueEvent(next);
     }
 
