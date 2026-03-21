@@ -1,6 +1,5 @@
 package lt.bananull.whse.event.events;
 
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.simulator.Simulator;
@@ -10,7 +9,7 @@ import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
 import java.util.Map;
-@Slf4j
+
 public class PortClosesEvent extends Event {
 
     private final String gridId;
@@ -28,7 +27,6 @@ public class PortClosesEvent extends Event {
     public void execute(Simulator simulator) {
         Port port = simulator.getState().getPort(gridId, portId);
         port.requestClose();
-        Instant now = simulator.getNow();
         Shift nextShift = PortShiftService.findNextShiftAfter(
             simulator.getState().getGrid(gridId),
             portId,

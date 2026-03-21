@@ -1,21 +1,15 @@
 package lt.bananull.whse.event.events;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.simulator.Simulator;
-import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.Map;
-@Slf4j
+
 public class PortOpensEvent extends Event {
 
     private final String gridId;
