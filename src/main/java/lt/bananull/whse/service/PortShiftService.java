@@ -16,4 +16,12 @@ public class PortShiftService {
             .orElse(null);
     }
 
+    public static Shift findNextShiftAfter(Grid grid, String portId, Instant after) {
+        return grid.getShifts().stream()
+            .filter(s -> s.getPortIds().contains(portId))
+            .filter(s -> s.getStartAt().isAfter(after)) // STRICT
+            .min(Comparator.comparing(Shift::getStartAt))
+            .orElse(null);
+    }
+
 }
