@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Simulation entity representing a customer order.
@@ -48,6 +49,12 @@ public class Shipment {
     public static Shipment from(ShipmentDto dto) {
         return new Shipment(dto.id(), dto.items(), dto.shipmentDate(),
                 dto.handlingFlags() != null ? dto.handlingFlags() : Set.of(), dto.sortingDirection());
+    }
+
+    public Map<String, Integer> getItemsForBin(String binId) {
+        return picks.stream()
+                .filter(pick -> pick.binId().equals(binId))
+                .collect(Collectors.toMap(PickDto::ean, PickDto::qty));
     }
 
     public boolean isAvailableForRerouting() {

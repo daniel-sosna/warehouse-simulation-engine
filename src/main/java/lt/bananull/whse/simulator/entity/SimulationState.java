@@ -16,17 +16,22 @@ import java.util.Map;
 public record SimulationState(
         Map<String, Shipment> shipments,
         Map<String, Bin> bins,
-        Map<String, Grid> grids
+        Map<String, Grid> grids,
+        Map<String, Port> ports
 ) {
 
-    public SimulationState(
+    private SimulationState(
             Map<String, Shipment> shipments,
             Map<String, Bin> bins,
             Map<String, Grid> grids
     ) {
-        this.shipments = new HashMap<>(shipments);
-        this.bins = Map.copyOf(bins);
-        this.grids = Map.copyOf(grids);
+        this(shipments, bins, grids, flatPorts(grids));
+    }
+
+    private static Map<String, Port> flatPorts(Map<String, Grid> grids) {
+        Map<String, Port> ports = new HashMap<>();
+        grids.values().forEach(g -> ports.putAll(g.getPorts()));
+        return ports;
     }
 
     public static SimulationState from(SimulationStateDto dto, SimulationParameters parameters, Instant simulationStartTime,
@@ -65,8 +70,8 @@ public record SimulationState(
         return grids.get(id);
     }
 
-    public Port getPort(String gridId, String portId) {
-        return grids.get(gridId).getPorts().get(portId);
+    public Port getPort(String id) {
+        return ports.get(id);
     }
 
     @Override

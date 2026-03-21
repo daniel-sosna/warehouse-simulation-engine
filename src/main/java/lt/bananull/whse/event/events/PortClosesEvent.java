@@ -8,6 +8,7 @@ import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 public class PortClosesEvent extends Event {
@@ -16,6 +17,7 @@ public class PortClosesEvent extends Event {
     private final String portId;
     private final Instant endsAt;
     private final Shift.BreakOccurrence portBreak;
+    private Port port;
 
     public PortClosesEvent(long simTime, Instant endsAt, String gridId, String portId,
                             Shift.BreakOccurrence portBreak){
@@ -27,8 +29,8 @@ public class PortClosesEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
-        Port port = simulator.getState().getPort(gridId, portId);
+    public List<Event> execute(Simulator simulator) {
+        port = simulator.getState().getPort(portId);
         port.requestClose();
 
         if (portBreak != null) {
@@ -36,6 +38,8 @@ public class PortClosesEvent extends Event {
         } else {
             handleShift(simulator);
         }
+
+        return List.of();
     }
 
     private void handleShift(Simulator simulator) {
@@ -45,6 +49,7 @@ public class PortClosesEvent extends Event {
             endsAt
         );
         if (nextShift == null) return; // no more shifts
+
         long openAt = DateTimeResolver.resolveSimTimeFromTimestamp(
             nextShift.getStartAt(),
             simulator.getParameters().simulationStartTime()
@@ -66,7 +71,8 @@ public class PortClosesEvent extends Event {
         return Map.of(
             "gridId", gridId,
             "portId", portId,
-            "intoBreak", portBreak != null
+            "intoBreak", portBreak != null,
+            "handlingFlags", port.getHandlingFlags()
         );
     }
 }

@@ -3,14 +3,12 @@ package lt.bananull.whse.event.events;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.simulator.Simulator;
-import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.List;
 import java.util.Map;
-
-import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
 public class PortStartsShipmentEvent extends Event {
 
@@ -24,19 +22,25 @@ public class PortStartsShipmentEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         SimulationState state = simulator.getState();
 
-        Port port = state.getPort(gridId, portId);
+        Port port = state.getPort(portId);
         port.startNextShipment();
 
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
         shipment.startPicking();
 
         for (PickDto pick : shipment.getPicks()) {
-            simulator.enqueueEvent(new BinRequestedAtPortEvent(getSimTime(), pick.binId(), gridId, portId, pick.ean(),
-                pick.qty()));
+            state.getBin(pick.binId()).reserveItem(pick.ean(), pick.qty());
         }
+
+        BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
+        if (event != null) {
+            return List.of(event);
+        }
+
+        return List.of();
     }
 
     @Override

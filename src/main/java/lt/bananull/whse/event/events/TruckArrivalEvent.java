@@ -4,6 +4,7 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,15 +22,18 @@ public class TruckArrivalEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         List<Shipment> shipmentsToShip = simulator.getState().shipments().values().stream()
             .filter(shipment -> shipment.getStatus() == PACKED
                     && Objects.equals(shipment.getSortingDirection(), sortingDirection))
             .toList();
-
-        shipmentsToShip.forEach(shipment ->
-            simulator.enqueueEvent(new ShipmentShippedEvent(getSimTime(), shipment.getId())));
         shippedShipmentCount = shipmentsToShip.size();
+
+        List<Event> events = new ArrayList<>();
+        shipmentsToShip.forEach(shipment ->
+            events.add(new ShipmentShippedEvent(getSimTime(), shipment.getId())));
+
+        return events;
     }
 
     @Override

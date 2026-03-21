@@ -5,6 +5,7 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Port;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -22,14 +23,16 @@ public class BinArrivesAtPortEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
+    public List<Event> execute(Simulator simulator) {
         double mult = simulator.resolveMultiplier(simulator.getParameters().pickingThroughput().randomness());
         int standardRate = simulator.getParameters().pickingThroughput().standard();
         long duration = Math.round((3600.0 / standardRate) * mult);
         long pickDoneAt = getSimTime() + duration;
 
-        Port port = simulator.getState().getPort(gridId, portId);
+        Port port = simulator.getState().getPort(portId);
         simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, port.getActiveShipmentId(), gridId, portId, binId, duration));
+
+        return List.of();
     }
 
     @Override

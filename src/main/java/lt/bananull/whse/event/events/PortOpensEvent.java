@@ -8,6 +8,7 @@ import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 public class PortOpensEvent extends Event {
@@ -15,6 +16,7 @@ public class PortOpensEvent extends Event {
     private final String gridId;
     private final String portId;
     private final boolean fromBreak;
+    private Port port;
 
     public PortOpensEvent(long simTime, String gridId, String portId, boolean fromBreak) {
         super(simTime);
@@ -24,17 +26,13 @@ public class PortOpensEvent extends Event {
     }
 
     @Override
-    public void execute(Simulator simulator) {
-        Instant now = simulator.getNow();
+    public List<Event> execute(Simulator simulator) {
+        port = simulator.getState().getPort(portId);
+        port.open();
+
+        Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
         Shift shift = PortShiftService.findCurrentOrNextShift(simulator.getState().getGrid(gridId), portId, now);
-
-        if (shift == null) return; // no more shifts left
-
-        Port port = simulator.getState().getPort(gridId, portId);
-        switch (port.getStatus()) {
-            case CLOSED -> port.open();
-            case PENDING_CLOSE -> port.reopenIfPendingClose(); // guard against pending close
-        }
+        if (shift == null) return List.of(); // no more shifts left
 
         if (!fromBreak) {
             long closeAt = DateTimeResolver.resolveSimTimeFromTimestamp(shift.getEndAt(),
@@ -46,13 +44,13 @@ public class PortOpensEvent extends Event {
         // Enqueue next break event
         Shift.BreakOccurrence portBreak = PortShiftService.findNextBreak(shift.getBreaks(), now);
 
-        if (portBreak == null) {
-            return;
+        if (portBreak != null) {
+            long closeForBreakAt = DateTimeResolver.resolveSimTimeFromTimestamp(portBreak.startAt(),
+                simulator.getParameters().simulationStartTime());
+            simulator.enqueueEvent(new PortClosesEvent(closeForBreakAt, null, gridId, portId, portBreak));
         }
 
-        long closeForBreakAt = DateTimeResolver.resolveSimTimeFromTimestamp(portBreak.startAt(),
-            simulator.getParameters().simulationStartTime());
-        simulator.enqueueEvent(new PortClosesEvent(closeForBreakAt, null, gridId, portId, portBreak));
+        return List.of();
     }
 
     @Override
@@ -60,7 +58,8 @@ public class PortOpensEvent extends Event {
         return Map.of(
             "gridId", gridId,
             "portId", portId,
-            "fromBreak", fromBreak
+            "fromBreak", fromBreak,
+            "handlingFlags", port.getHandlingFlags()
         );
     }
 }
