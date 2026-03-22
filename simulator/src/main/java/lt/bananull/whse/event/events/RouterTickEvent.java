@@ -12,6 +12,7 @@ import lt.bananull.whse.simulator.entity.SimulationState;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static lt.bananull.whse.simulator.enums.ShipmentStatus.RECEIVED;
 
@@ -42,19 +43,15 @@ public class RouterTickEvent extends Event {
         RouterResponseDto response = routerClient.route(request);
         simulator.updateAssignments(response.assignments());
 
-        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
-        for (AssignmentDto assignment : assignments) {
-            Shipment shipment = state.getShipment(assignment.shipmentId());
-            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
-            simulator.enqueueEvent(new ShipmentIsReadyEvent(getSimTime(), assignment.shipmentId()));
-        }
-
         long nextSimTime = getSimTime() + ROUTER_INTERVAL_SECONDS;
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
         }
 
-        return List.of();
+        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
+        return assignments.stream()
+            .map(assignment -> new ShipmentStartsConsolidationEvent(getSimTime(), assignment))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     /**
