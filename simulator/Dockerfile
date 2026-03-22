@@ -15,4 +15,4 @@ COPY build ./build
 RUN chmod +x build/router/router-linux-amd64
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
-CMD ["--dataDir", "./data/1", "--router", "build/router/router-linux-amd64", "--eventLogFile", "./output_logs.json"]
+CMD ["--dataDir", "./data/1", "--router", "build/router/router-linux-amd64", "--eventLogFile", "./output_logs.log"]
