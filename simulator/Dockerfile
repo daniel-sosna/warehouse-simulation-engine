@@ -18,4 +18,3 @@ RUN mkdir -p /app/output
 VOLUME ["/app/output"]
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
-CMD ["--dataDir", "./data/6", "--router", "build/router/router-linux-amd64", "--eventLogFile", "/app/output/results.log"]
