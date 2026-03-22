@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.BinRequestedAtPortEvent;
+import lt.bananull.whse.event.events.BinTransferStartedEvent;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Simulator {
@@ -86,14 +88,25 @@ public class Simulator {
             AssignmentDto a = assignments.poll();
             Set<String> binIds = a.picks().stream()
                 .map(PickDto::binId)
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(Collectors.toSet());
             if (!BinReservationService.canReserveAllPicks(this, binIds)) {
                 continue; // leave it for next router tick
-            } else {
-                BinReservationService.reserveAllPicks(this, a.shipmentId(), binIds);
             }
-            enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
-
+            Shipment shipment = state.getShipment(a.shipmentId());
+            String destGridId = state.getShipment(shipment.getId()).getAssignedGridId();
+            BinReservationService.reserveAllPicks(this, shipment.getId(), binIds);
+            Set<String> binsToTransfer = binIds.stream()
+                .filter(binId -> !state.getBin(binId).getCurrentGridId().equals(destGridId))
+                .collect(Collectors.toSet());
+            if (binsToTransfer.isEmpty()) {
+                // all bins local => shipment can become ready
+                enqueueEvent(new ShipmentIsReadyEvent(simTime, shipment.getId()));
+                continue;
+            }
+            shipment.startConsolidation();
+            for (String id : binsToTransfer) {
+                enqueueEvent(new BinTransferStartedEvent(getSimTime(), shipment.getId(), id, destGridId));
+            }
         }
     }
 

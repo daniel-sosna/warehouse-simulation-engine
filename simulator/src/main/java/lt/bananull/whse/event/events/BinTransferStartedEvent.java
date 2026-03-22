@@ -9,20 +9,19 @@ import java.util.Map;
 public class BinTransferStartedEvent extends Event {
 
     private final String shipmentId;
+    private final String binId;
+    private final String destGridId;
 
-    public BinTransferStartedEvent(long simTime, String shipmentId) {
+    public BinTransferStartedEvent(long simTime, String shipmentId, String binId, String destGridId) {
         super(simTime);
         this.shipmentId = shipmentId;
+        this.binId = binId;
+        this.destGridId = destGridId;
     }
 
     @Override
     public List<Event> execute(Simulator simulator) {
-        // pseudocode:
-        // something along the lines of
-        // get the shipment by id
-        // get all the bins associated
-        // call them to the grid, set their status to outside
-        // however dont know what happens if they are reserved
+
         return List.of();
     }
 
