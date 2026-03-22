@@ -6,7 +6,6 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
-import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
@@ -17,13 +16,13 @@ import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Shift;
-import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.DateTimeResolver;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -73,30 +72,30 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
-        for (AssignmentDto assignment : assignments) {
-            Shipment shipment = state.getShipment(assignment.shipmentId());
-            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
-        }
     }
 
-    public void tryDispatch() {
+    public List<AssignmentDto> pollAssignmentsToDispatch() {
+        List<AssignmentDto> assignmentsToDispatch = new ArrayList<>();
+
         while (!assignments.isEmpty()) {
             AssignmentDto assignmentDto = assignments.peek();
-            String packingGridId = assignmentDto.packingGrid();
 
             boolean allBinsAreAvailable = assignmentDto.picks().stream()
                 .map(PickDto::binId)
                 .allMatch(binId -> {
                     Bin bin = state.getBin(binId);
-                    return bin.getCurrentGridId().equals(packingGridId) || !bin.isNeededInCurrentGrid();
+                    return bin.getCurrentGridId().equals(assignmentDto.packingGrid()) || !bin.isNeededInCurrentGrid();
                 });
 
             if (!allBinsAreAvailable) {
-                break; // Wait until all bins are available
+                break;
             }
 
-            enqueueEvent(new ShipmentIsReadyEvent(simTime, assignmentDto.shipmentId()));
+            assignments.poll();
+            assignmentsToDispatch.add(assignmentDto);
         }
+
+        return assignmentsToDispatch;
     }
 
     public void run() {

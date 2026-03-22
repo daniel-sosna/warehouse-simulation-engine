@@ -63,7 +63,9 @@ public class BinRequestedAtPortEvent extends Event {
         long duration = Math.round(standardRate * mult);
         long arriveAt = getSimTime() + duration;
 
-        return List.of(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
+        simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
+
+        return List.of();
     }
 
     @Override

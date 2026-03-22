@@ -21,7 +21,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
     private String currentGridId;
-    private boolean isNeededInCurrentGrid =  false;
+    private int neededInGridCount = 0;
     private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)
@@ -39,6 +39,10 @@ public class Bin {
         Map<String, Integer> stock = new HashMap<>();
         dto.itemsInBin().forEach((ean, binItemDto) -> stock.put(ean, binItemDto.quantity()));
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
+    }
+
+    public boolean isNeededInCurrentGrid() {
+        return neededInGridCount > 0;
     }
 
     public Map<String, Integer> getStock() { return Collections.unmodifiableMap(stock); }
@@ -152,7 +156,12 @@ public class Bin {
         this.status = BinStatus.RESERVED;
     }
 
+    public void markNeededInGrid() {
+        this.neededInGridCount += 1;
+    }
+
     public void release() {
+        this.neededInGridCount -= 1;
         this.reservedForPortId = null;
         this.status = BinStatus.AVAILABLE;
     }

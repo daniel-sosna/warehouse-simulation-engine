@@ -2,10 +2,12 @@ package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,17 +29,25 @@ public class RouterTickEvent extends Event {
 
     @Override
     public List<Event> execute(Simulator simulator) {
+        SimulationState state = simulator.getState();
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
+
         rollbackToReceived(simulator);
         checkForReceivedShipments(simulator, now);
-        shipmentsRerouted = simulator.getState().shipments().values().stream()
+        shipmentsRerouted = state.shipments().values().stream()
                 .filter(shipment -> shipment.getStatus() == RECEIVED)
                 .count();
 
-        RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
+        RouterRequestDto request = RouterRequestDto.from(state, now);
         RouterResponseDto response = routerClient.route(request);
         simulator.updateAssignments(response.assignments());
-        simulator.tryDispatch();
+
+        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
+        for (AssignmentDto assignment : assignments) {
+            Shipment shipment = state.getShipment(assignment.shipmentId());
+            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
+            simulator.enqueueEvent(new ShipmentIsReadyEvent(getSimTime(), assignment.shipmentId()));
+        }
 
         long nextSimTime = getSimTime() + ROUTER_INTERVAL_SECONDS;
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
