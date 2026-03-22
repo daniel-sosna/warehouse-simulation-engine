@@ -1,5 +1,6 @@
 package lt.bananull.whse.simulator.entity;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.router.dto.PickDto;
@@ -7,7 +8,7 @@ import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,8 +29,8 @@ public class Shipment {
     private ShipmentStatus status;
     private String assignedGridId;
     private String assignedPortId;
+    @Getter(AccessLevel.NONE)
     private List<PickDto> picks = List.of();
-    private final Set<String> pickedBins = new HashSet<>();
 
     private Shipment(
         String id,
@@ -57,11 +58,17 @@ public class Shipment {
                 .collect(Collectors.toMap(PickDto::ean, PickDto::qty));
     }
 
+    public Collection<PickDto> getPicks() { return Collections.unmodifiableCollection(picks); }
+
     public boolean isAvailableForRerouting() {
         return (status == ShipmentStatus.ROUTED
                 || status == ShipmentStatus.CONSOLIDATION
                 || status == ShipmentStatus.READY)
                 && assignedPortId == null;
+    }
+
+    public boolean isFullyPicked() {
+        return picks.isEmpty();
     }
 
     public void markReceived() {
@@ -139,6 +146,17 @@ public class Shipment {
         this.status = ShipmentStatus.PICKING;
     }
 
+    public void completeBinPick(String binId) {
+        if (status != ShipmentStatus.PICKING) {
+            throw new IllegalStateException(
+                "Shipment %s cannot complete pick from status %s".formatted(id, status));
+        }
+
+        this.picks = picks.stream()
+            .filter(pick -> !pick.binId().equals(binId))
+            .toList();
+    }
+
     public void markPacked() {
         if (status != ShipmentStatus.PICKING) {
             throw new IllegalStateException(
@@ -176,13 +194,5 @@ public class Shipment {
     public String toString() {
         return "Shipment{id='%s', status=%s, grid='%s', port='%s'}"
                 .formatted(id, status, assignedGridId, assignedPortId);
-    }
-
-    public void addPickedBin(String binId) {
-        pickedBins.add(binId);
-    }
-
-    public boolean isFullyPicked() {
-        return pickedBins.containsAll(picks.stream().map(PickDto::binId).toList());
     }
 }

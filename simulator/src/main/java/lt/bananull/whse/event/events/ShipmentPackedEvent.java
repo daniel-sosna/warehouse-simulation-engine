@@ -7,18 +7,21 @@ import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ShipmentPackedEvent extends Event {
 
     private final String shipmentId;
+    private final Set<String> handlingFlags;
     private final String gridId;
     private final String portId;
 
-    public ShipmentPackedEvent(long simTime, String shipmentId, String gridId, String portId, long duration) {
+    public ShipmentPackedEvent(long simTime, String shipmentId, String gridId, String portId, long duration, Set<String> handlingFlags) {
         super(simTime, duration);
         this.shipmentId = shipmentId;
         this.gridId = gridId;
         this.portId = portId;
+        this.handlingFlags = handlingFlags;
     }
 
     @Override
@@ -39,6 +42,7 @@ public class ShipmentPackedEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
                 "shipmentId", shipmentId,
+                "handlingFlags", handlingFlags,
                 "gridId", gridId,
                 "portId", portId
         );

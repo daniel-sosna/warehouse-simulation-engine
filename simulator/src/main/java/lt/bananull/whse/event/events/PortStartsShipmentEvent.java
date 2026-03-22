@@ -14,6 +14,7 @@ public class PortStartsShipmentEvent extends Event {
 
     private final String gridId;
     private final String portId;
+    private String shipmentId;
 
     public PortStartsShipmentEvent(long simTime, String gridId, String portId) {
         super(simTime);
@@ -26,9 +27,9 @@ public class PortStartsShipmentEvent extends Event {
         SimulationState state = simulator.getState();
 
         Port port = state.getPort(portId);
-        port.startNextShipment();
+        shipmentId = port.startNextShipment();
 
-        Shipment shipment = state.getShipment(port.getActiveShipmentId());
+        Shipment shipment = state.getShipment(shipmentId);
         shipment.startPicking();
 
         for (PickDto pick : shipment.getPicks()) {
@@ -47,7 +48,8 @@ public class PortStartsShipmentEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "shipmentId", shipmentId
         );
     }
 }

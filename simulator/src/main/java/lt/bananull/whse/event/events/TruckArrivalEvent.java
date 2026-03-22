@@ -31,7 +31,7 @@ public class TruckArrivalEvent extends Event {
 
         List<Event> events = new ArrayList<>();
         shipmentsToShip.forEach(shipment ->
-            events.add(new ShipmentShippedEvent(getSimTime(), shipment.getId())));
+            events.add(new ShipmentShippedEvent(getSimTime(), shipment.getId(), sortingDirection)));
 
         return events;
     }
@@ -39,7 +39,7 @@ public class TruckArrivalEvent extends Event {
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-            "shipmentsTakenForShipping", shippedShipmentCount,
+            "shipmentsShipped", shippedShipmentCount,
             "sortingDirection", sortingDirection
         );
     }
