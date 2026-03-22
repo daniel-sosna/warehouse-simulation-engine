@@ -33,7 +33,7 @@
         </else>
     </if>
 
-    <root level="${logLevel:-ERROR}">
+    <root level="${logLevel:-WARNING}">
         <appender-ref ref="PROGRAM_FILE"/>
     </root>
 
