@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { NormalizedEvent } from "./lib/types";
+import { BinState, NormalizedEvent, PortState, ShipmentState } from "./lib/types";
 import { useSimulationStore } from "./store/useSimulationStore";
 
 type AppTab = "timeline" | "statistics";
@@ -26,6 +26,17 @@ function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
+function findLatestRevealedItem<T extends { revealed: boolean }>(groups: T[]) {
+  for (let index = groups.length - 1; index >= 0; index -= 1) {
+    const group = groups[index];
+    if (group?.revealed) {
+      return group;
+    }
+  }
+
+  return null;
+}
+
 export default function App() {
   const {
     loadedSimulation,
@@ -39,21 +50,24 @@ export default function App() {
     pause,
     stepNextEvent,
     stepPreviousEvent,
-    stepNextGroup,
-    stepPreviousGroup,
     scrubToEvent,
   } = useSimulationStore();
   const [activeTab, setActiveTab] = useState<AppTab>("timeline");
   const [selectedEvent, setSelectedEvent] = useState<NormalizedEvent | null>(null);
-  const [mapOffset, setMapOffset] = useState({ x: 72, y: 36 });
+  const [mapOffset, setMapOffset] = useState({ x: 120, y: 120 });
   const [isPanning, setIsPanning] = useState(false);
+  const [autoFollow, setAutoFollow] = useState(true);
   const dragStateRef = useRef<{
     startX: number;
     startY: number;
     originX: number;
     originY: number;
     moved: boolean;
+    pointerId: number;
   } | null>(null);
+  const pendingOffsetRef = useRef({ x: 120, y: 120 });
+  const animationFrameRef = useRef<number | null>(null);
+  const timelineViewportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isPlaying || !loadedSimulation) {
@@ -92,8 +106,107 @@ export default function App() {
   useEffect(() => {
     setActiveTab("timeline");
     setSelectedEvent(null);
-    setMapOffset({ x: 72, y: 36 });
+    setMapOffset({ x: 120, y: 120 });
+    pendingOffsetRef.current = { x: 120, y: 120 };
+    setAutoFollow(true);
   }, [loadedSimulation?.sourceName]);
+
+  const timelineEvents =
+    loadedSimulation
+      ? (() => {
+          let nextGroupX = 180;
+
+          return loadedSimulation.eventGroups.flatMap((group, groupIndex) => {
+            const groupEvents = loadedSimulation.events.slice(
+              group.startEventIndex,
+              group.endEventIndex + 1,
+            );
+
+            const groupSize = groupEvents.length;
+            const cardSpacing = 236; // wider than card width (208px) so cards do not overlap
+            const groupSpread = (groupSize - 1) * cardSpacing;
+            const groupCenterX = nextGroupX + groupSpread / 2;
+
+            // gentle global wave so the timeline is not perfectly straight
+            const baseY = 250 + Math.sin(groupIndex * 0.55) * 24;
+
+            const positioned = groupEvents.map((event, eventIndexWithinGroup) => {
+              const centeredOffset =
+                (eventIndexWithinGroup - (groupSize - 1) / 2) * cardSpacing;
+
+              // tiny vertical variation inside the same group
+              const localYOffset =
+                (eventIndexWithinGroup - (groupSize - 1) / 2) * 12;
+
+              return {
+                ...event,
+                x: groupCenterX + centeredOffset,
+                y: baseY + localYOffset,
+                revealed: replayState.currentEventIndex >= event.index,
+              };
+            });
+
+            // leave enough room before the next group
+            nextGroupX += Math.max(320, groupSpread + 300);
+
+            return positioned;
+          });
+        })()
+      : [];
+
+  const timelineWidth = Math.max(
+    2200,
+    (timelineEvents[timelineEvents.length - 1]?.x ?? 0) + 700,
+  );
+  const timelineHeight = 980;
+  const currentTimelineEvent =
+    replayState.currentEventIndex >= 0
+      ? timelineEvents[replayState.currentEventIndex] ?? null
+      : null;
+
+  function scheduleMapOffset(nextOffset: { x: number; y: number }) {
+    pendingOffsetRef.current = nextOffset;
+    if (animationFrameRef.current !== null) {
+      return;
+    }
+
+    animationFrameRef.current = window.requestAnimationFrame(() => {
+      setMapOffset(pendingOffsetRef.current);
+      animationFrameRef.current = null;
+    });
+  }
+
+  useEffect(() => {
+    if (
+      activeTab !== "timeline" ||
+      !autoFollow ||
+      !loadedSimulation ||
+      replayState.currentEventIndex < 0
+    ) {
+      return;
+    }
+
+    const event = timelineEvents[replayState.currentEventIndex];
+    if (!event) {
+      return;
+    }
+
+    focusEventInViewport(event);
+  }, [
+    activeTab,
+    autoFollow,
+    loadedSimulation,
+    replayState.currentEventIndex,
+    timelineEvents,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -106,16 +219,38 @@ export default function App() {
     event.target.value = "";
   }
 
+  function jumpToLatestEvent() {
+    if (!loadedSimulation) {
+      return;
+    }
+
+    const latest =
+      currentTimelineEvent ?? findLatestRevealedItem(timelineEvents);
+
+    if (!latest) {
+      return;
+    }
+
+    setAutoFollow(true);
+    focusEventInViewport(latest);
+  }
+
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || isNoPanTarget(event.target)) {
+      return;
+    }
+
+    event.currentTarget.setPointerCapture(event.pointerId);
     dragStateRef.current = {
       startX: event.clientX,
       startY: event.clientY,
       originX: mapOffset.x,
       originY: mapOffset.y,
       moved: false,
+      pointerId: event.pointerId,
     };
     setIsPanning(true);
-  }
+  } 
 
   function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     const dragState = dragStateRef.current;
@@ -128,504 +263,675 @@ export default function App() {
 
     if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
       dragState.moved = true;
+      if (autoFollow) {
+        setAutoFollow(false);
+      }
     }
 
-    setMapOffset({
+    scheduleMapOffset({
       x: dragState.originX + deltaX,
       y: dragState.originY + deltaY,
     });
   }
 
-  function handlePointerUp() {
+  function handlePointerUp(event?: ReactPointerEvent<HTMLDivElement>) {
+    if (
+      event &&
+      dragStateRef.current &&
+      event.currentTarget.hasPointerCapture(dragStateRef.current.pointerId)
+    ) {
+      event.currentTarget.releasePointerCapture(dragStateRef.current.pointerId);
+    }
+
     setIsPanning(false);
     window.setTimeout(() => {
       dragStateRef.current = null;
     }, 0);
   }
 
-  if (!loadedSimulation) {
+  function handlePlayPause() {
+    if (isPlaying) {
+      pause();
+      return;
+    }
+
+    setAutoFollow(true);
+    play();
+  }
+
+  function handlePreviousEvent() {
+    setAutoFollow(true);
+    stepPreviousEvent();
+  }
+
+  function handleNextEvent() {
+    setAutoFollow(true);
+    stepNextEvent();
+  }
+
+  function handleScrubToEvent(eventIndex: number) {
+    setAutoFollow(true);
+    scrubToEvent(eventIndex);
+  }
+
+  function handleSelectEvent(event: NormalizedEvent) {
+    if (dragStateRef.current?.moved) {
+      return;
+    }
+
+    setSelectedEvent(event);
+  }
+
+  function handleJumpReplayToSelectedEvent() {
+    if (!loadedSimulation || !selectedEvent) {
+      return;
+    }
+
+    const group = loadedSimulation.eventGroups[selectedEvent.groupIndex];
+    if (!group) {
+      return;
+    }
+
+    setAutoFollow(false);
+    scrubToEvent(group.endEventIndex);
+  }
+
+  function getFollowOffsetForEvent(event: { x: number; y: number }) {
+    const viewportWidth =
+      timelineViewportRef.current?.clientWidth ?? window.innerWidth;
+    const viewportHeight =
+      timelineViewportRef.current?.clientHeight ?? window.innerHeight;
+
+    return {
+      x: viewportWidth * 0.3 - event.x,
+      y: viewportHeight * 0.35 - event.y,
+    };
+  }
+
+  function focusEventInViewport(event: { x: number; y: number }) {
+    scheduleMapOffset(getFollowOffsetForEvent(event));
+  }
+
+  function isNoPanTarget(target: EventTarget | null) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eff6ff_45%,#eef2ff_100%)] px-4 py-6 text-slate-900 md:px-8">
-        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-5xl items-center justify-center">
-          <div className="w-full max-w-3xl rounded-[2rem] border border-slate-200 bg-white/90 p-8 shadow-[0_40px_120px_rgba(148,163,184,0.18)] backdrop-blur md:p-12">
-            <div className="space-y-4 text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-600">
-                Warehouse Simulation Visualizer
-              </p>
-              <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-                Upload a `simulation.log` to start replaying the warehouse story
-              </h1>
-              <p className="mx-auto max-w-2xl text-base leading-7 text-slate-600">
-                The app will parse the JSONL log in-browser, preserve same-time
-                ordering, and unlock the timeline and statistics views once the
-                file is valid.
-              </p>
+      target instanceof HTMLElement &&
+      Boolean(target.closest("[data-no-pan='true']"))
+    );
+  }
+
+  if (!loadedSimulation) {
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#eff6ff_45%,#eef2ff_100%)] text-slate-900">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.08),transparent_35%)]" />
+
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
+        <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 md:text-6xl">
+          Upload a log file to start simulation visualization
+        </h1> 
+
+        <label className="mt-12 flex cursor-pointer flex-col items-center justify-center gap-5 rounded-[2rem] border-2 border-dashed border-sky-200 bg-white/70 px-10 py-14 shadow-[0_30px_80px_rgba(148,163,184,0.14)] backdrop-blur transition hover:border-sky-400 hover:bg-white hover:shadow-[0_36px_90px_rgba(14,165,233,0.10)] md:px-16">
+          <input
+            className="hidden"
+            type="file"
+            accept=".log,.jsonl,.txt,application/json"
+            onChange={handleFileChange}
+          />
+
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+            <svg
+              className="h-8 w-8"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 16V5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+              <path
+                d="M8 9L12 5L16 9"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M5 19H19"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-lg font-semibold text-slate-950">
+              Drop file here or click to browse
+            </p>
+            <p className="text-sm text-slate-500">
+              JSONL only. Unknown or sparse events will still load safely.
+            </p>
+          </div>
+
+          <span className="rounded-full bg-sky-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-sky-700">
+            Choose log file
+          </span>
+        </label>
+
+        {parseIssues.length > 0 && (
+          <div className="mt-10 w-full max-w-3xl rounded-[1.5rem] border border-rose-200 bg-rose-50/90 p-5 text-left shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-700">
+                Parse errors
+              </h2>
+              <span className="text-sm text-rose-600">
+                {parseIssues.length} issue(s)
+              </span>
             </div>
 
-            <div className="mt-10 rounded-[1.75rem] border border-dashed border-sky-200 bg-sky-50/80 p-8">
-              <label className="flex cursor-pointer flex-col items-center gap-4 rounded-[1.5rem] border border-white bg-white px-6 py-10 text-center shadow-sm transition hover:border-sky-300 hover:shadow-md">
-                <input
-                  className="hidden"
-                  type="file"
-                  accept=".log,.jsonl,.txt,application/json"
-                  onChange={handleFileChange}
-                />
-                <span className="rounded-full bg-sky-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
-                  simulation.log
-                </span>
-                <span className="text-lg font-medium text-slate-900">
-                  Choose a file to load the replay
-                </span>
-                <span className="text-sm text-slate-500">
-                  JSONL only. Unknown or sparse events will still load safely.
-                </span>
-              </label>
+            <div className="mt-4 space-y-3">
+              {parseIssues.map((issue) => (
+                <div
+                  key={`${issue.lineNumber}-${issue.message}`}
+                  className="rounded-2xl border border-rose-200 bg-white p-3"
+                >
+                  <p className="text-sm font-medium text-rose-800">
+                    Line {issue.lineNumber}: {issue.message}
+                  </p>
+                  <pre className="mt-2 overflow-auto text-xs text-rose-700">
+                    {issue.rawLine}
+                  </pre>
+                </div>
+              ))}
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-            {parseIssues.length > 0 && (
-              <div className="mt-8 rounded-[1.5rem] border border-rose-200 bg-rose-50 p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-700">
-                    Parse errors
-                  </h2>
-                  <span className="text-sm text-rose-600">
-                    {parseIssues.length} issue(s)
-                  </span>
-                </div>
-                <div className="mt-4 space-y-3">
-                  {parseIssues.map((issue) => (
-                    <div
-                      key={`${issue.lineNumber}-${issue.message}`}
-                      className="rounded-2xl border border-rose-200 bg-white p-3"
-                    >
-                      <p className="text-sm font-medium text-rose-800">
-                        Line {issue.lineNumber}: {issue.message}
-                      </p>
-                      <pre className="mt-2 overflow-auto text-xs text-rose-700">
-                        {issue.rawLine}
-                      </pre>
-                    </div>
-                  ))}
-                </div>
+  if (activeTab === "timeline") {
+    const latestRevealedEvent = currentTimelineEvent
+      ? timelineEvents[currentTimelineEvent.index]
+      : findLatestRevealedItem(timelineEvents);
+
+    return (
+      <div className="relative h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.10),transparent_22%),linear-gradient(180deg,#f8fbff_0%,#edf4ff_100%)] text-slate-900">
+        <div className="pointer-events-none absolute inset-x-0 top-5 z-20 flex justify-center px-4">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200 bg-white/92 p-2 shadow-[0_24px_70px_rgba(148,163,184,0.22)] backdrop-blur">
+            <TabButton
+              active
+              label="Timeline"
+              onClick={() => setActiveTab("timeline")}
+            />
+            <TabButton
+              active={false}
+              label="Statistics"
+              onClick={() => setActiveTab("statistics")}
+            />
+          </div>
+        </div>
+
+        <div
+          ref={timelineViewportRef}
+          className={cn(
+            "absolute inset-0 overflow-hidden",
+            isPanning ? "cursor-grabbing" : "cursor-grab",
+          )}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
+          <div
+            className={cn(
+              "absolute left-0 top-0 will-change-transform",
+              autoFollow && !isPanning ? "transition-transform duration-200 ease-out" : "",
+            )}
+            style={{
+              width: timelineWidth,
+              height: timelineHeight,
+              transform: `translate(${mapOffset.x}px, ${mapOffset.y}px)`,
+            }}
+          >
+            <svg
+              className="absolute inset-0 h-full w-full"
+              viewBox={`0 0 ${timelineWidth} ${timelineHeight}`}
+              fill="none"
+            >
+              {timelineEvents.slice(0, -1).map((event, index) => {
+                const nextEvent = timelineEvents[index + 1];
+                if (!nextEvent) {
+                  return null;
+                }
+
+                const lineVisible = event.revealed && nextEvent.revealed;
+                return (
+                  <path
+                    key={`line-${event.index}`}
+                    d={`M ${event.x + 104} ${event.y + 62} C ${event.x + 150} ${event.y + 62}, ${nextEvent.x - 46} ${nextEvent.y + 62}, ${nextEvent.x} ${nextEvent.y + 62}`}
+                    stroke={lineVisible ? "#0ea5e9" : "#dbeafe"}
+                    strokeDasharray={lineVisible ? "0" : "8 12"}
+                    strokeLinecap="round"
+                    strokeWidth={lineVisible ? 3 : 2}
+                    style={{
+                      opacity: lineVisible ? 0.72 : 0.5,
+                      transition: "all 260ms ease",
+                    }}
+                  />
+                );
+              })}
+            </svg>
+
+            {timelineEvents.map((event) => {
+              const activeReplayEvent = event.index === replayState.currentEventIndex;
+              const selectedTimelineEvent = selectedEvent?.index === event.index;
+
+              return (
+                <button
+                  key={`event-${event.index}`}
+                  data-no-pan="true"
+                  onPointerDown={(pointerEvent) => {
+                    pointerEvent.stopPropagation();
+                  }}
+                  className={cn("absolute w-[208px] rounded-[1.55rem] border bg-white p-4 text-left shadow-[0_22px_55px_rgba(148,163,184,0.14)] transition-all duration-300",
+                    
+                    activeReplayEvent
+                      ? "border-sky-400 shadow-[0_24px_60px_rgba(14,165,233,0.24)]"
+                      : selectedTimelineEvent
+                        ? "border-violet-300 shadow-[0_20px_48px_rgba(139,92,246,0.16)]"
+                        : "border-slate-200 hover:border-sky-300",
+                    event.revealed
+                      ? "pointer-events-auto translate-y-0 opacity-100"
+                      : "pointer-events-none translate-y-4 opacity-0",
+                  )}
+                  style={{ left: event.x, top: event.y }}
+                  onClick={() => {
+                    handleSelectEvent(event);
+                  }}
+                  type="button"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
+                      Event
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      #{event.index + 1}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-base font-semibold text-slate-950">
+                    {event.event}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    simTime {event.simTime}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    {event.timestamp ?? "No timestamp"}
+                  </p>
+
+                </button>
+              );
+            })}
+
+            {replayState.currentSimTime === null && (
+              <div className="absolute left-24 top-28 rounded-[1.5rem] border border-slate-200 bg-white/96 px-5 py-4 text-sm text-slate-600 shadow-lg">
+                Start replaying to reveal the timeline map.
               </div>
             )}
+          </div>
+        </div>
+
+        {selectedEvent && (
+          <div className="pointer-events-none absolute inset-y-5 right-5 z-20 flex w-full max-w-md justify-end pb-28">
+            <div className="pointer-events-auto max-h-full w-full overflow-auto rounded-[1.8rem] border border-slate-200 bg-white/96 p-5 shadow-[0_28px_80px_rgba(148,163,184,0.24)] backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
+                    Event detail
+                  </p>
+                  <h3 className="mt-1 text-xl font-semibold text-slate-950">
+                    {selectedEvent.event}
+                  </h3>
+                </div>
+                <button
+                  className="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                  onClick={() => setSelectedEvent(null)}
+                  type="button"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <DetailCard label="simTime" value={String(selectedEvent.simTime)} />
+                <DetailCard
+                  label="Timestamp"
+                  value={formatTimestamp(selectedEvent.timestamp)}
+                />
+                <DetailCard label="Line" value={String(selectedEvent.lineNumber)} />
+                <DetailCard
+                  label="Replay position"
+                  value={
+                    replayState.currentGroupIndex === selectedEvent.groupIndex
+                      ? "Current replay point"
+                      : selectedEvent.simTime <
+                          (replayState.currentSimTime ?? Number.NEGATIVE_INFINITY)
+                        ? "Past event"
+                        : "Future event"
+                  }
+                />
+              </div>
+
+              <div className="mt-4">
+                <button
+                  className="w-full rounded-full bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700"
+                  onClick={handleJumpReplayToSelectedEvent}
+                  type="button"
+                >
+                  Jump replay to this simTime
+                </button>
+              </div>
+
+              <div className="mt-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Payload
+                </p>
+                <pre className="mt-2 overflow-auto rounded-[1.25rem] bg-slate-950 px-4 py-4 text-xs leading-6 text-slate-100">
+                  {JSON.stringify(selectedEvent.data, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-4">
+          <div className="pointer-events-auto w-[1600px] max-w-[calc(100vw-2rem)] rounded-[1.8rem] border border-slate-200 bg-white/96 px-5 py-4 shadow-[0_30px_80px_rgba(148,163,184,0.26)] backdrop-blur">
+            <div className="grid items-center gap-4 grid-cols-[320px_1fr_120px_210px_180px]">
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-[110px]">
+                  <ControlButton
+                    label={isPlaying ? "Pause" : "Play"}
+                    onClick={handlePlayPause}
+                    primary
+                    fullWidth
+                  />
+                </div>
+
+                <div className="w-[110px]">
+                  <ControlButton
+                    label="Prev event"
+                    onClick={handlePreviousEvent}
+                    fullWidth
+                  />
+                </div>
+
+                <div className="w-[110px]">
+                  <ControlButton
+                    label="Next event"
+                    onClick={handleNextEvent}
+                    fullWidth
+                  />
+                </div>
+              </div>
+
+              <div className="min-w-0 space-y-2">
+                <div className="flex items-center justify-center gap-4 text-sm text-slate-500 tabular-nums">
+                  <span className="whitespace-nowrap">
+                    Event {Math.max(replayState.currentEventIndex + 1, 0)} / {loadedSimulation.events.length}
+                  </span>
+
+                  <span className="inline-flex min-w-[180px] justify-center whitespace-nowrap">
+                    Current simTime: {formatSimTime(replayState.currentSimTime)}
+                  </span>
+
+                  <span className="inline-flex min-w-[260px] justify-center whitespace-nowrap">
+                    Current timestamp: {formatTimestamp(replayState.currentTimestamp)}
+                  </span>
+                </div>
+
+                <input
+                  className="w-full"
+                  type="range"
+                  min={-1}
+                  max={Math.max(loadedSimulation.events.length - 1, -1)}
+                  step={1}
+                  value={replayState.currentEventIndex}
+                  onChange={(event) => handleScrubToEvent(Number(event.target.value))}
+                />
+              </div>
+
+              <div className="flex justify-center">
+                <label className="flex h-[42px] w-[110px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                  <span>Speed</span>
+                  <select
+                    className="bg-transparent text-slate-900 outline-none"
+                    value={playbackSpeed}
+                    onChange={(event) => setPlaybackSpeed(Number(event.target.value))}
+                  >
+                    {[1, 2, 4, 8, 16].map((speed) => (
+                      <option key={speed} value={speed}>
+                        {speed}x
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="w-[210px]">
+                  <ControlButton
+                    label="Go to the latest event"
+                    onClick={jumpToLatestEvent}
+                    fullWidth
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <label className="flex h-[42px] w-[180px] cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-sky-300 hover:bg-sky-50">
+                  <input
+                    className="hidden"
+                    type="file"
+                    accept=".log,.jsonl,.txt,application/json"
+                    onChange={handleFileChange}
+                  />
+                  Upload another log
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  const timelineGroups = loadedSimulation.eventGroups.map((group, index) => {
-    const lane = index % 3;
-    return {
-      ...group,
-      x: 140 + index * 260,
-      y: 110 + lane * 170,
-      revealed:
-        replayState.currentSimTime !== null &&
-        group.simTime <= replayState.currentSimTime,
-    };
-  });
-
-  const timelineWidth = Math.max(
-    1600,
-    timelineGroups.length * 260 + 360,
-  );
-  const timelineHeight = 620;
-
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#f8fbff_30%,#eef4ff_100%)] px-4 py-4 text-slate-900 md:px-6">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
-        <header className="rounded-[2rem] border border-slate-200 bg-white/90 p-5 shadow-[0_35px_90px_rgba(148,163,184,0.16)] backdrop-blur">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
-                Warehouse Simulation Visualizer
-              </p>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                {loadedSimulation.sourceName}
-              </h1>
-              <p className="max-w-3xl text-sm leading-6 text-slate-600">
-                Replay timeline and metrics stay driven by the uploaded
-                `simulation.log`. The core parser, grouping, and checkpointed
-                replay behavior are unchanged.
-              </p>
-            </div>
+      <div className="pointer-events-none sticky top-5 z-20 flex justify-center">
+        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-slate-200 bg-white/92 p-2 shadow-[0_24px_70px_rgba(148,163,184,0.22)] backdrop-blur">
+          <TabButton
+            active={false}
+            label="Timeline"
+            onClick={() => setActiveTab("timeline")}
+          />
+          <TabButton
+            active
+            label="Statistics"
+            onClick={() => setActiveTab("statistics")}
+          />
+        </div>
+      </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <HeaderStat label="Current simTime" value={formatSimTime(replayState.currentSimTime)} />
-              <HeaderStat label="Timestamp" value={formatTimestamp(replayState.currentTimestamp)} />
-              <HeaderStat
-                label="Replay progress"
-                value={`${Math.max(replayState.currentEventIndex + 1, 0)} / ${loadedSimulation.events.length}`}
-              />
-              <label className="flex cursor-pointer items-center justify-center rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-sky-300 hover:bg-sky-50">
-                <input
-                  className="hidden"
-                  type="file"
-                  accept=".log,.jsonl,.txt,application/json"
-                  onChange={handleFileChange}
-                />
-                Upload another log
-              </label>
-            </div>
+      <div className="mx-auto mt-4 max-w-[1500px] rounded-[2rem] border border-slate-200 bg-white/92 p-5 shadow-[0_32px_100px_rgba(148,163,184,0.16)]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">
+              Statistics
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Replay derived performance metrics and entity state at the current point in time.
+            </p>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            <TabButton
-              active={activeTab === "timeline"}
-              label="Timeline"
-              onClick={() => setActiveTab("timeline")}
-            />
-            <TabButton
-              active={activeTab === "statistics"}
-              label="Statistics"
-              onClick={() => setActiveTab("statistics")}
-            />
+          <div className="rounded-[1.4rem] border border-sky-200 bg-sky-50 px-5 py-4 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
+              Current replay
+            </p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+              {formatSimTime(replayState.currentSimTime)}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {formatTimestamp(replayState.currentTimestamp)}
+            </p>
           </div>
-        </header>
+        </div>
 
-        {activeTab === "timeline" ? (
-          <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/92 shadow-[0_32px_100px_rgba(148,163,184,0.16)]">
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-950">
-                  Timeline Map
-                </h2>
-                <p className="text-sm text-slate-500">
-                  Drag to pan. Click an event card to inspect it.
-                </p>
-              </div>
-              <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                {timelineGroups.filter((group) => group.revealed).length} /{" "}
-                {timelineGroups.length} groups revealed
-              </div>
-            </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <KpiCard
+            label="Shipments received"
+            value={replayState.metrics.shipmentsReceived}
+            accent="sky"
+          />
+          <KpiCard
+            label="Shipments ready"
+            value={replayState.metrics.shipmentsReady}
+            accent="amber"
+          />
+          <KpiCard
+            label="Shipments packed"
+            value={replayState.metrics.shipmentsPacked}
+            accent="emerald"
+          />
+          <KpiCard
+            label="Shipments shipped"
+            value={replayState.metrics.shipmentsShipped}
+            accent="violet"
+          />
+          <KpiCard
+            label="Truck arrivals"
+            value={replayState.metrics.truckArrivals}
+            accent="rose"
+          />
+          <KpiCard
+            label="Events processed"
+            value={replayState.metrics.eventsProcessed}
+            accent="slate"
+          />
+        </div>
 
-            <div
-              className={cn(
-                "relative h-[calc(100vh-21rem)] min-h-[560px] overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.08),transparent_28%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]",
-                isPanning ? "cursor-grabbing" : "cursor-grab",
-              )}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
-            >
-              <div
-                className="absolute left-0 top-0 transition-transform duration-150"
-                style={{
-                  width: timelineWidth,
-                  height: timelineHeight,
-                  transform: `translate(${mapOffset.x}px, ${mapOffset.y}px)`,
-                }}
-              >
-                <svg
-                  className="absolute inset-0 h-full w-full"
-                  viewBox={`0 0 ${timelineWidth} ${timelineHeight}`}
-                  fill="none"
-                >
-                  {timelineGroups.slice(0, -1).map((group, index) => {
-                    const nextGroup = timelineGroups[index + 1];
-                    if (!nextGroup) {
-                      return null;
-                    }
-
-                    const lineVisible = group.revealed && nextGroup.revealed;
-                    return (
-                      <path
-                        key={`line-${group.groupIndex}`}
-                        d={`M ${group.x + 88} ${group.y + 54} C ${group.x + 150} ${group.y + 54}, ${nextGroup.x - 70} ${nextGroup.y + 54}, ${nextGroup.x} ${nextGroup.y + 54}`}
-                        stroke={lineVisible ? "#38bdf8" : "#dbeafe"}
-                        strokeDasharray={lineVisible ? "0" : "8 10"}
-                        strokeLinecap="round"
-                        strokeWidth={lineVisible ? 3 : 2}
-                        style={{
-                          opacity: lineVisible ? 0.75 : 0.55,
-                          transition: "all 260ms ease",
-                        }}
-                      />
-                    );
-                  })}
-                </svg>
-
-                {timelineGroups.map((group) => {
-                  const active = group.groupIndex === replayState.currentGroupIndex;
-                  return (
-                    <button
-                      key={`group-${group.groupIndex}`}
-                      className={cn(
-                        "absolute w-[176px] rounded-[1.4rem] border bg-white p-4 text-left shadow-[0_18px_45px_rgba(148,163,184,0.12)] transition-all duration-300",
-                        active
-                          ? "border-sky-400 shadow-[0_20px_45px_rgba(56,189,248,0.20)]"
-                          : "border-slate-200 hover:border-sky-300",
-                        group.revealed
-                          ? "pointer-events-auto translate-y-0 opacity-100"
-                          : "pointer-events-none translate-y-3 opacity-0",
-                      )}
-                      style={{ left: group.x, top: group.y }}
-                      onClick={() => {
-                        if (dragStateRef.current?.moved) {
-                          return;
-                        }
-                        scrubToEvent(group.endEventIndex);
-                        setSelectedEvent(group.events[group.events.length - 1] ?? null);
-                      }}
-                      type="button"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
-                          {group.eventCount} event{group.eventCount > 1 ? "s" : ""}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                          #{group.groupIndex + 1}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-base font-semibold text-slate-950">
-                        simTime {group.simTime}
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
-                        {group.timestamp ?? "No timestamp"}
-                      </p>
-                      <div className="mt-4 space-y-1.5">
-                        {group.events.slice(0, 3).map((event) => (
-                          <button
-                            key={event.index}
-                            className="block w-full rounded-xl bg-slate-50 px-2 py-1.5 text-left text-sm text-slate-700 transition hover:bg-sky-50"
-                            onClick={(clickEvent) => {
-                              clickEvent.stopPropagation();
-                              if (dragStateRef.current?.moved) {
-                                return;
-                              }
-                              scrubToEvent(event.index);
-                              setSelectedEvent(event);
-                            }}
-                            type="button"
-                          >
-                            {event.event}
-                          </button>
-                        ))}
-                        {group.events.length > 3 && (
-                          <p className="px-2 text-xs text-slate-400">
-                            +{group.events.length - 3} more
-                          </p>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {replayState.currentSimTime === null && (
-                  <div className="absolute left-20 top-16 rounded-[1.5rem] border border-slate-200 bg-white/95 px-5 py-4 text-sm text-slate-600 shadow-lg">
-                    Start replaying to reveal the timeline map.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 px-5 py-4 backdrop-blur">
-              <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-end">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    <span>Scrub by event</span>
-                    <span>
-                      {replayState.currentEventIndex < 0
-                        ? "Before first event"
-                        : `Line ${loadedSimulation.events[replayState.currentEventIndex]?.lineNumber ?? "-"}`}
-                    </span>
-                  </div>
-                  <input
-                    className="w-full"
-                    type="range"
-                    min={-1}
-                    max={Math.max(loadedSimulation.events.length - 1, -1)}
-                    step={1}
-                    value={replayState.currentEventIndex}
-                    onChange={(event) => scrubToEvent(Number(event.target.value))}
-                  />
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                    <span>
-                      Event {Math.max(replayState.currentEventIndex + 1, 0)} /{" "}
-                      {loadedSimulation.events.length}
-                    </span>
-                    <span>
-                      Group {Math.max(replayState.currentGroupIndex + 1, 0)} /{" "}
-                      {loadedSimulation.eventGroups.length}
-                    </span>
-                    <span>{formatTimestamp(replayState.currentTimestamp)}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <ControlButton
-                    label={isPlaying ? "Pause" : "Play"}
-                    onClick={isPlaying ? pause : play}
-                    primary
-                  />
-                  <ControlButton label="Prev event" onClick={stepPreviousEvent} />
-                  <ControlButton label="Next event" onClick={stepNextEvent} />
-                  <ControlButton label="Prev group" onClick={stepPreviousGroup} />
-                  <ControlButton label="Next group" onClick={stepNextGroup} />
-                  <label className="ml-1 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                    <span>Speed</span>
-                    <select
-                      className="bg-transparent text-slate-900 outline-none"
-                      value={playbackSpeed}
-                      onChange={(event) => setPlaybackSpeed(Number(event.target.value))}
-                    >
-                      {[1, 2, 4, 8, 16].map((speed) => (
-                        <option key={speed} value={speed}>
-                          {speed}x
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {selectedEvent && (
-              <div className="pointer-events-none absolute inset-y-4 right-4 flex w-full max-w-md justify-end">
-                <div className="pointer-events-auto max-h-[calc(100%-2rem)] w-full overflow-auto rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_24px_70px_rgba(148,163,184,0.24)]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
-                        Event detail
-                      </p>
-                      <h3 className="mt-1 text-xl font-semibold text-slate-950">
-                        {selectedEvent.event}
-                      </h3>
-                    </div>
-                    <button
-                      className="rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
-                      onClick={() => setSelectedEvent(null)}
-                      type="button"
-                    >
-                      Close
-                    </button>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <DetailCard label="simTime" value={String(selectedEvent.simTime)} />
-                    <DetailCard label="Timestamp" value={formatTimestamp(selectedEvent.timestamp)} />
-                    <DetailCard label="Line" value={String(selectedEvent.lineNumber)} />
-                    <DetailCard
-                      label="Duration"
-                      value={
-                        selectedEvent.duration === null
-                          ? "Unavailable"
-                          : `${selectedEvent.duration}s`
-                      }
-                    />
-                  </div>
-
-                  <div className="mt-5">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Payload
-                    </p>
-                    <pre className="mt-2 overflow-auto rounded-[1.25rem] bg-slate-950 px-4 py-4 text-xs leading-6 text-slate-100">
-                      {JSON.stringify(selectedEvent.data, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              </div>
+        <div className="mt-6 space-y-4">
+          <EntityAccordion
+            defaultOpen
+            title="Shipments"
+            count={Object.keys(replayState.shipmentsById).length}
+            rows={Object.values(replayState.shipmentsById).map((shipment) =>
+              buildShipmentRow(shipment),
             )}
-          </section>
-        ) : (
-          <section className="rounded-[2rem] border border-slate-200 bg-white/92 p-5 shadow-[0_32px_100px_rgba(148,163,184,0.16)]">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-slate-950">
-                  Statistics
-                </h2>
-                <p className="text-sm text-slate-500">
-                  Replay-derived KPI snapshot and current entity state.
-                </p>
-              </div>
-              <div className="text-sm text-slate-500">
-                Current replay: {formatSimTime(replayState.currentSimTime)}
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              <KpiCard
-                label="Shipments received"
-                value={replayState.metrics.shipmentsReceived}
-                accent="sky"
-              />
-              <KpiCard
-                label="Shipments ready"
-                value={replayState.metrics.shipmentsReady}
-                accent="amber"
-              />
-              <KpiCard
-                label="Shipments packed"
-                value={replayState.metrics.shipmentsPacked}
-                accent="emerald"
-              />
-              <KpiCard
-                label="Shipments shipped"
-                value={replayState.metrics.shipmentsShipped}
-                accent="violet"
-              />
-              <KpiCard
-                label="Truck arrivals"
-                value={replayState.metrics.truckArrivals}
-                accent="rose"
-              />
-              <KpiCard
-                label="Events processed"
-                value={replayState.metrics.eventsProcessed}
-                accent="slate"
-              />
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <EntityAccordion
-                defaultOpen
-                title="Shipments"
-                count={Object.keys(replayState.shipmentsById).length}
-                rows={Object.values(replayState.shipmentsById).map((shipment) => ({
-                  key: shipment.id,
-                  primary: shipment.id,
-                  secondary: shipment.status,
-                  tertiary:
-                    shipment.activePortId || shipment.gridId
-                      ? `port ${shipment.activePortId ?? "?"} · grid ${shipment.gridId ?? "?"}`
-                      : "No active assignment",
-                }))}
-              />
-              <EntityAccordion
-                title="Ports"
-                count={Object.keys(replayState.portsById).length}
-                rows={Object.values(replayState.portsById).map((port) => ({
-                  key: port.id,
-                  primary: port.id,
-                  secondary: port.status,
-                  tertiary: port.gridId
-                    ? `grid ${port.gridId} · ${port.lastTransition ?? "state change"}`
-                    : port.lastTransition ?? "No grid linked yet",
-                }))}
-              />
-              <EntityAccordion
-                title="Bins"
-                count={Object.keys(replayState.binsById).length}
-                rows={Object.values(replayState.binsById).map((bin) => ({
-                  key: bin.id,
-                  primary: bin.id,
-                  secondary: bin.status,
-                  tertiary:
-                    bin.portId || bin.gridId
-                      ? `port ${bin.portId ?? "-"} · grid ${bin.gridId ?? "-"}`
-                      : "No location details yet",
-                }))}
-              />
-            </div>
-          </section>
-        )}
+          />
+          <EntityAccordion
+            title="Ports"
+            count={Object.keys(replayState.portsById).length}
+            rows={Object.values(replayState.portsById).map((port) =>
+              buildPortRow(port),
+            )}
+          />
+          <EntityAccordion
+            title="Bins"
+            count={Object.keys(replayState.binsById).length}
+            rows={Object.values(replayState.binsById).map((bin) => buildBinRow(bin))}
+          />
+        </div>
       </div>
     </div>
   );
+}
+
+function buildShipmentRow(shipment: ShipmentState) {
+  return {
+    key: shipment.id,
+    title: shipment.id,
+    badge: shipment.status,
+    fields: [
+      { label: "Status", value: shipment.status },
+      { label: "Grid", value: shipment.gridId ?? "Unavailable" },
+      { label: "Active port", value: shipment.activePortId ?? "Unavailable" },
+      {
+        label: "Received at",
+        value:
+          shipment.receivedAtSimTime === null
+            ? "Unavailable"
+            : `${shipment.receivedAtSimTime}s`,
+      },
+      {
+        label: "Ready at",
+        value:
+          shipment.readyAtSimTime === null ? "Unavailable" : `${shipment.readyAtSimTime}s`,
+      },
+      {
+        label: "Packed at",
+        value:
+          shipment.packedAtSimTime === null
+            ? "Unavailable"
+            : `${shipment.packedAtSimTime}s`,
+      },
+      {
+        label: "Picked bins",
+        value: shipment.pickedBinIds.length
+          ? shipment.pickedBinIds.join(", ")
+          : "None recorded",
+      },
+    ],
+  };
+}
+
+function buildPortRow(port: PortState) {
+  return {
+    key: port.id,
+    title: port.id,
+    badge: port.status,
+    fields: [
+      { label: "Status", value: port.status },
+      { label: "Grid", value: port.gridId ?? "Unavailable" },
+      {
+        label: "Active shipment",
+        value: port.activeShipmentId ?? "Unavailable",
+      },
+      { label: "Active bin", value: port.activeBinId ?? "Unavailable" },
+      {
+        label: "Handling flags",
+        value: port.handlingFlags.length
+          ? port.handlingFlags.join(", ")
+          : "None",
+      },
+      {
+        label: "Last transition",
+        value: port.lastTransition ?? "Unavailable",
+      },
+    ],
+  };
+}
+
+function buildBinRow(bin: BinState) {
+  return {
+    key: bin.id,
+    title: bin.id,
+    badge: bin.status,
+    fields: [
+      { label: "Status", value: bin.status },
+      { label: "Grid", value: bin.gridId ?? "Unavailable" },
+      { label: "Port", value: bin.portId ?? "Unavailable" },
+      { label: "Shipment", value: bin.shipmentId ?? "Unavailable" },
+      {
+        label: "Last event index",
+        value:
+          bin.lastEventIndex === null ? "Unavailable" : String(bin.lastEventIndex + 1),
+      },
+    ],
+  };
 }
 
 function TabButton({
@@ -653,30 +959,22 @@ function TabButton({
   );
 }
 
-function HeaderStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </p>
-      <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
-    </div>
-  );
-}
-
 function ControlButton({
   label,
   onClick,
   primary = false,
+  fullWidth = false,
 }: {
   label: string;
   onClick: () => void;
   primary?: boolean;
+  fullWidth?: boolean;
 }) {
   return (
     <button
       className={cn(
-        "rounded-full px-4 py-2 text-sm font-medium transition",
+        "inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition whitespace-nowrap",
+        fullWidth ? "w-full" : "",
         primary
           ? "bg-sky-600 text-white hover:bg-sky-700"
           : "border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:text-slate-950",
@@ -693,6 +991,17 @@ function DetailCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function BottomMeta({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
         {label}
       </p>
       <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
@@ -720,15 +1029,7 @@ function KpiCard({
 
   return (
     <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
-      <div
-        className={cn(
-          "inline-flex rounded-full bg-gradient-to-r px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
-          accents[accent],
-        )}
-      >
-        KPI
-      </div>
-      <p className="mt-4 text-sm text-slate-500">{label}</p>
+      <p className="text-sm text-slate-500">{label}</p>
       <p className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">
         {value.toLocaleString()}
       </p>
@@ -746,9 +1047,9 @@ function EntityAccordion({
   count: number;
   rows: Array<{
     key: string;
-    primary: string;
-    secondary: string;
-    tertiary: string;
+    title: string;
+    badge: string;
+    fields: Array<{ label: string; value: string }>;
   }>;
   defaultOpen?: boolean;
 }) {
@@ -757,7 +1058,7 @@ function EntityAccordion({
   return (
     <div className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm">
       <button
-        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
+        className="flex w-full items-center justify-between gap-3 rounded-[1.2rem] text-left transition hover:bg-slate-50"
         onClick={() => setIsOpen((current) => !current)}
         type="button"
       >
@@ -767,13 +1068,26 @@ function EntityAccordion({
         </div>
         <span
           className={cn(
-            "rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] transition",
+            "flex h-10 w-10 items-center justify-center rounded-full border transition",
             isOpen
-              ? "bg-slate-950 text-white"
-              : "bg-slate-100 text-slate-500",
+              ? "border-slate-900 bg-slate-900 text-white"
+              : "border-slate-200 bg-slate-100 text-slate-500",
           )}
         >
-          Toggle
+          <svg
+            className={cn("h-5 w-5 transition-transform duration-200", isOpen ? "rotate-180" : "rotate-0")}
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 7.5L10 12.5L15 7.5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
       </button>
 
@@ -783,17 +1097,32 @@ function EntityAccordion({
             rows.map((row) => (
               <div
                 key={row.key}
-                className="rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3"
+                className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-slate-950">
-                    {row.primary}
+                  <span className="text-sm font-semibold text-slate-950">
+                    {row.title}
                   </span>
                   <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    {row.secondary}
+                    {row.badge}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-500">{row.tertiary}</p>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {row.fields.map((field) => (
+                    <div
+                      key={`${row.key}-${field.label}`}
+                      className="rounded-[1rem] border border-white bg-white px-3 py-3"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                        {field.label}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                        {field.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))
           ) : (
