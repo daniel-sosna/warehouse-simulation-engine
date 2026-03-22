@@ -903,15 +903,8 @@ const timelineEvents =
                 />
                 <DetailCard label="Line" value={String(selectedEvent.lineNumber)} />
                 <DetailCard
-                  label="Replay position"
-                  value={
-                    replayState.currentGroupIndex === selectedEvent.groupIndex
-                      ? "Current replay point"
-                      : selectedEvent.simTime <
-                          (replayState.currentSimTime ?? Number.NEGATIVE_INFINITY)
-                        ? "Past event"
-                        : "Future event"
-                  }
+                  label="Duration"
+                  value={String(selectedEvent.duration)}
                 />
               </div>
 
