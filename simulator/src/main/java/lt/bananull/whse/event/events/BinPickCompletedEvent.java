@@ -6,8 +6,8 @@ import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
-import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.ArrayList;
 import java.util.List;

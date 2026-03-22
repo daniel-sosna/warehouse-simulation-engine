@@ -74,8 +74,8 @@ public class RouterTickEvent extends Event {
         state.shipments().values().stream()
                 .filter(Shipment::isAvailableForRerouting)
                 .forEach(shipment -> {
-                    shipment.rollbackToReceived();
                     shipment.getBinIds().stream().map(state::getBin).forEach(Bin::decrementNeededInGrid);
+                    shipment.rollbackToReceived();
                 });
     }
 

@@ -2,11 +2,11 @@ package lt.bananull.whse;
 
 import ch.qos.logback.classic.LoggerContext;
 import lt.bananull.whse.config.AppConfig;
-import lt.bananull.whse.simulator.Simulator;
-import lt.bananull.whse.simulator.SimulationParameters;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.simulator.SimulationParameters;
+import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.utils.HealthCheckThread;
 import lt.bananull.whse.utils.LogFileSorter;
 import org.slf4j.LoggerFactory;
