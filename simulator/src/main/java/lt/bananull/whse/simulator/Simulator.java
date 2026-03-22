@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
+import lt.bananull.whse.event.events.BinRequestedAtPortEvent;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
 import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
@@ -11,6 +12,7 @@ import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.service.BinReservationService;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
 import lt.bananull.whse.simulator.entity.Grid;
@@ -80,17 +82,13 @@ public class Simulator {
     public void dispatchAll() {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
-
+            if (!BinReservationService.canReserveAllPicks(this, a.picks())) {
+                continue; // leave it for next router tick
+            } else {
+                BinReservationService.reserveAllPicks(this, a.shipmentId(), a.picks());
+            }
             enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
-            // long doneAt = simTime + TRAVEL_SECONDS;
-            // enqueueEvent(new BinArrivesAtPort(doneAt, a));
 
-            // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
-            // then we will need: Dispatcher (or PortScheduler) that:
-            // - takes AssignmentDto
-            // - decides which port/grid can start now
-            // - reserves bin/port
-            // - schedules BinArrivedAtPort, BinPickCompleted, etc.
         }
     }
 

@@ -23,6 +23,7 @@ public class Bin {
     private String currentGridId;
     private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
+    private String reservedForShipmentId;
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> reservedItems = new HashMap<>();
     @Getter(AccessLevel.NONE)
@@ -32,6 +33,7 @@ public class Bin {
         this.id = id;
         this.currentGridId = currentGridId;
         this.stock = new HashMap<>(stock);
+        this.reservedForShipmentId = null;
     }
 
     public static Bin from(BinDto dto) {
@@ -176,6 +178,16 @@ public class Bin {
 
     public String pollPort() {
         return portQueue.poll();
+    }
+
+    public boolean canReserve() {
+        return status == BinStatus.AVAILABLE;
+    }
+
+    public void reserveForConsolidation(String shipmentId, String ean, int qt) {
+        this.reservedForShipmentId = shipmentId;
+        reserve(ean, qt);
+        status = BinStatus.RESERVED;
     }
 
     @Override

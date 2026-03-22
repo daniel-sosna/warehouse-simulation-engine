@@ -26,7 +26,7 @@ public class RouterTickEvent extends Event {
     public List<Event> execute(Simulator simulator) {
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
         checkForReceivedShipments(simulator, now);
-        // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
+        rollbackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
 
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
         RouterResponseDto response = routerClient.route(request);
@@ -60,6 +60,8 @@ public class RouterTickEvent extends Event {
         simulator.getState().shipments().values().stream()
                 .filter(Shipment::isAvailableForRerouting)
                 .forEach(Shipment::rollbackToReceived);
+        // shipment == consolidated
+        // bin.status = available;
     }
 
     @Override
