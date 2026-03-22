@@ -11,11 +11,14 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import static lt.bananull.whse.simulator.enums.ShipmentStatus.RECEIVED;
+
 public class RouterTickEvent extends Event {
 
     private static final int ROUTER_INTERVAL_SECONDS = 900;
 
     private final RouterClient routerClient;
+    private long shipmentsRerouted = 0;
 
     public RouterTickEvent(long simTime, RouterClient routerClient) {
         super(simTime);
@@ -25,8 +28,11 @@ public class RouterTickEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
+        rollbackToReceived(simulator);
         checkForReceivedShipments(simulator, now);
-        // rollBackToReceived(simulator); // TODO: uncomment when shipment picking is fully implemented
+        shipmentsRerouted = simulator.getState().shipments().values().stream()
+                .filter(shipment -> shipment.getStatus() == RECEIVED)
+                .count();
 
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
         RouterResponseDto response = routerClient.route(request);
@@ -64,6 +70,6 @@ public class RouterTickEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of();
+        return Map.of("shipmentsRerouted", shipmentsRerouted);
     }
 }

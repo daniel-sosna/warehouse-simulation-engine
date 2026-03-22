@@ -34,12 +34,11 @@ public class PortStartsShipmentEvent extends Event {
         SimulationState state = simulator.getState();
 
         Port port = state.getPort(portId);
-        port.startNextShipment();
+        shipmentId = port.startNextShipment();
 
-        Shipment shipment = state.getShipment(port.getActiveShipmentId());
+        Shipment shipment = state.getShipment(shipmentId);
         shipment.startPicking();
 
-        shipmentId = shipment.getId();
         sortingDirection = shipment.getSortingDirection();
         handlingFlags = shipment.getHandlingFlags();
         items = shipment.getItems();

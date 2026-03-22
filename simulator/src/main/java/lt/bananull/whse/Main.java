@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.SimulationParameters;
 import lt.bananull.whse.load.DataLoader;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.utils.HealthCheckThread;
 import lt.bananull.whse.utils.LogFileSorter;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,14 @@ public class Main {
 
         // Main loop
         Simulator simulator = new Simulator(routerClient, state, parameters);
-        simulator.run();
+
+        HealthCheckThread.HealthCheckContext healthCheckContext =
+            HealthCheckThread.start(simulator, config.healthCheckInterval());
+        try {
+            simulator.run();
+        } finally {
+            HealthCheckThread.stop(healthCheckContext);
+        }
 
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext loggerContext) {
             loggerContext.stop();
