@@ -187,7 +187,7 @@ public class Simulator {
             .filter(binId -> !state.getBin(binId).getCurrentGridId().equals(destGridId))
             .collect(java.util.stream.Collectors.toSet());
 
-        shipment.startConsolidation();
+        shipment.startConsolidation(destGridId, this);
 
         if (binsToTransfer.isEmpty()) {
             enqueueEvent(new ShipmentIsReadyEvent(simTime, shipmentId));

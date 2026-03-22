@@ -3,6 +3,7 @@ package lt.bananull.whse.simulator.entity;
 import lombok.Getter;
 import lt.bananull.whse.load.dto.ShipmentDto;
 import lt.bananull.whse.router.dto.PickDto;
+import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.enums.ShipmentStatus;
 
 import java.time.Instant;
@@ -85,13 +86,21 @@ public class Shipment {
         this.status = ShipmentStatus.ROUTED;
     }
 
-    public void startConsolidation() {
+    public void startConsolidation(String destGridId, Simulator simulator) {
         if (status != ShipmentStatus.ROUTED) {
             throw new IllegalStateException(
                     "Shipment %s cannot start consolidation from status %s".formatted(id, status));
         }
 
         this.status = ShipmentStatus.CONSOLIDATION;
+        this.consolidatedBins.clear();
+
+        for (PickDto p : picks) {
+            String binId = p.binId();
+            if (simulator.getState().getBin(binId).getCurrentGridId().equals(destGridId)) {
+                consolidatedBins.add(binId); // add the bins that already are on the correct grid
+            }
+        }
     }
 
     public void markReady() {
