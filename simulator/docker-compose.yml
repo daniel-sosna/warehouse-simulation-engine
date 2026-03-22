@@ -1,0 +1,11 @@
+services:
+    simulator:
+        build: .
+        image: whse-test
+        volumes:
+            - .:/app/output
+        command: [
+            "--dataDir", "./data/6",
+            "--router", "build/router/router-linux-amd64",
+            "--eventLogFile", "./output/results.log"
+        ]
