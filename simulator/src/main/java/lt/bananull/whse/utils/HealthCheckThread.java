@@ -23,22 +23,20 @@ public final class HealthCheckThread {
         Thread healthCheckThread = new Thread(() -> {
             printTableHeader();
 
-            while (runHealthChecks.get()) {
-                boolean status = simulator.getState() != null;
-                if (status) {
-                    Simulator.HealthData healthData = simulator.getHealthData();
-                    printHealthRow("UP", healthData.simTimeSeconds(), healthData.simTimeReadable(),
-                        String.format("~%.1f%%", healthData.progressPercent()), healthData.scheduledEvents());
-                } else {
-                    printHealthRow("DOWN", 0, "-", "-", 0);
-                }
+            try {
+                while (runHealthChecks.get()) {
+                    printHealthRow(simulator);
 
-                try {
-                    Thread.sleep((long) healthCheckIntervalSeconds * 1000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+                    try {
+                        Thread.sleep((long) healthCheckIntervalSeconds * 1000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
+            } finally {
+                printHealthRow(simulator);
+                printTableFooter();
             }
         }, "simulator-health-check");
 
@@ -51,6 +49,21 @@ public final class HealthCheckThread {
         System.out.println(TABLE_SEPARATOR);
         System.out.println(TABLE_HEADER);
         System.out.println(TABLE_SEPARATOR);
+    }
+
+    private static void printTableFooter() {
+        System.out.println(TABLE_SEPARATOR);
+    }
+
+    private static void printHealthRow(Simulator simulator) {
+        boolean status = simulator.getState() != null;
+        if (status) {
+            Simulator.HealthData healthData = simulator.getHealthData();
+            printHealthRow("UP", healthData.simTimeSeconds(), healthData.simTimeReadable(),
+                String.format("~%.1f%%", healthData.progressPercent()), healthData.scheduledEvents());
+        } else {
+            printHealthRow("DOWN", 0, "-", "-", 0);
+        }
     }
 
     private static void printHealthRow(String status, long simTimeSeconds, String simTimeReadable,
