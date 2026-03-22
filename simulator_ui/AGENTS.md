@@ -27,7 +27,7 @@ Before making substantial changes:
 3. Understand the real event shapes from the logs before making assumptions
 4. Propose a short implementation plan before coding
 
-`README.md` contains the **task description / simulator requirements / event meanings / metrics expectations**.
+`README.md` contains the **task description of the program that generates the simulation.log file / simulator requirements / event meanings / metrics expectations**.
 
 ---
 
@@ -185,6 +185,8 @@ For each event:
 - update derived state conservatively
 - never invent missing data that is not supported by the log
 
+**IMPORTANT** there can be added more data to the events later. Make it easily addable
+
 ### `ShipmentReceived`
 Meaning:
 - A shipment becomes available to the system.
@@ -255,8 +257,10 @@ Expected state effect:
 - usually leads toward `BinPickCompleted`
 
 Important data:
-- often includes `binId`
-- duration may be present at top level
+- includes `binId`
+- includes `gridId`
+- includes `portId`
+- duration present at top level
 
 UI meaning:
 - a meaningful picking milestone
@@ -275,8 +279,10 @@ Expected state effect:
 - if all required bins are picked, transition toward **Packed**
 
 Important data:
-- usually includes `shipmentId`
-- usually includes `binId`
+- includes `shipmentId`
+- includes `binId`
+- includes `gridId`
+- includes `portId`
 - duration exists at the top level
 
 UI meaning:
@@ -297,8 +303,8 @@ Expected state effect:
 - create or imply pending bin requests
 
 Important data:
-- usually includes `gridId`
-- usually includes `portId`
+- includes `gridId`
+- includes `portId`
 
 UI meaning:
 - key transition from waiting/ready state into active work
@@ -317,7 +323,7 @@ Expected state effect:
 - otherwise place shipment in a queue
 
 Important data:
-- usually includes `shipmentId`
+- includes `shipmentId`
 
 UI meaning:
 - important transition between routing and actual handling
@@ -336,7 +342,9 @@ Expected state effect:
 - possibly trigger the next shipment on that port
 
 Important data:
-- usually includes `shipmentId`
+- includes `shipmentId`
+- includes `gridId`
+- includes `portId`
 
 UI meaning:
 - major milestone
@@ -355,8 +363,8 @@ Expected state effect:
 - may immediately coincide with `ShipmentShipped` events at the same `simTime`
 
 Important data:
-- may include `sortingDirection`
-- may include `shipmentsTakenForShipping`
+- includes `sortingDirection`
+- includes `shipmentsTakenForShipping`
 
 UI meaning:
 - important logistics event
@@ -374,7 +382,7 @@ Expected state effect:
 - mark shipment status as **Shipped**
 
 Important data:
-- usually includes `shipmentId`
+- includes `shipmentId`
 
 UI meaning:
 - final shipment lifecycle milestone
@@ -393,10 +401,10 @@ Expected state effect:
 - possibly distinguish reopening from break vs opening for shift
 
 Important data:
-- usually includes `gridId`
-- usually includes `portId`
-- usually includes `fromBreak`
-- usually includes `handlingFlags`
+- includes `gridId`
+- includes `portId`
+- includes `fromBreak`
+- includes `handlingFlags`
 
 UI meaning:
 - operational availability signal
@@ -415,10 +423,10 @@ Expected state effect:
 - possibly distinguish break start vs shift end
 
 Important data:
-- usually includes `gridId`
-- usually includes `portId`
-- usually includes `intoBreak`
-- usually includes `handlingFlags`
+- includes `gridId`
+- includes `portId`
+- includes `intoBreak`
+- includes `handlingFlags`
 
 UI meaning:
 - useful for operational schedule context

@@ -9,9 +9,12 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class BinPickCompletedEvent extends Event {
@@ -20,6 +23,7 @@ public class BinPickCompletedEvent extends Event {
     private final String portId;
     private final String binId;
     private final String shipmentId;
+    private Map<String, Integer> itemsPicked;
 
     public BinPickCompletedEvent(long simTime, String shipmentId, String gridId,  String portId, String binId, long duration) {
         super(simTime, duration);
@@ -37,6 +41,7 @@ public class BinPickCompletedEvent extends Event {
         Port port = state.getPort(portId);
 
         bin.deductStock(shipment.getItemsForBin(binId));
+        itemsPicked = shipment.getItemsForBin(binId);
         bin.release();
         port.releaseBin();
         shipment.completeBinPick(binId);
@@ -56,7 +61,7 @@ public class BinPickCompletedEvent extends Event {
 
         // Check the port's shipment progress: if not fully packed, request next bin for this port.
         if (shipment.isFullyPicked()) {
-            events.add(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration(), shipment.getHandlingFlags()));
+            events.add(new ShipmentPackedEvent(getSimTime(), shipmentId, gridId, portId, getDuration()));
         } else {
             BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);
             if (event != null) {
@@ -74,11 +79,14 @@ public class BinPickCompletedEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "shipmentId", shipmentId,
-                "binId", binId,
-                "gridId", gridId,
-                "portId", portId
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("binId", binId),
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("itemsPicked", itemsPicked)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

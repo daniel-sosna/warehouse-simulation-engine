@@ -8,8 +8,11 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static lt.bananull.whse.simulator.enums.BinStatus.AVAILABLE;
 
@@ -18,6 +21,8 @@ public class BinRequestedAtPortEvent extends Event {
     private final String binId;
     private final String gridId;
     private final String portId;
+    private String shipmentId;
+    private Map<String, Integer> binStock;
 
     public BinRequestedAtPortEvent(long simTime, String binId, String gridId, String portId) {
         super(simTime);
@@ -63,6 +68,9 @@ public class BinRequestedAtPortEvent extends Event {
         long duration = Math.round(standardRate * mult);
         long arriveAt = getSimTime() + duration;
 
+        shipmentId = port.getActiveShipmentId();
+        binStock = bin.getStock();
+
         simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
 
         return List.of();
@@ -70,10 +78,14 @@ public class BinRequestedAtPortEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "binId", binId,
-                "gridId", gridId,
-                "portId", portId
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("binId", binId),
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("binStock", binStock)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

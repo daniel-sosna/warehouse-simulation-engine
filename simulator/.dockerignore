@@ -1,0 +1,29 @@
+# Build artifacts
+target/
+*.jar
+*.war
+
+# IDE settings
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Version control
+.git
+.gitignore
+
+# Local build/temp folders
+bin/
+out/
+
+# Docker specific
+Dockerfile
+docker-compose.yml
+.dockerignore
