@@ -21,14 +21,16 @@ public class BinTransferStartedEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         Bin bin = simulator.getState().getBin(binId);
-        bin.sendOnConveyorBelt(destGridId);
 
         double mult = simulator.resolveMultiplier(simulator.getParameters().transfersConveyors().durationRandomness());
         int standardRate = simulator.getParameters().getBaseTransferDurationSeconds(bin.getCurrentGridId(), destGridId);
         long duration = Math.round(standardRate * mult);
         long arrivesAt = getSimTime() + duration;
 
-        return List.of(new BinTransferCompletedEvent(arrivesAt, binId, destGridId));
+        bin.sendOnConveyorBelt(destGridId);
+        simulator.enqueueEvent(new BinTransferCompletedEvent(arrivesAt, duration, binId, destGridId));
+
+        return List.of();
     }
 
     @Override

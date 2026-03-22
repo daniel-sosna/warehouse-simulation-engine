@@ -25,6 +25,7 @@ public class ShipmentStartsConsolidationEvent extends Event {
         String packingGrid = assignment.packingGrid();
         Shipment shipment = simulator.getState().getShipment(assignment.shipmentId());
         shipment.routeToGrid(packingGrid, assignment.picks());
+        shipment.startConsolidation();
 
         List<Event> events = new ArrayList<>();
 
@@ -49,6 +50,9 @@ public class ShipmentStartsConsolidationEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of();
+        return Map.of(
+            "shipmentId", assignment.shipmentId(),
+            "packingGrid", assignment.packingGrid()
+        );
     }
 }

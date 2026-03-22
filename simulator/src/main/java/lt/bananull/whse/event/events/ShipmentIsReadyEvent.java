@@ -25,7 +25,6 @@ public class ShipmentIsReadyEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
-        shipment.startConsolidation();
         shipment.markReady();
 
         gridId = shipment.getAssignedGridId();

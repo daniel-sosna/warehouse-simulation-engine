@@ -17,8 +17,8 @@ public class BinTransferCompletedEvent extends Event {
     private final String binId;
     private final String destGridId;
 
-    public BinTransferCompletedEvent(long simTime, String binId, String destGridId) {
-        super(simTime);
+    public BinTransferCompletedEvent(long simTime, long duration, String binId, String destGridId) {
+        super(simTime, duration);
         this.binId = binId;
         this.destGridId = destGridId;
     }

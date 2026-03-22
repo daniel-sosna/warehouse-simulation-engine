@@ -2,6 +2,7 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
+import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
@@ -62,6 +63,11 @@ public class BinPickCompletedEvent extends Event {
                 events.add(event);
             }
         }
+
+        // Check assignments queue
+        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
+        assignments.forEach(assignment ->
+            events.add(new ShipmentStartsConsolidationEvent(getSimTime(), assignment)));
 
         return events;
     }

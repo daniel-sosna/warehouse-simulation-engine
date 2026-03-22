@@ -77,6 +77,8 @@ public class Simulator {
     public List<AssignmentDto> pollAssignmentsToDispatch() {
         List<AssignmentDto> assignmentsToDispatch = new ArrayList<>();
 
+        // Check bin that has been used in this loop
+
         while (!assignments.isEmpty()) {
             AssignmentDto assignmentDto = assignments.peek();
 
