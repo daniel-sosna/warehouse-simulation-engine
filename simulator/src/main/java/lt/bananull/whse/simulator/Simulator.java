@@ -113,16 +113,17 @@ public class Simulator {
         return randomnessResolver.resolveMultiplier(randomness);
     }
 
-    public String getHealthString() {
-        double progressPercent = simulationDurationSeconds == 0 ? 100.0 : simTime * 100.0 / simulationDurationSeconds;
-
-        return String.format("simTime=%-7d | simTime=%-9s | progress=%-6s | scheduled events=%d",
+    public HealthData getHealthData() {
+        return new HealthData(
             simTime,
             String.format("%dd %02d:%02d", simTime / (24 * 3600), simTime % (24 * 3600) / 3600, simTime % 3600 / 60),
-            String.format("~%.1f%%", progressPercent),
+            simulationDurationSeconds == 0 ? 100.0 : simTime * 100.0 / simulationDurationSeconds,
             events.size()
         );
     }
+
+    public record HealthData(long simTimeSeconds, String simTimeReadable, double progressPercent,
+                             int scheduledEvents) {}
 
     private void enqueueTruckEvents() {
         List<TruckArrivalEvent> truckEvents = TruckArrivalService.generateTruckArrivalEvents(parameters.simulationStartTime(),
