@@ -324,6 +324,7 @@ export function applyEventToState(
         const shipment = ensureShipment(state, shipmentId);
         shipment.status = "ready";
         shipment.readyAtSimTime = event.simTime;
+        shipment.gridId = gridId;
         shipment.eventIndices.push(event.index);
         enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsReady += 1;

@@ -1,7 +1,9 @@
 import {
   ChangeEvent,
   PointerEvent as ReactPointerEvent,
+  RefObject,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -16,6 +18,15 @@ import {
 import { useSimulationStore } from "./store/useSimulationStore";
 
 type AppTab = "timeline" | "statistics";
+type ExplorerEntityType = "shipments" | "ports" | "bins";
+type ExplorerRow = {
+  key: string;
+  title: string;
+  badge: string;
+  summary: [string, string, string];
+  searchText: string;
+  fields: Array<{ label: string; value: string }>;
+};
 
 function formatTimestamp(timestamp: string | null) {
   return timestamp ?? "Unavailable";
@@ -162,10 +173,15 @@ export default function App() {
     scrubToEvent,
   } = useSimulationStore();
   const [activeTab, setActiveTab] = useState<AppTab>("timeline");
+  const [explorerTab, setExplorerTab] = useState<ExplorerEntityType>("shipments");
+  const [explorerSearch, setExplorerSearch] = useState("");
+  const [selectedExplorerKey, setSelectedExplorerKey] = useState<string | null>(null);
+  const [explorerScrollTop, setExplorerScrollTop] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<NormalizedEvent | null>(null);
   const [mapOffset, setMapOffset] = useState({ x: 120, y: 120 });
   const [isPanning, setIsPanning] = useState(false);
   const [autoFollow, setAutoFollow] = useState(true);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const dragStateRef = useRef<{
     startX: number;
     startY: number;
@@ -176,6 +192,7 @@ export default function App() {
   } | null>(null);
   const pendingOffsetRef = useRef({ x: 120, y: 120 });
   const animationFrameRef = useRef<number | null>(null);
+  const explorerListRef = useRef<HTMLDivElement | null>(null);
   const timelineViewportRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -214,11 +231,79 @@ export default function App() {
 
   useEffect(() => {
     setActiveTab("timeline");
+    setExplorerTab("shipments");
+    setExplorerSearch("");
+    setSelectedExplorerKey(null);
+    setExplorerScrollTop(0);
     setSelectedEvent(null);
     setMapOffset({ x: 120, y: 120 });
     pendingOffsetRef.current = { x: 120, y: 120 };
     setAutoFollow(true);
   }, [loadedSimulation?.sourceName]);
+
+  const shipmentRows = useMemo(
+    () => Object.values(replayState.shipmentsById).map((shipment) => buildShipmentRow(shipment)),
+    [replayState.shipmentsById],
+  );
+  const portRows = useMemo(
+    () => Object.values(replayState.portsById).map((port) => buildPortRow(port)),
+    [replayState.portsById],
+  );
+  const binRows = useMemo(
+    () => Object.values(replayState.binsById).map((bin) => buildBinRow(bin)),
+    [replayState.binsById],
+  );
+
+  const explorerRows = useMemo(() => {
+    switch (explorerTab) {
+      case "ports":
+        return portRows;
+      case "bins":
+        return binRows;
+      case "shipments":
+      default:
+        return shipmentRows;
+    }
+  }, [binRows, explorerTab, portRows, shipmentRows]);
+
+  const filteredExplorerRows = useMemo(() => {
+    const normalizedSearch = explorerSearch.trim().toLowerCase();
+    if (!normalizedSearch) {
+      return explorerRows;
+    }
+
+    return explorerRows.filter((row) => row.searchText.includes(normalizedSearch));
+  }, [explorerRows, explorerSearch]);
+
+  const selectedExplorerRow =
+    filteredExplorerRows.find((row) => row.key === selectedExplorerKey) ??
+    explorerRows.find((row) => row.key === selectedExplorerKey) ??
+    null;
+
+  useEffect(() => {
+    setSelectedExplorerKey(null);
+    setExplorerSearch("");
+    setExplorerScrollTop(0);
+    if (explorerListRef.current) {
+      explorerListRef.current.scrollTop = 0;
+    }
+  }, [explorerTab]);
+
+  useEffect(() => {
+    setExplorerScrollTop(0);
+    if (explorerListRef.current) {
+      explorerListRef.current.scrollTop = 0;
+    }
+  }, [explorerSearch]);
+
+  useEffect(() => {
+    if (
+      selectedExplorerKey &&
+      !explorerRows.some((row) => row.key === selectedExplorerKey)
+    ) {
+      setSelectedExplorerKey(null);
+    }
+  }, [explorerRows, selectedExplorerKey]);
 
 const timelineEvents =
   loadedSimulation
@@ -284,6 +369,67 @@ const timelineEvents =
     980,
     Math.max(...timelineEvents.map((event) => event.y + 180), 980),
   );
+
+  const visibleBounds = useMemo(() => {
+    const overscan = 500;
+
+    const viewportWidth = viewportSize.width || window.innerWidth;
+    const viewportHeight = viewportSize.height || window.innerHeight;
+
+    const left = -mapOffset.x - overscan;
+    const top = -mapOffset.y - overscan;
+    const right = -mapOffset.x + viewportWidth + overscan;
+    const bottom = -mapOffset.y + viewportHeight + overscan;
+
+    return { left, top, right, bottom };
+  }, [mapOffset.x, mapOffset.y, viewportSize.width, viewportSize.height]);
+
+  const visibleTimelineEvents = useMemo(() => {
+    const selectedIndex = selectedEvent?.index ?? -1;
+    const currentIndex = replayState.currentEventIndex;
+
+    return timelineEvents.filter((event) => {
+      const cardLeft = event.x;
+      const cardTop = event.y;
+      const cardRight = event.x + 208;
+      const cardBottom = event.y + 124;
+
+      const inViewport =
+        cardRight >= visibleBounds.left &&
+        cardLeft <= visibleBounds.right &&
+        cardBottom >= visibleBounds.top &&
+        cardTop <= visibleBounds.bottom;
+
+      const mustKeep =
+        event.index === currentIndex || event.index === selectedIndex;
+
+      return inViewport || mustKeep;
+    });
+  }, [
+    timelineEvents,
+    visibleBounds,
+    replayState.currentEventIndex,
+    selectedEvent?.index,
+  ]);
+
+  const visibleEventIndexSet = useMemo(() => {
+    return new Set(visibleTimelineEvents.map((event) => event.index));
+  }, [visibleTimelineEvents]);
+
+  const visibleLinePairs = useMemo(() => {
+    return timelineEvents.slice(0, -1).flatMap((event, index) => {
+      const nextEvent = timelineEvents[index + 1];
+      if (!nextEvent) {
+        return [];
+      }
+
+      const shouldRender =
+        visibleEventIndexSet.has(event.index) ||
+        visibleEventIndexSet.has(nextEvent.index);
+
+      return shouldRender ? [{ event, nextEvent }] : [];
+    });
+  }, [timelineEvents, visibleEventIndexSet]);
 
   const currentTimelineEvent =
     replayState.currentEventIndex >= 0
@@ -360,6 +506,33 @@ const timelineEvents =
     setAutoFollow(true);
     focusEventInViewport(latest);
   }
+
+  useEffect(() => {
+    if (activeTab !== "timeline" || !timelineViewportRef.current) {
+      return;
+    }
+
+    const element = timelineViewportRef.current;
+
+    const updateSize = () => {
+      setViewportSize({
+        width: element.clientWidth,
+        height: element.clientHeight,
+      });
+    };
+
+    updateSize();
+
+    const observer = new ResizeObserver(() => {
+      updateSize();
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [activeTab, loadedSimulation]);
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (event.button !== 0 || isNoPanTarget(event.target)) {
@@ -623,12 +796,7 @@ const timelineEvents =
               viewBox={`0 0 ${timelineWidth} ${timelineHeight}`}
               fill="none"
             >
-              {timelineEvents.slice(0, -1).map((event, index) => {
-                const nextEvent = timelineEvents[index + 1];
-                if (!nextEvent) {
-                  return null;
-                }
-
+              {visibleLinePairs.map(({ event, nextEvent }) => {
                 const lineVisible = event.revealed && nextEvent.revealed;
                 const sameGroup = event.groupIndex === nextEvent.groupIndex;
 
@@ -653,7 +821,7 @@ const timelineEvents =
               })}
             </svg>
 
-            {timelineEvents.map((event) => {
+            {visibleTimelineEvents.map((event) => {
               const activeReplayEvent = event.index === replayState.currentEventIndex;
               const selectedTimelineEvent = selectedEvent?.index === event.index;
 
@@ -950,27 +1118,103 @@ const timelineEvents =
           />
         </div>
 
-        <div className="mt-6 space-y-4">
-          <EntityAccordion
-            defaultOpen
-            title="Shipments"
-            count={Object.keys(replayState.shipmentsById).length}
-            rows={Object.values(replayState.shipmentsById).map((shipment) =>
-              buildShipmentRow(shipment),
-            )}
-          />
-          <EntityAccordion
-            title="Ports"
-            count={Object.keys(replayState.portsById).length}
-            rows={Object.values(replayState.portsById).map((port) =>
-              buildPortRow(port),
-            )}
-          />
-          <EntityAccordion
-            title="Bins"
-            count={Object.keys(replayState.binsById).length}
-            rows={Object.values(replayState.binsById).map((bin) => buildBinRow(bin))}
-          />
+        <div className="mt-6 rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
+                Entity Explorer
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                Browse replay entities at scale
+              </h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Scan rows quickly, filter the active entity type, and inspect the
+                selected entity in the side drawer.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 p-1">
+                <ExplorerTabButton
+                  active={explorerTab === "shipments"}
+                  label="Shipments"
+                  onClick={() => setExplorerTab("shipments")}
+                />
+                <ExplorerTabButton
+                  active={explorerTab === "ports"}
+                  label="Ports"
+                  onClick={() => setExplorerTab("ports")}
+                />
+                <ExplorerTabButton
+                  active={explorerTab === "bins"}
+                  label="Bins"
+                  onClick={() => setExplorerTab("bins")}
+                />
+              </div>
+
+              <label className="flex min-w-[280px] items-center gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3">
+                <svg
+                  className="h-4 w-4 text-slate-400"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M8.75 3.75a5 5 0 1 0 0 10a5 5 0 0 0 0-10ZM13.25 13.25L16.25 16.25"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <input
+                  className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  placeholder={`Search ${explorerTab}...`}
+                  value={explorerSearch}
+                  onChange={(event) => setExplorerSearch(event.target.value)}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/70">
+              <div className="grid grid-cols-[minmax(0,1.3fr)_160px_160px_160px] gap-4 border-b border-slate-200 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <span>{explorerTab.slice(0, 1).toUpperCase() + explorerTab.slice(1, -1)}</span>
+                <span>Summary</span>
+                <span>Context</span>
+                <span>Signals</span>
+              </div>
+
+              {filteredExplorerRows.length ? (
+                <VirtualizedEntityList
+                  listRef={explorerListRef}
+                  rows={filteredExplorerRows}
+                  selectedKey={selectedExplorerKey}
+                  scrollTop={explorerScrollTop}
+                  onScroll={setExplorerScrollTop}
+                  onSelect={setSelectedExplorerKey}
+                />
+              ) : (
+                <div className="flex h-[560px] items-center justify-center px-6">
+                  <div className="max-w-md text-center">
+                    <p className="text-lg font-semibold text-slate-900">
+                      No matching {explorerTab}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Try a different search term or move replay to a point where
+                      more entities exist.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <EntityDetailDrawer
+              entityType={explorerTab}
+              row={selectedExplorerRow}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -978,10 +1222,28 @@ const timelineEvents =
 }
 
 function buildShipmentRow(shipment: ShipmentState) {
+  const handlingFlags = formatStringList(shipment.handlingFlags);
+  const itemSummary = formatItemQuantities(shipment.items);
   return {
     key: shipment.id,
     title: shipment.id,
     badge: shipment.status,
+    summary: [
+      shipment.sortingDirection ?? "No sorting direction",
+      shipment.activePortId ?? shipment.gridId ?? "No assignment",
+      handlingFlags === "Unavailable" ? "No handling flags" : handlingFlags,
+    ] as [string, string, string],
+    searchText: [
+      shipment.id,
+      shipment.status,
+      shipment.sortingDirection ?? "",
+      shipment.gridId ?? "",
+      shipment.activePortId ?? "",
+      handlingFlags === "Unavailable" ? "" : handlingFlags,
+      itemSummary === "Unavailable" ? "" : itemSummary,
+    ]
+      .join(" ")
+      .toLowerCase(),
     fields: [
       { label: "Status", value: shipment.status },
       {
@@ -990,11 +1252,11 @@ function buildShipmentRow(shipment: ShipmentState) {
       },
       {
         label: "Handling flags",
-        value: formatStringList(shipment.handlingFlags),
+        value: handlingFlags,
       },
       { label: "Grid", value: shipment.gridId ?? "Unavailable" },
       { label: "Active port", value: shipment.activePortId ?? "Unavailable" },
-      { label: "Items", value: formatItemQuantities(shipment.items) },
+      { label: "Items", value: itemSummary },
       {
         label: "Received at",
         value:
@@ -1025,10 +1287,29 @@ function buildShipmentRow(shipment: ShipmentState) {
 }
 
 function buildPortRow(port: PortState) {
+  const handlingFlags = port.handlingFlags.length
+    ? port.handlingFlags.join(", ")
+    : "None";
   return {
     key: port.id,
     title: port.id,
     badge: port.status,
+    summary: [
+      port.gridId ?? "No grid",
+      port.activeShipmentId ?? "No active shipment",
+      handlingFlags,
+    ] as [string, string, string],
+    searchText: [
+      port.id,
+      port.status,
+      port.gridId ?? "",
+      port.activeShipmentId ?? "",
+      port.activeBinId ?? "",
+      handlingFlags,
+      port.lastTransition ?? "",
+    ]
+      .join(" ")
+      .toLowerCase(),
     fields: [
       { label: "Status", value: port.status },
       { label: "Grid", value: port.gridId ?? "Unavailable" },
@@ -1039,37 +1320,44 @@ function buildPortRow(port: PortState) {
       { label: "Active bin", value: port.activeBinId ?? "Unavailable" },
       {
         label: "Handling flags",
-        value: port.handlingFlags.length
-          ? port.handlingFlags.join(", ")
-          : "None",
-      },
-      {
-        label: "Last transition",
-        value: port.lastTransition ?? "Unavailable",
+        value: handlingFlags,
       },
     ],
   };
 }
 
 function buildBinRow(bin: BinState) {
+  const binStock = formatItemQuantities(bin.binStock);
+  const itemsPicked = formatItemQuantities(bin.itemsPicked);
   return {
     key: bin.id,
     title: bin.id,
     badge: bin.status,
+    summary: [
+      bin.shipmentId ?? "No shipment link",
+      bin.portId ?? bin.gridId ?? "No location",
+      itemsPicked === "Unavailable" ? "No pick detail" : "Pick detail available",
+    ] as [string, string, string],
+    searchText: [
+      bin.id,
+      bin.status,
+      bin.shipmentId ?? "",
+      bin.portId ?? "",
+      bin.gridId ?? "",
+      binStock === "Unavailable" ? "" : binStock,
+      itemsPicked === "Unavailable" ? "" : itemsPicked,
+    ]
+      .join(" ")
+      .toLowerCase(),
     fields: [
       { label: "Status", value: bin.status },
       { label: "Grid", value: bin.gridId ?? "Unavailable" },
       { label: "Port", value: bin.portId ?? "Unavailable" },
       { label: "Shipment", value: bin.shipmentId ?? "Unavailable" },
-      { label: "Bin stock", value: formatItemQuantities(bin.binStock) },
+      { label: "Bin stock", value: binStock },
       {
         label: "Items picked",
-        value: formatItemQuantities(bin.itemsPicked),
-      },
-      {
-        label: "Last event index",
-        value:
-          bin.lastEventIndex === null ? "Unavailable" : String(bin.lastEventIndex + 1),
+        value: itemsPicked,
       },
     ],
   };
@@ -1193,101 +1481,161 @@ function KpiCard({
   );
 }
 
-function EntityAccordion({
-  title,
-  count,
-  rows,
-  defaultOpen = false,
+function ExplorerTabButton({
+  active,
+  label,
+  onClick,
 }: {
-  title: string;
-  count: number;
-  rows: Array<{
-    key: string;
-    title: string;
-    badge: string;
-    fields: Array<{ label: string; value: string }>;
-  }>;
-  defaultOpen?: boolean;
+  active: boolean;
+  label: string;
+  onClick: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <button
+      className={cn(
+        "rounded-full px-4 py-2 text-sm font-medium transition",
+        active
+          ? "bg-slate-950 text-white shadow-sm"
+          : "text-slate-600 hover:bg-white hover:text-slate-950",
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+function VirtualizedEntityList({
+  listRef,
+  rows,
+  selectedKey,
+  scrollTop,
+  onScroll,
+  onSelect,
+}: {
+  listRef: RefObject<HTMLDivElement>;
+  rows: ExplorerRow[];
+  selectedKey: string | null;
+  scrollTop: number;
+  onScroll: (value: number) => void;
+  onSelect: (value: string) => void;
+}) {
+  const rowHeight = 78;
+  const viewportHeight = 560;
+  const overscan = 6;
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+  const visibleCount = Math.ceil(viewportHeight / rowHeight) + overscan * 2;
+  const endIndex = Math.min(rows.length, startIndex + visibleCount);
+  const visibleRows = rows.slice(startIndex, endIndex);
 
   return (
-    <div className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm">
-      <button
-        className="flex w-full items-center justify-between gap-3 rounded-[1.2rem] text-left transition hover:bg-slate-50"
-        onClick={() => setIsOpen((current) => !current)}
-        type="button"
+    <div
+      ref={listRef}
+      className="h-[560px] overflow-auto"
+      onScroll={(event) => onScroll(event.currentTarget.scrollTop)}
+    >
+      <div
+        className="relative"
+        style={{ height: rows.length * rowHeight }}
       >
-        <div>
-          <p className="text-lg font-semibold text-slate-950">{title}</p>
-          <p className="text-sm text-slate-500">{count} tracked entities</p>
-        </div>
-        <span
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-full border transition",
-            isOpen
-              ? "border-slate-900 bg-slate-900 text-white"
-              : "border-slate-200 bg-slate-100 text-slate-500",
-          )}
-        >
-          <svg
-            className={cn("h-5 w-5 transition-transform duration-200", isOpen ? "rotate-180" : "rotate-0")}
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M5 7.5L10 12.5L15 7.5"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-      </button>
+        {visibleRows.map((row, index) => {
+          const rowIndex = startIndex + index;
+          const selected = row.key === selectedKey;
 
-      {isOpen && (
-        <div className="mt-4 space-y-3">
-          {rows.length ? (
-            rows.map((row) => (
-              <div
-                key={row.key}
-                className="rounded-[1.3rem] border border-slate-200 bg-slate-50 px-4 py-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-slate-950">
+          return (
+            <button
+              key={row.key}
+              className={cn(
+                "absolute left-0 right-0 grid grid-cols-[minmax(0,1.3fr)_160px_160px_160px] gap-4 border-b border-slate-200 px-4 py-3 text-left transition",
+                selected
+                  ? "bg-sky-50"
+                  : "bg-transparent hover:bg-white/70",
+              )}
+              style={{ top: rowIndex * rowHeight, height: rowHeight }}
+              onClick={() => onSelect(row.key)}
+              type="button"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold text-slate-950">
                     {row.title}
                   </span>
-                  <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                     {row.badge}
                   </span>
                 </div>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {row.fields.map((field) => (
-                    <div
-                      key={`${row.key}-${field.label}`}
-                      className="rounded-[1rem] border border-white bg-white px-3 py-3"
-                    >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                        {field.label}
-                      </p>
-                      <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-slate-700">
-                        {field.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
               </div>
-            ))
-          ) : (
-            <div className="rounded-[1.2rem] border border-dashed border-slate-200 px-4 py-5 text-sm text-slate-500">
-              No entities are visible at the current replay point.
+              {row.summary.map((value, summaryIndex) => (
+                <div
+                  key={`${row.key}-${summaryIndex}`}
+                  className="truncate text-sm text-slate-600"
+                >
+                  {value}
+                </div>
+              ))}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EntityDetailDrawer({
+  entityType,
+  row,
+}: {
+  entityType: ExplorerEntityType;
+  row: ExplorerRow | null;
+}) {
+  return (
+    <aside className="h-[640px] overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50/70 p-4">
+      {row ? (
+        <div className="flex h-full flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">
+                {entityType.slice(0, 1).toUpperCase() + entityType.slice(1, -1)} detail
+              </p>
+              <h4 className="mt-2 text-xl font-semibold text-slate-950">
+                {row.title}
+              </h4>
             </div>
-          )}
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              {row.badge}
+            </span>
+          </div>
+
+          <div className="mt-5 flex-1 space-y-3 overflow-auto pr-1">
+            {row.fields.map((field) => (
+              <div
+                key={`${row.key}-${field.label}`}
+                className="rounded-[1.1rem] border border-white bg-white px-4 py-3"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  {field.label}
+                </p>
+                <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-slate-700">
+                  {field.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex h-full min-h-[560px] items-center justify-center">
+          <div className="max-w-sm text-center">
+            <p className="text-lg font-semibold text-slate-950">
+              Select a row to inspect details
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              The selected {entityType.slice(0, -1)} stays highlighted in the
+              explorer while this drawer is open.
+            </p>
+          </div>
         </div>
       )}
-    </div>
+    </aside>
   );
 }
