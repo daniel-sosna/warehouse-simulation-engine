@@ -2,18 +2,28 @@ package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Bin;
 
 import java.util.List;
 import java.util.Map;
 
 public class BinTransferCompletedEvent extends Event {
 
-    public BinTransferCompletedEvent(long simTime) {
+    private final String shipmentId;
+    private final String binId;
+    private final String destGridId;
+
+    public BinTransferCompletedEvent(long simTime, String shipmentId, String binId, String destGridId) {
         super(simTime);
+        this.shipmentId = shipmentId;
+        this.binId = binId;
+        this.destGridId = destGridId;
     }
 
     @Override
     public List<Event> execute(Simulator simulator) {
+        Bin bin = simulator.getState().getBin(binId);
+        bin.arriveAtGrid(destGridId);
         return List.of();
     }
 

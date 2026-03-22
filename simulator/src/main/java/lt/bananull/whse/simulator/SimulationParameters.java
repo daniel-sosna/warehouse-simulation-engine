@@ -150,4 +150,24 @@ public record SimulationParameters(
             @JsonProperty("min") double min,
             @JsonProperty("max") double max
     ) {}
+
+    public int getBaseTransferDurationSeconds(String fromGridId, String toGridId) {
+        if (fromGridId.equals(toGridId)) return 0;
+
+        return transfersConveyors().durations().stream()
+            .filter(d ->
+                (d.from().equals(fromGridId) && d.to().equals(toGridId)) ||
+                    (d.from().equals(toGridId) && d.to().equals(fromGridId))
+            )
+            .findFirst()
+            .map(TransferDuration::duration)   // <-- FIXED
+            .orElseThrow(() -> new IllegalArgumentException(
+                "No transfer duration configured for pair " + fromGridId + " <-> " + toGridId
+            ));
+    }
+
+    public long getTransferDurationSeconds(String fromGridId, String toGridId, double randomnessMultiplier) {
+        int base = getBaseTransferDurationSeconds(fromGridId, toGridId);
+        return Math.max(0L, Math.round(base * randomnessMultiplier));
+    }
 }

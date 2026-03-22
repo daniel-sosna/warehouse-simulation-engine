@@ -170,7 +170,7 @@ public class Bin {
         }
 
         this.currentGridId = gridId;
-        this.status = BinStatus.AVAILABLE;
+        this.status = BinStatus.RESERVED; // when it moves grids, it means it was reserved
     }
 
     public void enqueuePort(String portId) {
