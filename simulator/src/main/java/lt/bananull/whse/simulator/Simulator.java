@@ -36,7 +36,7 @@ public class Simulator {
     @Getter private final long simulationDurationSeconds;
     @Getter private final ZoneId zoneId = ZoneId.of("UTC"); // for now just hardcoded the zone
 
-    @Getter private long simTime = 0;
+    @Getter private volatile long simTime = 0;
     @Getter private final SimulationState state;
     @Getter private final SimulationParameters parameters;
     @Getter private final EventHandler eventHandler;
@@ -95,7 +95,6 @@ public class Simulator {
     }
 
     public void run() {
-        System.out.println("Simulator started");
         enqueueTruckEvents();
         startPorts();
 
@@ -103,20 +102,26 @@ public class Simulator {
             Event e = events.poll();
             long eventSimTime = e.getSimTime();
             if (simTime != eventSimTime) {
-                if (eventSimTime % (3600 * 6) == 0) {
-                    System.out.printf("Sim time: %s hours\t| scheduled events: %d\t| progress: ~%.1f%%%n",
-                        eventSimTime / 3600, events.size(), simTime * 100.0 / simulationDurationSeconds);
-                }
                 simTime = eventSimTime;
             }
             if (simTime > simulationDurationSeconds) break;
             eventHandler.handle(e);
         }
-        System.out.println("Simulator finished");
     }
 
     public double resolveMultiplier(SimulationParameters.Randomness randomness) {
         return randomnessResolver.resolveMultiplier(randomness);
+    }
+
+    public String getHealthString() {
+        double progressPercent = simulationDurationSeconds == 0 ? 100.0 : simTime * 100.0 / simulationDurationSeconds;
+
+        return String.format("simTime=%-7d | simTime=%-9s | progress=%-6s | scheduled events=%d",
+            simTime,
+            String.format("%dd %02d:%02d", simTime / (24 * 3600), simTime % (24 * 3600) / 3600, simTime % 3600 / 60),
+            String.format("~%.1f%%", progressPercent),
+            events.size()
+        );
     }
 
     private void enqueueTruckEvents() {
