@@ -24,7 +24,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SplittableRandom;
 
@@ -76,18 +78,30 @@ public class Simulator {
 
     public List<AssignmentDto> pollAssignmentsToDispatch() {
         List<AssignmentDto> assignmentsToDispatch = new ArrayList<>();
-
-        // Check bin that has been used in this loop
+        Map<String, String> neededBinsInGrids = new HashMap<>();
 
         while (!assignments.isEmpty()) {
             AssignmentDto assignmentDto = assignments.peek();
+            String packingGrid = assignmentDto.packingGrid();
 
-            boolean allBinsAreAvailable = assignmentDto.picks().stream()
+            List<Bin> requiredBins = assignmentDto.picks().stream()
                 .map(PickDto::binId)
-                .allMatch(binId -> {
-                    Bin bin = state.getBin(binId);
-                    return bin.getCurrentGridId().equals(assignmentDto.packingGrid()) || !bin.isNeededInCurrentGrid();
-                });
+                .distinct()
+                .map(state::getBin)
+                .toList();
+
+            boolean allBinsAreAvailable = true;
+            for (Bin bin : requiredBins) {
+                if (
+                    (!neededBinsInGrids.containsKey(bin.getId()) || neededBinsInGrids.get(bin.getId()).equals(packingGrid))
+                    && (!bin.isNeededInCurrentGrid() || bin.getCurrentGridId().equals(packingGrid))
+                ) {
+                    neededBinsInGrids.put(bin.getId(), packingGrid);
+                } else {
+                    allBinsAreAvailable = false;
+                    break;
+                }
+            }
 
             if (!allBinsAreAvailable) {
                 break;
