@@ -28,7 +28,6 @@ public class BinTransferCompletedEvent extends Event {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.addArrivedBin(binId);
         if (shipment.isConsolidationComplete()) {
-            shipment.markReady();
             return List.of(new ShipmentIsReadyEvent(getSimTime(), shipmentId));
         }
         return List.of();

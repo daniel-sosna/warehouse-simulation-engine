@@ -5,5 +5,12 @@
     "itemsInBin": {
       "EAN-123": {"quantity": 1000}
     }
-  }
+  },
+    {
+        "id": "BIN-002",
+        "currentGridLocation": "AS2",
+        "itemsInBin": {
+            "EAN-124": {"quantity": 1000}
+        }
+    }
 ]

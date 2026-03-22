@@ -10,5 +10,17 @@
         ]
       }
     ]
-  }
+  },
+    {
+        "id": "AS2",
+        "shifts": [
+            {
+                "start": "07:00",
+                "end": "20:00",
+                "portConfig": [
+                    {"portIndex": "Port-2", "handlingFlags": []}
+                ]
+            }
+        ]
+    }
 ]
