@@ -871,12 +871,6 @@ const timelineEvents =
                 </button>
               );
             })}
-
-            {replayState.currentSimTime === null && (
-              <div className="absolute left-24 top-28 rounded-[1.5rem] border border-slate-200 bg-white/96 px-5 py-4 text-sm text-slate-600 shadow-lg">
-                Start replaying to reveal the timeline map.
-              </div>
-            )}
           </div>
         </div>
 
@@ -1000,10 +994,13 @@ const timelineEvents =
               </div>
 
               <div className="flex justify-center">
-                <label className="flex h-[42px] w-[110px] items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-                  <span>Speed</span>
+                <label className="relative flex h-[42px] w-[110px] cursor-pointer items-center justify-between gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 transition hover:border-sky-300 hover:bg-sky-50">
+                  <span className="pointer-events-none">Speed</span>
+                  <span className="pointer-events-none text-slate-900">
+                    {playbackSpeed}x
+                  </span>
                   <select
-                    className="bg-transparent text-slate-900 outline-none"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                     value={playbackSpeed}
                     onChange={(event) => setPlaybackSpeed(Number(event.target.value))}
                   >
