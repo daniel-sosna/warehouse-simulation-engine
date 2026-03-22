@@ -14,6 +14,8 @@ export interface EventData extends Record<string, unknown> {
   portId?: string;
   gridId?: string;
   binId?: string;
+  packingGrid?: string;
+  destGridId?: string;
   sortingDirection?: string;
   handlingFlags?: string[];
   items?: ItemQuantities;
@@ -56,6 +58,7 @@ export interface EventGroup {
 export type ShipmentStatus =
   | "unknown"
   | "received"
+  | "consolidation"
   | "ready"
   | "picking"
   | "packed"
@@ -74,6 +77,7 @@ export type BinStatus =
   | "available"
   | "requested"
   | "at-port"
+  | "outside"
   | "in-transfer";
 
 export interface ShipmentState {
@@ -85,6 +89,7 @@ export interface ShipmentState {
   shippedAtSimTime: number | null;
   activePortId: string | null;
   gridId: string | null;
+  packingGridId: string | null;
   sortingDirection: string | null;
   handlingFlags: string[];
   items: ItemQuantities | null;
@@ -110,6 +115,7 @@ export interface BinState {
   status: BinStatus;
   portId: string | null;
   shipmentId: string | null;
+  destGridId: string | null;
   binStock: ItemQuantities | null;
   itemsPicked: ItemQuantities | null;
   lastEventIndex: number | null;

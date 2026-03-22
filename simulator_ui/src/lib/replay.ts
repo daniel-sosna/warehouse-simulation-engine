@@ -33,6 +33,7 @@ function cloneShipments(
       id,
       {
         ...shipment,
+        packingGridId: shipment.packingGridId,
         handlingFlags: [...shipment.handlingFlags],
         items: cloneItemQuantities(shipment.items),
         pickedBinIds: [...shipment.pickedBinIds],
@@ -209,6 +210,7 @@ function ensureShipment(
       shippedAtSimTime: null,
       activePortId: null,
       gridId: null,
+      packingGridId: null,
       sortingDirection: null,
       handlingFlags: [],
       items: null,
@@ -258,6 +260,7 @@ function ensureBin(state: DerivedReplayState, binId: string) {
       status: "unknown",
       portId: null,
       shipmentId: null,
+      destGridId: null,
       binStock: null,
       itemsPicked: null,
       lastEventIndex: null,
@@ -296,6 +299,8 @@ export function applyEventToState(
   const portId = getString(data.portId);
   const gridId = getString(data.gridId);
   const binId = getString(data.binId);
+  const packingGrid = getString(data.packingGrid);
+  const destGridId = getString(data.destGridId);
 
   state.currentEventIndex = event.index;
   state.currentGroupIndex = event.groupIndex;
@@ -319,12 +324,30 @@ export function applyEventToState(
       }
       break;
     }
+    case "ShipmentStartsConsolidation": {
+      if (shipmentId) {
+        const shipment = ensureShipment(state, shipmentId);
+        shipment.status = "consolidation";
+        shipment.packingGridId = packingGrid;
+        shipment.gridId = packingGrid ?? shipment.gridId;
+        shipment.eventIndices.push(event.index);
+        changes.push(
+          packingGrid
+            ? `Shipment ${shipmentId} started consolidation for ${packingGrid}`
+            : `Shipment ${shipmentId} started consolidation`,
+        );
+      } else {
+        changes.push("Shipment consolidation started with missing shipmentId");
+      }
+      break;
+    }
     case "ShipmentIsReady": {
       if (shipmentId) {
         const shipment = ensureShipment(state, shipmentId);
         shipment.status = "ready";
         shipment.readyAtSimTime = event.simTime;
         shipment.gridId = gridId;
+        shipment.packingGridId = shipment.packingGridId ?? gridId;
         shipment.eventIndices.push(event.index);
         enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsReady += 1;
@@ -561,10 +584,15 @@ export function applyEventToState(
     case "BinTransferStarted": {
       if (binId) {
         const bin = ensureBin(state, binId);
-        bin.status = "in-transfer";
+        bin.status = "outside";
+        bin.destGridId = destGridId;
         bin.lastEventIndex = event.index;
       }
-      changes.push(binId ? `Bin ${binId} transfer started` : "Bin transfer started");
+      changes.push(
+        binId
+          ? `Bin ${binId} transfer started${destGridId ? ` to ${destGridId}` : ""}`
+          : "Bin transfer started",
+      );
       break;
     }
     case "BinTransferCompleted": {
@@ -572,12 +600,13 @@ export function applyEventToState(
         const bin = ensureBin(state, binId);
         bin.status = "available";
         bin.lastEventIndex = event.index;
-        if (gridId) {
-          bin.gridId = gridId;
-        }
+        bin.gridId = destGridId ?? gridId ?? bin.gridId;
+        bin.destGridId = null;
       }
       changes.push(
-        binId ? `Bin ${binId} transfer completed` : "Bin transfer completed",
+        binId
+          ? `Bin ${binId} transfer completed${destGridId ? ` at ${destGridId}` : ""}`
+          : "Bin transfer completed",
       );
       break;
     }

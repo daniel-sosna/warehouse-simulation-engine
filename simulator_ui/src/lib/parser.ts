@@ -11,6 +11,7 @@ import { buildReplayArtifacts } from "./replay";
 
 const HIGH_IMPORTANCE_EVENTS = new Set([
   "ShipmentReceived",
+  "ShipmentStartsConsolidation",
   "ShipmentIsReady",
   "PortStartsShipment",
   "BinArrivesAtPort",

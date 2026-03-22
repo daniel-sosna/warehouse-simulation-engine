@@ -86,10 +86,18 @@ function getItemQuantityValue(value: unknown) {
   return Object.keys(result).length ? result : null;
 }
 
+function estimateTimelineCardHeight(eventName: string) {
+  const charsPerLine = 18;
+  const lineCount = Math.max(1, Math.ceil(eventName.length / charsPerLine));
+  return 122 + Math.max(0, lineCount - 1) * 24;
+}
+
 function buildEventStructuredFields(event: NormalizedEvent) {
   const data = event.data as EventData;
   const fields: Array<{ label: string; value: string }> = [];
   const shipmentId = getStringValue(data.shipmentId);
+  const packingGrid = getStringValue(data.packingGrid);
+  const destGridId = getStringValue(data.destGridId);
   const sortingDirection = getStringValue(data.sortingDirection);
   const portId = getStringValue(data.portId);
   const gridId = getStringValue(data.gridId);
@@ -105,6 +113,12 @@ function buildEventStructuredFields(event: NormalizedEvent) {
   }
   if (sortingDirection) {
     fields.push({ label: "Sorting direction", value: sortingDirection });
+  }
+  if (packingGrid) {
+    fields.push({ label: "Packing grid", value: packingGrid });
+  }
+  if (destGridId) {
+    fields.push({ label: "Destination grid", value: destGridId });
   }
   if (handlingFlags) {
     fields.push({ label: "Handling flags", value: formatStringList(handlingFlags) });
@@ -309,7 +323,6 @@ const timelineEvents =
   loadedSimulation
     ? (() => {
         const groupSpacing = 360;
-        const cardVerticalSpacing = 156;
         const baseStartX = 220;
         const baseCenterY = 300;
         const topPadding = 120;
@@ -328,14 +341,25 @@ const timelineEvents =
           // slight overall wave across columns
           const columnCenterY = baseCenterY + Math.sin(groupIndex * 0.45) * 28;
 
+          const groupEventHeights = groupEvents.map((event) =>
+            estimateTimelineCardHeight(event.event),
+          );
+          const betweenCardSpacing = 32;
+          const totalGroupHeight =
+            groupEventHeights.reduce((sum, height) => sum + height, 0) +
+            Math.max(0, groupSize - 1) * betweenCardSpacing;
+          let cursorY = columnCenterY - totalGroupHeight / 2;
+
           return groupEvents.map((event, eventIndexWithinGroup) => {
-            const centeredOffset =
-              (eventIndexWithinGroup - (groupSize - 1) / 2) * cardVerticalSpacing;
+            const cardHeight = groupEventHeights[eventIndexWithinGroup] ?? 122;
+            const y = cursorY;
+            cursorY += cardHeight + betweenCardSpacing;
 
             return {
               ...event,
               x: columnX,
-              y: columnCenterY + centeredOffset,
+              y,
+              cardHeight,
               revealed: replayState.currentEventIndex >= event.index,
             };
           });
@@ -367,7 +391,7 @@ const timelineEvents =
 
   const timelineHeight = Math.max(
     980,
-    Math.max(...timelineEvents.map((event) => event.y + 180), 980),
+    Math.max(...timelineEvents.map((event) => event.y + event.cardHeight + 80), 980),
   );
 
   const visibleBounds = useMemo(() => {
@@ -392,7 +416,7 @@ const timelineEvents =
       const cardLeft = event.x;
       const cardTop = event.y;
       const cardRight = event.x + 208;
-      const cardBottom = event.y + 124;
+      const cardBottom = event.y + event.cardHeight;
 
       const inViewport =
         cardRight >= visibleBounds.left &&
@@ -801,8 +825,8 @@ const timelineEvents =
                 const sameGroup = event.groupIndex === nextEvent.groupIndex;
 
                 const d = sameGroup
-                  ? `M ${event.x + 104} ${event.y + 124} L ${nextEvent.x + 104} ${nextEvent.y}`
-                  : `M ${event.x + 208} ${event.y + 62} C ${event.x + 280} ${event.y + 62}, ${nextEvent.x - 72} ${nextEvent.y + 62}, ${nextEvent.x} ${nextEvent.y + 62}`;
+                  ? `M ${event.x + 104} ${event.y + event.cardHeight} L ${nextEvent.x + 104} ${nextEvent.y}`
+                  : `M ${event.x + 208} ${event.y + event.cardHeight / 2} C ${event.x + 280} ${event.y + event.cardHeight / 2}, ${nextEvent.x - 72} ${nextEvent.y + nextEvent.cardHeight / 2}, ${nextEvent.x} ${nextEvent.y + nextEvent.cardHeight / 2}`;
 
                 return (
                   <path
@@ -832,7 +856,7 @@ const timelineEvents =
                   onPointerDown={(pointerEvent) => {
                     pointerEvent.stopPropagation();
                   }}
-                  className={cn("absolute w-[208px] rounded-[1.55rem] border bg-white p-4 text-left shadow-[0_22px_55px_rgba(148,163,184,0.14)] transition-all duration-300",
+                  className={cn("absolute min-h-[122px] w-[208px] rounded-[1.55rem] border bg-white px-4 pb-5 pt-4 text-left shadow-[0_22px_55px_rgba(148,163,184,0.14)] transition-all duration-300",
                     
                     activeReplayEvent
                       ? "border-sky-400 shadow-[0_24px_60px_rgba(14,165,233,0.24)]"
@@ -843,7 +867,7 @@ const timelineEvents =
                       ? "pointer-events-auto translate-y-0 opacity-100"
                       : "pointer-events-none translate-y-4 opacity-0",
                   )}
-                  style={{ left: event.x, top: event.y }}
+                  style={{ left: event.x, top: event.y, minHeight: event.cardHeight }}
                   onClick={() => {
                     handleSelectEvent(event);
                   }}
@@ -858,7 +882,7 @@ const timelineEvents =
                     </span>
                   </div>
 
-                  <p className="mt-3 text-base font-semibold text-slate-950">
+                  <p className="mt-3 break-words text-base font-semibold leading-5 text-slate-950">
                     {event.event}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-slate-500">
@@ -917,6 +941,24 @@ const timelineEvents =
                   Jump replay to this event
                 </button>
               </div>
+
+              {buildEventStructuredFields(selectedEvent).length > 0 && (
+                <div className="mt-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Key details
+                  </p>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                    {buildEventStructuredFields(selectedEvent).map((field) => (
+                      <DetailCard
+                        key={`${selectedEvent.index}-${field.label}`}
+                        label={field.label}
+                        value={field.value}
+                        multiline
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -1220,7 +1262,7 @@ function buildShipmentRow(shipment: ShipmentState) {
     badge: shipment.status,
     summary: [
       shipment.sortingDirection ?? "No sorting direction",
-      shipment.activePortId ?? shipment.gridId ?? "No assignment",
+      shipment.activePortId ?? shipment.packingGridId ?? shipment.gridId ?? "No assignment",
       handlingFlags === "Unavailable" ? "No handling flags" : handlingFlags,
     ] as [string, string, string],
     searchText: [
@@ -1228,6 +1270,7 @@ function buildShipmentRow(shipment: ShipmentState) {
       shipment.status,
       shipment.sortingDirection ?? "",
       shipment.gridId ?? "",
+      shipment.packingGridId ?? "",
       shipment.activePortId ?? "",
       handlingFlags === "Unavailable" ? "" : handlingFlags,
       itemSummary === "Unavailable" ? "" : itemSummary,
@@ -1243,6 +1286,10 @@ function buildShipmentRow(shipment: ShipmentState) {
       {
         label: "Handling flags",
         value: handlingFlags,
+      },
+      {
+        label: "Packing grid",
+        value: shipment.packingGridId ?? "Unavailable",
       },
       { label: "Grid", value: shipment.gridId ?? "Unavailable" },
       { label: "Active port", value: shipment.activePortId ?? "Unavailable" },
@@ -1325,7 +1372,9 @@ function buildBinRow(bin: BinState) {
     badge: bin.status,
     summary: [
       bin.shipmentId ?? "No shipment link",
-      bin.portId ?? bin.gridId ?? "No location",
+      bin.status === "outside"
+        ? `Moving to ${bin.destGridId ?? "unknown destination"}`
+        : bin.portId ?? bin.gridId ?? "No location",
       itemsPicked === "Unavailable" ? "No pick detail" : "Pick detail available",
     ] as [string, string, string],
     searchText: [
@@ -1334,6 +1383,7 @@ function buildBinRow(bin: BinState) {
       bin.shipmentId ?? "",
       bin.portId ?? "",
       bin.gridId ?? "",
+      bin.destGridId ?? "",
       binStock === "Unavailable" ? "" : binStock,
       itemsPicked === "Unavailable" ? "" : itemsPicked,
     ]
@@ -1342,6 +1392,7 @@ function buildBinRow(bin: BinState) {
     fields: [
       { label: "Status", value: bin.status },
       { label: "Grid", value: bin.gridId ?? "Unavailable" },
+      { label: "Destination grid", value: bin.destGridId ?? "Unavailable" },
       { label: "Port", value: bin.portId ?? "Unavailable" },
       { label: "Shipment", value: bin.shipmentId ?? "Unavailable" },
       { label: "Bin stock", value: binStock },
