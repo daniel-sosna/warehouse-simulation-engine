@@ -220,54 +220,71 @@ export default function App() {
     setAutoFollow(true);
   }, [loadedSimulation?.sourceName]);
 
-  const timelineEvents =
-    loadedSimulation
-      ? (() => {
-          let nextGroupX = 180;
+const timelineEvents =
+  loadedSimulation
+    ? (() => {
+        const groupSpacing = 360;
+        const cardVerticalSpacing = 156;
+        const baseStartX = 220;
+        const baseCenterY = 300;
+        const topPadding = 120;
 
-          return loadedSimulation.eventGroups.flatMap((group, groupIndex) => {
-            const groupEvents = loadedSimulation.events.slice(
-              group.startEventIndex,
-              group.endEventIndex + 1,
-            );
+        const rawEvents = loadedSimulation.eventGroups.flatMap((group, groupIndex) => {
+          const groupEvents = loadedSimulation.events.slice(
+            group.startEventIndex,
+            group.endEventIndex + 1,
+          );
 
-            const groupSize = groupEvents.length;
-            const cardSpacing = 236; // wider than card width (208px) so cards do not overlap
-            const groupSpread = (groupSize - 1) * cardSpacing;
-            const groupCenterX = nextGroupX + groupSpread / 2;
+          const groupSize = groupEvents.length;
 
-            // gentle global wave so the timeline is not perfectly straight
-            const baseY = 250 + Math.sin(groupIndex * 0.55) * 24;
+          // one column per simTime group
+          const columnX = baseStartX + groupIndex * groupSpacing;
 
-            const positioned = groupEvents.map((event, eventIndexWithinGroup) => {
-              const centeredOffset =
-                (eventIndexWithinGroup - (groupSize - 1) / 2) * cardSpacing;
+          // slight overall wave across columns
+          const columnCenterY = baseCenterY + Math.sin(groupIndex * 0.45) * 28;
 
-              // tiny vertical variation inside the same group
-              const localYOffset =
-                (eventIndexWithinGroup - (groupSize - 1) / 2) * 12;
+          return groupEvents.map((event, eventIndexWithinGroup) => {
+            const centeredOffset =
+              (eventIndexWithinGroup - (groupSize - 1) / 2) * cardVerticalSpacing;
 
-              return {
-                ...event,
-                x: groupCenterX + centeredOffset,
-                y: baseY + localYOffset,
-                revealed: replayState.currentEventIndex >= event.index,
-              };
-            });
-
-            // leave enough room before the next group
-            nextGroupX += Math.max(320, groupSpread + 300);
-
-            return positioned;
+            return {
+              ...event,
+              x: columnX,
+              y: columnCenterY + centeredOffset,
+              revealed: replayState.currentEventIndex >= event.index,
+            };
           });
-        })()
-      : [];
+        });
+
+        const minY = Math.min(...rawEvents.map((event) => event.y), topPadding);
+        const shiftY = minY < topPadding ? topPadding - minY : 0;
+
+        return rawEvents.map((event) => ({
+          ...event,
+          y: event.y + shiftY,
+        }));
+      })()
+    : [];
+
+  const maxGroupSize = loadedSimulation
+    ? Math.max(
+        ...loadedSimulation.eventGroups.map(
+          (group) => group.endEventIndex - group.startEventIndex + 1,
+        ),
+        1,
+      )
+    : 1;
 
   const timelineWidth = Math.max(
     2200,
     (timelineEvents[timelineEvents.length - 1]?.x ?? 0) + 700,
   );
-  const timelineHeight = 980;
+
+  const timelineHeight = Math.max(
+    980,
+    Math.max(...timelineEvents.map((event) => event.y + 180), 980),
+  );
+
   const currentTimelineEvent =
     replayState.currentEventIndex >= 0
       ? timelineEvents[replayState.currentEventIndex] ?? null
@@ -432,17 +449,12 @@ export default function App() {
   }
 
   function handleJumpReplayToSelectedEvent() {
-    if (!loadedSimulation || !selectedEvent) {
+    if (!selectedEvent) {
       return;
     }
 
-    const group = loadedSimulation.eventGroups[selectedEvent.groupIndex];
-    if (!group) {
-      return;
-    }
-
-    setAutoFollow(false);
-    scrubToEvent(group.endEventIndex);
+    setAutoFollow(true);
+    scrubToEvent(selectedEvent.index);
   }
 
   function getFollowOffsetForEvent(event: { x: number; y: number }) {
@@ -618,10 +630,16 @@ export default function App() {
                 }
 
                 const lineVisible = event.revealed && nextEvent.revealed;
+                const sameGroup = event.groupIndex === nextEvent.groupIndex;
+
+                const d = sameGroup
+                  ? `M ${event.x + 104} ${event.y + 124} L ${nextEvent.x + 104} ${nextEvent.y}`
+                  : `M ${event.x + 208} ${event.y + 62} C ${event.x + 280} ${event.y + 62}, ${nextEvent.x - 72} ${nextEvent.y + 62}, ${nextEvent.x} ${nextEvent.y + 62}`;
+
                 return (
                   <path
                     key={`line-${event.index}`}
-                    d={`M ${event.x + 104} ${event.y + 62} C ${event.x + 150} ${event.y + 62}, ${nextEvent.x - 46} ${nextEvent.y + 62}, ${nextEvent.x} ${nextEvent.y + 62}`}
+                    d={d}
                     stroke={lineVisible ? "#0ea5e9" : "#dbeafe"}
                     strokeDasharray={lineVisible ? "0" : "8 12"}
                     strokeLinecap="round"
@@ -741,7 +759,7 @@ export default function App() {
                   onClick={handleJumpReplayToSelectedEvent}
                   type="button"
                 >
-                  Jump replay to this simTime
+                  Jump replay to this event
                 </button>
               </div>
 
