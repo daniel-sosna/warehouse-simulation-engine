@@ -33,6 +33,7 @@ public class BinRequestedAtPortEvent extends Event {
 
         String binId = shipment.getPicks().stream()
                 .map(pick -> state.getBin(pick.binId()))
+                .filter(bin -> bin.getStatus() != AVAILABLE)
                 .map(Bin::getId)
                 .findFirst()
                 .orElse(null);
