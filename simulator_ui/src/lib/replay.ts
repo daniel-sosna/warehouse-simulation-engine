@@ -2,6 +2,7 @@ import {
   DerivedReplayState,
   EventGroup,
   GridState,
+  ItemQuantities,
   MetricsSnapshot,
   NormalizedEvent,
   PortState,
@@ -16,6 +17,14 @@ function cloneMetrics(metrics: MetricsSnapshot): MetricsSnapshot {
   return { ...metrics };
 }
 
+function cloneItemQuantities(items: ItemQuantities | null): ItemQuantities | null {
+  if (!items) {
+    return null;
+  }
+
+  return { ...items };
+}
+
 function cloneShipments(
   shipments: Record<string, ShipmentState>,
 ): Record<string, ShipmentState> {
@@ -24,6 +33,8 @@ function cloneShipments(
       id,
       {
         ...shipment,
+        handlingFlags: [...shipment.handlingFlags],
+        items: cloneItemQuantities(shipment.items),
         pickedBinIds: [...shipment.pickedBinIds],
         eventIndices: [...shipment.eventIndices],
       },
@@ -38,7 +49,16 @@ function clonePorts(ports: DerivedReplayState["portsById"]) {
 }
 
 function cloneBins(bins: DerivedReplayState["binsById"]) {
-  return Object.fromEntries(Object.entries(bins).map(([id, bin]) => [id, { ...bin }]));
+  return Object.fromEntries(
+    Object.entries(bins).map(([id, bin]) => [
+      id,
+      {
+        ...bin,
+        binStock: cloneItemQuantities(bin.binStock),
+        itemsPicked: cloneItemQuantities(bin.itemsPicked),
+      },
+    ]),
+  );
 }
 
 function cloneGrids(grids: Record<string, GridState>): Record<string, GridState> {
@@ -71,6 +91,8 @@ export function createInitialReplayState(): DerivedReplayState {
       shipmentsPacked: 0,
       shipmentsShipped: 0,
       truckArrivals: 0,
+      knownItemUnits: null,
+      pickedItemUnits: null,
     },
     recentChanges: [],
   };
@@ -103,6 +125,76 @@ function getStringArray(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === "string");
 }
 
+function hasOwn(object: object, key: string) {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+function getItemQuantities(value: unknown): ItemQuantities | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const result: ItemQuantities = {};
+  for (const [key, itemValue] of Object.entries(value)) {
+    if (typeof itemValue === "number" && Number.isFinite(itemValue)) {
+      result[key] = itemValue;
+    }
+  }
+
+  return result;
+}
+
+function sumItemQuantities(items: ItemQuantities | null): number | null {
+  if (!items) {
+    return null;
+  }
+
+  return Object.values(items).reduce((total, value) => total + value, 0);
+}
+
+function recomputeItemMetrics(state: DerivedReplayState) {
+  const shipmentItems = Object.values(state.shipmentsById)
+    .map((shipment) => sumItemQuantities(shipment.items))
+    .filter((value): value is number => value !== null);
+  const pickedItems = Object.values(state.binsById)
+    .map((bin) => sumItemQuantities(bin.itemsPicked))
+    .filter((value): value is number => value !== null);
+
+  state.metrics.knownItemUnits = shipmentItems.length
+    ? shipmentItems.reduce((total, value) => total + value, 0)
+    : null;
+  state.metrics.pickedItemUnits = pickedItems.length
+    ? pickedItems.reduce((total, value) => total + value, 0)
+    : null;
+}
+
+function enrichShipmentFromEventData(
+  shipment: ShipmentState,
+  data: NormalizedEvent["data"],
+  fallbackItemsKey?: "items" | "shipmentItems",
+) {
+  if (hasOwn(data, "sortingDirection")) {
+    shipment.sortingDirection = getString(data.sortingDirection);
+  }
+
+  if (hasOwn(data, "handlingFlags")) {
+    shipment.handlingFlags = getStringArray(data.handlingFlags);
+  }
+
+  const itemKeys: Array<"items" | "shipmentItems"> = [];
+  if (fallbackItemsKey) {
+    itemKeys.push(fallbackItemsKey);
+  }
+  itemKeys.push("items", "shipmentItems");
+
+  for (const key of itemKeys) {
+    if (hasOwn(data, key)) {
+      shipment.items = getItemQuantities(data[key]);
+      break;
+    }
+  }
+}
+
 function ensureShipment(
   state: DerivedReplayState,
   shipmentId: string,
@@ -117,6 +209,9 @@ function ensureShipment(
       shippedAtSimTime: null,
       activePortId: null,
       gridId: null,
+      sortingDirection: null,
+      handlingFlags: [],
+      items: null,
       pickedBinIds: [],
       eventIndices: [],
     };
@@ -163,6 +258,8 @@ function ensureBin(state: DerivedReplayState, binId: string) {
       status: "unknown",
       portId: null,
       shipmentId: null,
+      binStock: null,
+      itemsPicked: null,
       lastEventIndex: null,
     };
   }
@@ -214,6 +311,7 @@ export function applyEventToState(
         shipment.status = "received";
         shipment.receivedAtSimTime = event.simTime;
         shipment.eventIndices.push(event.index);
+        enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsReceived += 1;
         changes.push(`Shipment ${shipmentId} received`);
       } else {
@@ -227,6 +325,7 @@ export function applyEventToState(
         shipment.status = "ready";
         shipment.readyAtSimTime = event.simTime;
         shipment.eventIndices.push(event.index);
+        enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsReady += 1;
         changes.push(`Shipment ${shipmentId} ready`);
       } else {
@@ -235,12 +334,24 @@ export function applyEventToState(
       break;
     }
     case "PortStartsShipment": {
+      if (shipmentId) {
+        const shipment = ensureShipment(state, shipmentId);
+        shipment.status = "picking";
+        shipment.activePortId = portId;
+        shipment.gridId = gridId;
+        shipment.eventIndices.push(event.index);
+        enrichShipmentFromEventData(shipment, data, "shipmentItems");
+      }
       if (portId) {
         const port = ensurePort(state, portId);
         port.status = "busy";
         port.lastEventIndex = event.index;
         port.lastEventType = event.eventKey;
         port.lastTransition = "started-shipment";
+        port.activeShipmentId = shipmentId;
+        if (hasOwn(data, "handlingFlags")) {
+          port.handlingFlags = getStringArray(data.handlingFlags);
+        }
         if (gridId) {
           linkPortToGrid(state, portId, gridId, event.index);
         }
@@ -255,10 +366,20 @@ export function applyEventToState(
         const bin = ensureBin(state, binId);
         bin.status = "requested";
         bin.portId = portId;
+        bin.shipmentId = shipmentId;
+        if (hasOwn(data, "binStock")) {
+          bin.binStock = getItemQuantities(data.binStock);
+        }
         bin.lastEventIndex = event.index;
         if (gridId) {
           bin.gridId = gridId;
         }
+      }
+      if (shipmentId) {
+        const shipment = ensureShipment(state, shipmentId);
+        shipment.activePortId = portId;
+        shipment.gridId = gridId;
+        shipment.eventIndices.push(event.index);
       }
       if (portId) {
         const port = ensurePort(state, portId);
@@ -279,10 +400,20 @@ export function applyEventToState(
         const bin = ensureBin(state, binId);
         bin.status = "at-port";
         bin.portId = portId;
+        bin.shipmentId = shipmentId;
+        if (hasOwn(data, "binStock")) {
+          bin.binStock = getItemQuantities(data.binStock);
+        }
         bin.lastEventIndex = event.index;
         if (gridId) {
           bin.gridId = gridId;
         }
+      }
+      if (shipmentId) {
+        const shipment = ensureShipment(state, shipmentId);
+        shipment.activePortId = portId;
+        shipment.gridId = gridId;
+        shipment.eventIndices.push(event.index);
       }
       if (portId) {
         const port = ensurePort(state, portId);
@@ -322,6 +453,9 @@ export function applyEventToState(
         bin.status = "available";
         bin.portId = null;
         bin.shipmentId = shipmentId;
+        if (hasOwn(data, "itemsPicked")) {
+          bin.itemsPicked = getItemQuantities(data.itemsPicked);
+        }
         bin.lastEventIndex = event.index;
         if (gridId) {
           bin.gridId = gridId;
@@ -342,6 +476,7 @@ export function applyEventToState(
         shipment.activePortId = portId;
         shipment.gridId = gridId;
         shipment.eventIndices.push(event.index);
+        enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsPacked += 1;
       }
       if (portId) {
@@ -367,6 +502,7 @@ export function applyEventToState(
         shipment.status = "shipped";
         shipment.shippedAtSimTime = event.simTime;
         shipment.eventIndices.push(event.index);
+        enrichShipmentFromEventData(shipment, data, "items");
         state.metrics.shipmentsShipped += 1;
         changes.push(`Shipment ${shipmentId} shipped`);
       } else {
@@ -454,6 +590,7 @@ export function applyEventToState(
     }
   }
 
+  recomputeItemMetrics(state);
   state.recentChanges = changes;
   return state;
 }

@@ -1,5 +1,6 @@
 import {
   EventGroup,
+  EventData,
   EventImportance,
   LoadedSimulation,
   NormalizedEvent,
@@ -57,12 +58,12 @@ function normalizeEventKey(eventName: string): string {
   return eventName;
 }
 
-function parseObjectRecord(value: unknown): Record<string, unknown> {
+function parseObjectRecord(value: unknown): EventData {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
 
-  return value as Record<string, unknown>;
+  return value as EventData;
 }
 
 export function parseSimulationLog(text: string): {

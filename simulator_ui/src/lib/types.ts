@@ -7,6 +7,24 @@ export interface ParseIssue {
   rawLine: string;
 }
 
+export type ItemQuantities = Record<string, number>;
+
+export interface EventData extends Record<string, unknown> {
+  shipmentId?: string;
+  portId?: string;
+  gridId?: string;
+  binId?: string;
+  sortingDirection?: string;
+  handlingFlags?: string[];
+  items?: ItemQuantities;
+  shipmentItems?: ItemQuantities;
+  itemsPicked?: ItemQuantities;
+  binStock?: ItemQuantities;
+  shipmentsTakenForShipping?: number;
+  fromBreak?: boolean;
+  intoBreak?: boolean;
+}
+
 export interface RawLogEvent {
   lineNumber: number;
   rawLine: string;
@@ -14,7 +32,7 @@ export interface RawLogEvent {
   timestamp: string | null;
   event: string;
   duration: number | null;
-  data: Record<string, unknown>;
+  data: EventData;
 }
 
 export interface NormalizedEvent extends RawLogEvent {
@@ -67,6 +85,9 @@ export interface ShipmentState {
   shippedAtSimTime: number | null;
   activePortId: string | null;
   gridId: string | null;
+  sortingDirection: string | null;
+  handlingFlags: string[];
+  items: ItemQuantities | null;
   pickedBinIds: string[];
   eventIndices: number[];
 }
@@ -89,6 +110,8 @@ export interface BinState {
   status: BinStatus;
   portId: string | null;
   shipmentId: string | null;
+  binStock: ItemQuantities | null;
+  itemsPicked: ItemQuantities | null;
   lastEventIndex: number | null;
 }
 
@@ -106,6 +129,8 @@ export interface MetricsSnapshot {
   shipmentsPacked: number;
   shipmentsShipped: number;
   truckArrivals: number;
+  knownItemUnits: number | null;
+  pickedItemUnits: number | null;
 }
 
 export interface DerivedReplayState {

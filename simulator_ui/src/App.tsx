@@ -5,7 +5,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { BinState, NormalizedEvent, PortState, ShipmentState } from "./lib/types";
+import {
+  BinState,
+  EventData,
+  ItemQuantities,
+  NormalizedEvent,
+  PortState,
+  ShipmentState,
+} from "./lib/types";
 import { useSimulationStore } from "./store/useSimulationStore";
 
 type AppTab = "timeline" | "statistics";
@@ -24,6 +31,108 @@ function formatSimTime(simTime: number | null) {
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
+}
+
+function formatStringList(values: string[] | null | undefined) {
+  return values && values.length ? values.join(", ") : "Unavailable";
+}
+
+function formatItemQuantities(items: ItemQuantities | null | undefined) {
+  if (!items || !Object.keys(items).length) {
+    return "Unavailable";
+  }
+
+  return Object.entries(items)
+    .map(([itemId, quantity]) => `${itemId}: ${quantity}`)
+    .join("\n");
+}
+
+function getStringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function getStringArrayValue(value: unknown) {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const values = value.filter((item): item is string => typeof item === "string");
+  return values.length ? values : [];
+}
+
+function getItemQuantityValue(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const result: ItemQuantities = {};
+  for (const [key, itemValue] of Object.entries(value)) {
+    if (typeof itemValue === "number" && Number.isFinite(itemValue)) {
+      result[key] = itemValue;
+    }
+  }
+
+  return Object.keys(result).length ? result : null;
+}
+
+function buildEventStructuredFields(event: NormalizedEvent) {
+  const data = event.data as EventData;
+  const fields: Array<{ label: string; value: string }> = [];
+  const shipmentId = getStringValue(data.shipmentId);
+  const sortingDirection = getStringValue(data.sortingDirection);
+  const portId = getStringValue(data.portId);
+  const gridId = getStringValue(data.gridId);
+  const binId = getStringValue(data.binId);
+  const handlingFlags = getStringArrayValue(data.handlingFlags);
+  const items = getItemQuantityValue(data.items);
+  const shipmentItems = getItemQuantityValue(data.shipmentItems);
+  const itemsPicked = getItemQuantityValue(data.itemsPicked);
+  const binStock = getItemQuantityValue(data.binStock);
+
+  if (shipmentId) {
+    fields.push({ label: "Shipment ID", value: shipmentId });
+  }
+  if (sortingDirection) {
+    fields.push({ label: "Sorting direction", value: sortingDirection });
+  }
+  if (handlingFlags) {
+    fields.push({ label: "Handling flags", value: formatStringList(handlingFlags) });
+  }
+  if (portId) {
+    fields.push({ label: "Port ID", value: portId });
+  }
+  if (gridId) {
+    fields.push({ label: "Grid ID", value: gridId });
+  }
+  if (binId) {
+    fields.push({ label: "Bin ID", value: binId });
+  }
+  if (items) {
+    fields.push({ label: "Items", value: formatItemQuantities(items) });
+  }
+  if (shipmentItems) {
+    fields.push({
+      label: "Shipment items",
+      value: formatItemQuantities(shipmentItems),
+    });
+  }
+  if (itemsPicked) {
+    fields.push({
+      label: "Items picked",
+      value: formatItemQuantities(itemsPicked),
+    });
+  }
+  if (binStock) {
+    fields.push({ label: "Bin stock", value: formatItemQuantities(binStock) });
+  }
+  if (typeof data.shipmentsTakenForShipping === "number") {
+    fields.push({
+      label: "Shipments taken",
+      value: String(data.shipmentsTakenForShipping),
+    });
+  }
+
+  return fields;
 }
 
 function findLatestRevealedItem<T extends { revealed: boolean }>(groups: T[]) {
@@ -638,7 +747,7 @@ export default function App() {
 
               <div className="mt-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Payload
+                  Raw payload
                 </p>
                 <pre className="mt-2 overflow-auto rounded-[1.25rem] bg-slate-950 px-4 py-4 text-xs leading-6 text-slate-100">
                   {JSON.stringify(selectedEvent.data, null, 2)}
@@ -857,8 +966,17 @@ function buildShipmentRow(shipment: ShipmentState) {
     badge: shipment.status,
     fields: [
       { label: "Status", value: shipment.status },
+      {
+        label: "Sorting direction",
+        value: shipment.sortingDirection ?? "Unavailable",
+      },
+      {
+        label: "Handling flags",
+        value: formatStringList(shipment.handlingFlags),
+      },
       { label: "Grid", value: shipment.gridId ?? "Unavailable" },
       { label: "Active port", value: shipment.activePortId ?? "Unavailable" },
+      { label: "Items", value: formatItemQuantities(shipment.items) },
       {
         label: "Received at",
         value:
@@ -925,6 +1043,11 @@ function buildBinRow(bin: BinState) {
       { label: "Grid", value: bin.gridId ?? "Unavailable" },
       { label: "Port", value: bin.portId ?? "Unavailable" },
       { label: "Shipment", value: bin.shipmentId ?? "Unavailable" },
+      { label: "Bin stock", value: formatItemQuantities(bin.binStock) },
+      {
+        label: "Items picked",
+        value: formatItemQuantities(bin.itemsPicked),
+      },
       {
         label: "Last event index",
         value:
@@ -987,13 +1110,28 @@ function ControlButton({
   );
 }
 
-function DetailCard({ label, value }: { label: string; value: string }) {
+function DetailCard({
+  label,
+  value,
+  multiline = false,
+}: {
+  label: string;
+  value: string;
+  multiline?: boolean;
+}) {
   return (
     <div className="rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+      <p
+        className={cn(
+          "mt-2 text-sm font-medium text-slate-900",
+          multiline ? "whitespace-pre-line break-words" : "",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -1117,7 +1255,7 @@ function EntityAccordion({
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                         {field.label}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                      <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-slate-700">
                         {field.value}
                       </p>
                     </div>
