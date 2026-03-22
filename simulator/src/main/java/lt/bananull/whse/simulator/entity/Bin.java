@@ -54,7 +54,7 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : reservedItems.entrySet()) {
             String ean = entry.getKey();
-            int remaining = availableStock.get(ean) - entry.getValue();
+            int remaining = availableStock.getOrDefault(ean, 0) - entry.getValue();
 
             if (remaining <= 0) {
                 availableStock.remove(ean);
@@ -78,8 +78,14 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
             String ean = entry.getKey();
-            int remainingStock = stock.get(ean) - entry.getValue();
+            int remainingStock = stock.getOrDefault(ean, 0) - entry.getValue();
             int remainingReserved = reservedItems.getOrDefault(ean, 0) - entry.getValue();
+
+            if (remainingStock < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot deduct %d units of EAN %s from bin %s; only %d available"
+                                .formatted(entry.getValue(), ean, id, stock.getOrDefault(ean, 0) - reservedItems.getOrDefault(ean, 0)));
+            }
 
             if (remainingStock == 0) {
                 stock.remove(ean);
@@ -133,12 +139,12 @@ public class Bin {
     }
 
     private void reserve(String ean, int quantity) {
-        int availableQty = stock.get(ean);
+        int availableQty = stock.getOrDefault(ean, 0);
         int currentlyReserved = reservedItems.getOrDefault(ean, 0);
         if (quantity + currentlyReserved > availableQty) {
             throw new IllegalArgumentException(
-                "Bin %s has only %d units of EAN %s; cannot reserve additional %d"
-                    .formatted(id, availableQty - currentlyReserved, ean, quantity));
+                "Cannot reserve %d units of EAN %s in bin %s; only %d available"
+                    .formatted(quantity, ean, id, availableQty - currentlyReserved));
         }
 
         reservedItems.put(ean, currentlyReserved + quantity);
@@ -160,12 +166,16 @@ public class Bin {
         this.neededInGridCount += 1;
     }
 
+    public void decrementNeededInGrid() {
+        this.neededInGridCount -= 1;
+    }
+
     public void release() {
         if (status != BinStatus.RESERVED) {
             throw new IllegalStateException("Bin %s cannot be released from status %s".formatted(id, status));
         }
 
-        this.neededInGridCount -= 1;
+        decrementNeededInGrid();
         this.reservedForPortId = null;
         this.status = BinStatus.AVAILABLE;
     }

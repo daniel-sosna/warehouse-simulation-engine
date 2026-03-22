@@ -14,6 +14,11 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
     public static void main(String[] args) {
+        if (AppConfig.isHelpRequested(args)) {
+            System.out.println(AppConfig.usage());
+            return;
+        }
+
         AppConfig config = AppConfig.fromArgs(args);
 
         // Read files from dataDir
@@ -39,10 +44,10 @@ public class Main {
             loggerContext.stop();
         }
 
-//        try {
-//            LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
-//        } catch (Exception e) {
-//            System.err.print("Failed to sort log file by simTime");
-//        }
+        try {
+            LogFileSorter.sortSimulationLogBySimTime(config.eventLogFile());
+        } catch (Exception e) {
+            System.err.print("Failed to sort log file by simTime");
+        }
     }
 }

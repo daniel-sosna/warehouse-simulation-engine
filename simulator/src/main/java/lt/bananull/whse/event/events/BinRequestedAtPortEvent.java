@@ -31,8 +31,8 @@ public class BinRequestedAtPortEvent extends Event {
         Port port = state.getPort(portId);
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
 
-        String binId = shipment.getPicks().stream()
-                .map(pick -> state.getBin(pick.binId()))
+        String binId = shipment.getBinIds().stream()
+                .map(state::getBin)
                 .filter(bin -> bin.getStatus() == AVAILABLE)
                 .map(Bin::getId)
                 .findFirst()

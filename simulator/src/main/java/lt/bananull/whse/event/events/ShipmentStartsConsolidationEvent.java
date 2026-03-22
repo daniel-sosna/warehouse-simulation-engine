@@ -29,10 +29,7 @@ public class ShipmentStartsConsolidationEvent extends Event {
 
         List<Event> events = new ArrayList<>();
 
-        shipment.getPicks().stream()
-            .map(PickDto::binId)
-            .distinct()
-            .forEach(binId -> {
+        shipment.getBinIds().forEach(binId -> {
                 Bin bin = simulator.getState().getBin(binId);
 
                 if (!bin.getCurrentGridId().equals(packingGrid)) {

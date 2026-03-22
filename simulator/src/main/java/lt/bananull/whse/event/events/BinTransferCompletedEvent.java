@@ -33,7 +33,7 @@ public class BinTransferCompletedEvent extends Event {
 
         state.shipments().values().stream()
             .filter(shipment -> shipment.getStatus() == CONSOLIDATION
-                && shipment.getPicks().stream().map(PickDto::binId).anyMatch(binId::equals)
+                && shipment.getBinIds().stream().anyMatch(binId::equals)
                 && shipment.isConsolidated(state))
             .forEach(shipment -> events.add(new ShipmentIsReadyEvent(getSimTime(), shipment.getId())));
 

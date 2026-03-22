@@ -1,6 +1,6 @@
 {
   "simulationStartTime": "2026-03-04T06:00:00Z",
-  "simulationEndTime": "2026-03-4T23:59:00Z",
+  "simulationEndTime": "2026-03-04T23:59:00Z",
   "truckArrivalSchedules": {
     "schedules": [
       {

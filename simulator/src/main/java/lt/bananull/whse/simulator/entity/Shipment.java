@@ -62,6 +62,8 @@ public class Shipment {
 
     public Collection<PickDto> getPicks() { return Collections.unmodifiableCollection(picks); }
 
+    public Collection<String> getBinIds() { return picks.stream().map(PickDto::binId).distinct().toList(); }
+
     public boolean isAvailableForRerouting() {
         return (status == ShipmentStatus.ROUTED
                 || status == ShipmentStatus.CONSOLIDATION
@@ -70,15 +72,13 @@ public class Shipment {
     }
 
     public boolean isConsolidated(SimulationState state) {
-        return picks.stream()
-            .map(PickDto::binId)
-            .distinct()
+        return getBinIds().stream()
             .map(state::getBin)
             .allMatch(b -> b.getStatus() != OUTSIDE);
     }
 
     public boolean isBinNeeded(String binId) {
-        return picks.stream().anyMatch(pick -> pick.binId().equals(binId));
+        return getBinIds().stream().anyMatch(id -> id.equals(binId));
     }
 
     public boolean isFullyPicked() {

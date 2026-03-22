@@ -18,6 +18,30 @@ public record AppConfig(
         return new AppConfig(DEFAULT_DATA_DIR, DEFAULT_ROUTER_COMMAND, DEFAULT_EVENT_LOG_FILE, DEFAULT_HEALTH_CHECK_INTERVAL);
     }
 
+    public static boolean isHelpRequested(String[] args) {
+        for (String arg : args) {
+            if ("--help".equals(arg) || "-h".equals(arg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String usage() {
+        return String.join(System.lineSeparator(),
+            "Usage: java -jar whse.jar [options]",
+            "",
+            "Options:",
+            "  --help, -h                         Show this help message and exit",
+            "  --dataDir <path>                   Path to input data directory (default: ./data)",
+            "  --router <command>                 Router command to execute (default: ./build/router)",
+            "  --eventLogFile <path>              Output event log file path (default: ./simulation.log)",
+            "  --healthCheckInterval <seconds>    Health-check interval, 0 disables (default: 0)",
+            "  --debug                            Set log level to DEBUG",
+            "  --info                             Set log level to INFO"
+        );
+    }
+
     public static AppConfig fromArgs(String[] args) {
         Path dataDir = DEFAULT_DATA_DIR;
         String routerCommand = DEFAULT_ROUTER_COMMAND;

@@ -6,6 +6,7 @@ import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
@@ -33,7 +34,7 @@ public class RouterTickEvent extends Event {
         SimulationState state = simulator.getState();
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
 
-        rollbackToReceived(simulator);
+        rollbackToReceived(state);
         checkForReceivedShipments(simulator, now);
         shipmentsRerouted = state.shipments().values().stream()
                 .filter(shipment -> shipment.getStatus() == RECEIVED)
@@ -69,10 +70,13 @@ public class RouterTickEvent extends Event {
                 });
     }
 
-    private void rollbackToReceived(Simulator simulator) {
-        simulator.getState().shipments().values().stream()
+    private void rollbackToReceived(SimulationState state) {
+        state.shipments().values().stream()
                 .filter(Shipment::isAvailableForRerouting)
-                .forEach(Shipment::rollbackToReceived);
+                .forEach(shipment -> {
+                    shipment.rollbackToReceived();
+                    shipment.getBinIds().stream().map(state::getBin).forEach(Bin::decrementNeededInGrid);
+                });
     }
 
     @Override
