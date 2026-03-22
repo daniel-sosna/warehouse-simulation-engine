@@ -100,6 +100,7 @@ public class Simulator {
                 .collect(Collectors.toSet());
             if (binsToTransfer.isEmpty()) {
                 // all bins local => shipment can become ready
+                shipment.startConsolidation(); // need to be consolidated to be ready
                 enqueueEvent(new ShipmentIsReadyEvent(simTime, shipment.getId()));
                 continue;
             }

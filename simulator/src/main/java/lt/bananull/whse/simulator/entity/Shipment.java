@@ -30,6 +30,7 @@ public class Shipment {
     private String assignedPortId;
     private List<PickDto> picks = List.of();
     private final Set<String> pickedBins = new HashSet<>();
+    private final Set<String> consolidatedBins = new HashSet<>();
 
     private Shipment(
         String id,
@@ -182,7 +183,15 @@ public class Shipment {
         pickedBins.add(binId);
     }
 
+    public void addArrivedBin(String binId) {
+        consolidatedBins.add(binId);
+    }
+
     public boolean isFullyPicked() {
         return pickedBins.containsAll(picks.stream().map(PickDto::binId).toList());
+    }
+
+    public boolean isConsolidationComplete() {
+        return consolidatedBins.containsAll(picks.stream().map(PickDto::binId).collect(Collectors.toSet()));
     }
 }
