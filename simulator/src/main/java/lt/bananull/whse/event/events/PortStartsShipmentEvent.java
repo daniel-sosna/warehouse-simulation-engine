@@ -7,14 +7,21 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PortStartsShipmentEvent extends Event {
 
     private final String gridId;
     private final String portId;
     private String shipmentId;
+    private String sortingDirection;
+    private Set<String> handlingFlags;
+    private Map<String, Integer> items;
 
     public PortStartsShipmentEvent(long simTime, String gridId, String portId) {
         super(simTime);
@@ -32,6 +39,10 @@ public class PortStartsShipmentEvent extends Event {
         Shipment shipment = state.getShipment(shipmentId);
         shipment.startPicking();
 
+        sortingDirection = shipment.getSortingDirection();
+        handlingFlags = shipment.getHandlingFlags();
+        items = shipment.getItems();
+
         for (PickDto pick : shipment.getPicks()) {
             state.getBin(pick.binId()).reserveItem(pick.ean(), pick.qty());
         }
@@ -46,10 +57,15 @@ public class PortStartsShipmentEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "gridId", gridId,
-                "portId", portId,
-                "shipmentId", shipmentId
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("sortingDirection", sortingDirection),
+                new AbstractMap.SimpleEntry<>("handlingFlags", handlingFlags),
+                new AbstractMap.SimpleEntry<>("shipmentItems", items)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
