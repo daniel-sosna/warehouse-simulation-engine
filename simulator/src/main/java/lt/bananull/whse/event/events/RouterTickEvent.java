@@ -37,7 +37,7 @@ public class RouterTickEvent extends Event {
         RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
         RouterResponseDto response = routerClient.route(request);
         simulator.updateAssignments(response.assignments());
-        simulator.dispatchAll();
+        simulator.tryDispatch();
 
         long nextSimTime = getSimTime() + ROUTER_INTERVAL_SECONDS;
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {

@@ -21,6 +21,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
     private String currentGridId;
+    private boolean isNeededInCurrentGrid =  false;
     private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)

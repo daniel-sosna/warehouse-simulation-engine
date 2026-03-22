@@ -67,6 +67,10 @@ public class Shipment {
                 && assignedPortId == null;
     }
 
+    public boolean isBinNeeded(String binId) {
+        return picks.stream().anyMatch(pick -> pick.binId().equals(binId));
+    }
+
     public boolean isFullyPicked() {
         return picks.isEmpty();
     }

@@ -11,8 +11,10 @@ import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
+import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.simulator.entity.Shipment;
@@ -77,20 +79,23 @@ public class Simulator {
         }
     }
 
-    public void dispatchAll() {
+    public void tryDispatch() {
         while (!assignments.isEmpty()) {
-            AssignmentDto a = assignments.poll();
+            AssignmentDto assignmentDto = assignments.peek();
+            String packingGridId = assignmentDto.packingGrid();
 
-            enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
-            // long doneAt = simTime + TRAVEL_SECONDS;
-            // enqueueEvent(new BinArrivesAtPort(doneAt, a));
+            boolean allBinsAreAvailable = assignmentDto.picks().stream()
+                .map(PickDto::binId)
+                .allMatch(binId -> {
+                    Bin bin = state.getBin(binId);
+                    return bin.getCurrentGridId().equals(packingGridId) || !bin.isNeededInCurrentGrid();
+                });
 
-            // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
-            // then we will need: Dispatcher (or PortScheduler) that:
-            // - takes AssignmentDto
-            // - decides which port/grid can start now
-            // - reserves bin/port
-            // - schedules BinArrivedAtPort, BinPickCompleted, etc.
+            if (!allBinsAreAvailable) {
+                break; // Wait until all bins are available
+            }
+
+            enqueueEvent(new ShipmentIsReadyEvent(simTime, assignmentDto.shipmentId()));
         }
     }
 
