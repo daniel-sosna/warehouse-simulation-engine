@@ -9,11 +9,16 @@ import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PortStartsShipmentEvent extends Event {
 
     private final String gridId;
     private final String portId;
+    private String shipmentId;
+    private String sortingDirection;
+    private Set<String> handlingFlags;
+    private Map<String, Integer> items;
 
     public PortStartsShipmentEvent(long simTime, String gridId, String portId) {
         super(simTime);
@@ -31,6 +36,11 @@ public class PortStartsShipmentEvent extends Event {
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
         shipment.startPicking();
 
+        shipmentId = shipment.getId();
+        sortingDirection = shipment.getSortingDirection();
+        handlingFlags = shipment.getHandlingFlags();
+        items = shipment.getItems();
+
         for (PickDto pick : shipment.getPicks()) {
             state.getBin(pick.binId()).reserveItem(pick.ean(), pick.qty());
         }
@@ -47,7 +57,11 @@ public class PortStartsShipmentEvent extends Event {
     public Map<String, Object> getData() {
         return Map.of(
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "shipmentId", shipmentId,
+                "sortingDirection", sortingDirection,
+                "handlingFlags", handlingFlags,
+                "shipmentItems", items
         );
     }
 }

@@ -7,12 +7,16 @@ import lt.bananull.whse.simulator.entity.Shipment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ShipmentPackedEvent extends Event {
 
     private final String shipmentId;
     private final String gridId;
     private final String portId;
+    private String sortingDirection;
+    private Set<String> handlingFlags ;
+    private Map<String, Integer> items;
 
     public ShipmentPackedEvent(long simTime, String shipmentId, String gridId, String portId, long duration) {
         super(simTime, duration);
@@ -28,6 +32,10 @@ public class ShipmentPackedEvent extends Event {
         port.completeActiveShipment();
         shipment.markPacked();
 
+        sortingDirection = shipment.getSortingDirection();
+        handlingFlags = shipment.getHandlingFlags();
+        items = shipment.getItems();
+
         if (port.getQueueSize() > 0) {
             return List.of(new PortStartsShipmentEvent(getSimTime(), gridId, portId));
         }
@@ -40,7 +48,10 @@ public class ShipmentPackedEvent extends Event {
         return Map.of(
                 "shipmentId", shipmentId,
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "sortingDirection", sortingDirection,
+                "handlingFlags", handlingFlags,
+                "items", items
         );
     }
 }

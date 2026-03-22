@@ -18,6 +18,8 @@ public class BinRequestedAtPortEvent extends Event {
     private final String binId;
     private final String gridId;
     private final String portId;
+    private String shipmentId;
+    private Map<String, Integer> binStock;
 
     public BinRequestedAtPortEvent(long simTime, String binId, String gridId, String portId) {
         super(simTime);
@@ -63,6 +65,9 @@ public class BinRequestedAtPortEvent extends Event {
         long duration = Math.round(standardRate * mult);
         long arriveAt = getSimTime() + duration;
 
+        shipmentId = port.getActiveShipmentId();
+        binStock = bin.getStock();
+
         return List.of(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
     }
 
@@ -71,7 +76,9 @@ public class BinRequestedAtPortEvent extends Event {
         return Map.of(
                 "binId", binId,
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "shipmentId", shipmentId,
+                "binStock", binStock
         );
     }
 }

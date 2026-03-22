@@ -14,6 +14,8 @@ public class BinArrivesAtPortEvent extends Event {
     private final String gridId;
     private final String binId;
     private final String portId;
+    private String shipmentId;
+    private Map<String, Integer> binStock;
 
     public BinArrivesAtPortEvent(long simTime, long duration, String gridId, String portId, String binId) {
         super(simTime, duration);
@@ -29,8 +31,9 @@ public class BinArrivesAtPortEvent extends Event {
         long duration = Math.round((3600.0 / standardRate) * mult);
         long pickDoneAt = getSimTime() + duration;
 
-        Port port = simulator.getState().getPort(portId);
-        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, port.getActiveShipmentId(), gridId, portId, binId, duration));
+        binStock = simulator.getState().getBin(binId).getStock();
+        shipmentId = simulator.getState().getPort(portId).getActiveShipmentId();
+        simulator.enqueueEvent(new BinPickCompletedEvent(pickDoneAt, shipmentId, gridId, portId, binId, duration));
 
         return List.of();
     }
@@ -40,7 +43,9 @@ public class BinArrivesAtPortEvent extends Event {
         return Map.of(
                 "binId", binId,
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "shipmentId", shipmentId,
+                "binStock", binStock
         );
     }
 }

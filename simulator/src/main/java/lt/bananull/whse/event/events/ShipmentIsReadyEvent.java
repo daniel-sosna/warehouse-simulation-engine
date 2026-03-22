@@ -15,6 +15,9 @@ import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 public class ShipmentIsReadyEvent extends Event {
 
     private final String shipmentId;
+    private String sortingDirection;
+    private Set<String> handlingFlags;
+    private Map<String, Integer> items;
 
     public ShipmentIsReadyEvent(long simTime, String shipmentId) {
         super(simTime);
@@ -26,6 +29,10 @@ public class ShipmentIsReadyEvent extends Event {
         Shipment shipment = simulator.getState().getShipment(shipmentId);
         shipment.startConsolidation();
         shipment.markReady();
+
+        sortingDirection = shipment.getSortingDirection();
+        handlingFlags = shipment.getHandlingFlags();
+        items = shipment.getItems();
 
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
         Set<String> handlingFlags = shipment.getHandlingFlags();
@@ -46,7 +53,12 @@ public class ShipmentIsReadyEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of("shipmentId", shipmentId);
+        return Map.of(
+            "shipmentId", shipmentId,
+            "sortingDirection", sortingDirection,
+            "handlingFlags", handlingFlags,
+            "items", items
+        );
     }
 
 }

@@ -19,6 +19,7 @@ public class BinPickCompletedEvent extends Event {
     private final String portId;
     private final String binId;
     private final String shipmentId;
+    private Map<String, Integer> itemsPicked;
 
     public BinPickCompletedEvent(long simTime, String shipmentId, String gridId,  String portId, String binId, long duration) {
         super(simTime, duration);
@@ -37,6 +38,7 @@ public class BinPickCompletedEvent extends Event {
 
         shipment.addPickedBin(binId);
         bin.deductStock(shipment.getItemsForBin(binId));
+        itemsPicked = shipment.getItemsForBin(binId);
         bin.release();
         port.releaseBin();
 
@@ -69,10 +71,11 @@ public class BinPickCompletedEvent extends Event {
     @Override
     public Map<String, Object> getData() {
         return Map.of(
-                "shipmentId", shipmentId,
                 "binId", binId,
                 "gridId", gridId,
-                "portId", portId
+                "portId", portId,
+                "shipmentId", shipmentId,
+                "itemsPicked", itemsPicked
         );
     }
 }
