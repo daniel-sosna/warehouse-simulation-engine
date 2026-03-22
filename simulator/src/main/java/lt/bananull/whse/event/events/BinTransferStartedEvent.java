@@ -9,13 +9,11 @@ import java.util.Map;
 
 public class BinTransferStartedEvent extends Event {
 
-    private final String shipmentId;
     private final String binId;
     private final String destGridId;
 
-    public BinTransferStartedEvent(long simTime, String shipmentId, String binId, String destGridId) {
+    public BinTransferStartedEvent(long simTime, String binId, String destGridId) {
         super(simTime);
-        this.shipmentId = shipmentId;
         this.binId = binId;
         this.destGridId = destGridId;
     }
@@ -23,18 +21,21 @@ public class BinTransferStartedEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         Bin bin = simulator.getState().getBin(binId);
-        bin.sendOnConveyorBelt();
+        bin.sendOnConveyorBelt(destGridId);
 
         double mult = simulator.resolveMultiplier(simulator.getParameters().transfersConveyors().durationRandomness());
         int standardRate = simulator.getParameters().getBaseTransferDurationSeconds(bin.getCurrentGridId(), destGridId);
         long duration = Math.round(standardRate * mult);
         long arrivesAt = getSimTime() + duration;
 
-        return List.of(new BinTransferCompletedEvent(arrivesAt, shipmentId, binId, destGridId));
+        return List.of(new BinTransferCompletedEvent(arrivesAt, binId, destGridId));
     }
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of();
+        return Map.of(
+                "binId", binId,
+                "destGridId", destGridId
+        );
     }
 }

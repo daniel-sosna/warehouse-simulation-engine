@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static lt.bananull.whse.simulator.enums.BinStatus.OUTSIDE;
+
 /**
  * Simulation entity representing a customer order.
  * Mutable throughout the shipment lifecycle.
@@ -65,6 +67,14 @@ public class Shipment {
                 || status == ShipmentStatus.CONSOLIDATION
                 || status == ShipmentStatus.READY)
                 && assignedPortId == null;
+    }
+
+    public boolean isConsolidated(SimulationState state) {
+        return picks.stream()
+            .map(PickDto::binId)
+            .distinct()
+            .map(state::getBin)
+            .allMatch(b -> b.getStatus() != OUTSIDE);
     }
 
     public boolean isBinNeeded(String binId) {

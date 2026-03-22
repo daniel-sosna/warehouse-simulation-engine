@@ -148,35 +148,45 @@ public class Bin {
         if (portId == null || portId.isEmpty()) {
             throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));
         }
-        if (status == BinStatus.RESERVED) {
-            throw new IllegalStateException("Bin %s is already reserved for port %s".formatted(id, reservedForPortId));
+        if (status != BinStatus.AVAILABLE) {
+            throw new IllegalStateException("Bin %s cannot be reserved from status %s".formatted(id, status));
         }
 
         this.reservedForPortId = portId;
         this.status = BinStatus.RESERVED;
     }
 
-    public void markNeededInGrid() {
+    public void incrementNeededInGrid() {
         this.neededInGridCount += 1;
     }
 
     public void release() {
+        if (status != BinStatus.RESERVED) {
+            throw new IllegalStateException("Bin %s cannot be released from status %s".formatted(id, status));
+        }
+
         this.neededInGridCount -= 1;
         this.reservedForPortId = null;
         this.status = BinStatus.AVAILABLE;
     }
 
-    public void sendOnConveyorBelt() {
-        this.currentGridId = null;
-        this.status = BinStatus.OUTSIDE;
-    }
-
-    public void arriveAtGrid(String gridId) {
+    public void sendOnConveyorBelt(String gridId) {
         if (gridId == null || gridId.isEmpty()) {
             throw new IllegalArgumentException("Grid ID must be provided when bin %s arrives".formatted(id));
         }
+        if (status != BinStatus.AVAILABLE) {
+            throw new IllegalStateException("Bin %s cannot be sent on conveyor belt from status %s".formatted(id, status));
+        }
 
         this.currentGridId = gridId;
+        this.status = BinStatus.OUTSIDE;
+    }
+
+    public void arriveAtGrid() {
+        if (status != BinStatus.OUTSIDE) {
+            throw new IllegalStateException("Bin %s cannot arrive at grid from status %s".formatted(id, status));
+        }
+
         this.status = BinStatus.AVAILABLE;
     }
 
