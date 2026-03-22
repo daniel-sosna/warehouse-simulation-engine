@@ -9,6 +9,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 
 /**
@@ -184,9 +185,9 @@ public class Bin {
         return status == BinStatus.AVAILABLE;
     }
 
-    public void reserveForConsolidation(String shipmentId, String ean, int qt) {
+    public void reserveForConsolidation(String shipmentId) {
         this.reservedForShipmentId = shipmentId;
-        reserve(ean, qt);
+        // reserve(ean, qt); will reserve in portsTatrsshipment
         status = BinStatus.RESERVED;
     }
 

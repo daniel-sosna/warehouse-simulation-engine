@@ -12,6 +12,7 @@ import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.service.BinReservationService;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.SplittableRandom;
 
 @Slf4j
@@ -82,10 +84,13 @@ public class Simulator {
     public void dispatchAll() {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
-            if (!BinReservationService.canReserveAllPicks(this, a.picks())) {
+            Set<String> binIds = a.picks().stream()
+                .map(PickDto::binId)
+                .collect(java.util.stream.Collectors.toSet());
+            if (!BinReservationService.canReserveAllPicks(this, binIds)) {
                 continue; // leave it for next router tick
             } else {
-                BinReservationService.reserveAllPicks(this, a.shipmentId(), a.picks());
+                BinReservationService.reserveAllPicks(this, a.shipmentId(), binIds);
             }
             enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
 
