@@ -42,6 +42,11 @@ public class BinPickCompletedEvent extends Event {
 
         List<Event> events = new ArrayList<>();
 
+        String nextShipment = bin.pollNextWaiter();
+        if (nextShipment != null) {
+            events.add(new ShipmentRecheckDispatchEvent(getSimTime(), nextShipment));
+        }
+
         // Check the bin's port queue: poll until a waiting port without an assigned bin is found.
         String nextPortId = bin.pollPort();
         while (nextPortId != null) {

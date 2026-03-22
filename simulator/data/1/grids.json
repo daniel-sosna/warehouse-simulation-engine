@@ -4,7 +4,7 @@
     "shifts": [
       {
         "start": "07:00",
-        "end": "10:00",
+        "end": "20:00",
         "portConfig": [
           {"portIndex": "Port-1", "handlingFlags": []}
         ]

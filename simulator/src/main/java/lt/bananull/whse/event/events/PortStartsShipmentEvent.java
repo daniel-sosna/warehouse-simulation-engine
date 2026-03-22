@@ -33,6 +33,7 @@ public class PortStartsShipmentEvent extends Event {
 
         for (PickDto pick : shipment.getPicks()) {
             state.getBin(pick.binId()).reserveItem(pick.ean(), pick.qty());
+            System.out.println("reserved items");
         }
 
         BinRequestedAtPortEvent event = BinRequestedAtPortEvent.scheduleForPort(gridId, portId, getSimTime(), simulator);

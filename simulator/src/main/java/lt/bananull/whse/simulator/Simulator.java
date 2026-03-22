@@ -27,7 +27,9 @@ import lt.bananull.whse.utils.RandomnessResolver;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SplittableRandom;
@@ -50,6 +52,9 @@ public class Simulator {
     private final RandomnessResolver randomnessResolver;
     private final PriorityQueue<AssignmentDto> assignments = new PriorityQueue<>();
     private final PriorityQueue<Event> events = new PriorityQueue<>();
+
+    private final Map<String, AssignmentDto> assignmentByShipmentId = new HashMap<>();
+
 
     public Simulator(RouterClient routerClient, SimulationStateDto initialState, SimulationParameters parameters) {
         this.parameters = parameters;
@@ -77,37 +82,19 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
-        for (AssignmentDto assignment : assignments) {
-            Shipment shipment = state.getShipment(assignment.shipmentId());
-            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
+
+        for (AssignmentDto a : newAssignments) {
+            assignmentByShipmentId.put(a.shipmentId(), a);
+
+            Shipment shipment = state.getShipment(a.shipmentId());
+            shipment.routeToGrid(a.packingGrid(), a.picks());
         }
     }
 
     public void dispatchAll() {
         while (!assignments.isEmpty()) {
             AssignmentDto a = assignments.poll();
-            Set<String> binIds = a.picks().stream()
-                .map(PickDto::binId)
-                .collect(Collectors.toSet());
-            if (!BinReservationService.canReserveAllPicks(this, binIds)) {
-                continue; // leave it for next router tick
-            }
-            Shipment shipment = state.getShipment(a.shipmentId());
-            String destGridId = state.getShipment(shipment.getId()).getAssignedGridId();
-            BinReservationService.reserveAllPicks(this, shipment.getId(), binIds);
-            Set<String> binsToTransfer = binIds.stream()
-                .filter(binId -> !state.getBin(binId).getCurrentGridId().equals(destGridId))
-                .collect(Collectors.toSet());
-            if (binsToTransfer.isEmpty()) {
-                // all bins local => shipment can become ready
-                shipment.startConsolidation(); // need to be consolidated to be ready
-                enqueueEvent(new ShipmentIsReadyEvent(simTime, shipment.getId()));
-                continue;
-            }
-            shipment.startConsolidation();
-            for (String id : binsToTransfer) {
-                enqueueEvent(new BinTransferStartedEvent(getSimTime(), shipment.getId(), id, destGridId));
-            }
+            tryDispatchShipment(a.shipmentId());
         }
     }
 
@@ -162,5 +149,53 @@ public class Simulator {
                 }
             };
         };
+    }
+    public void tryDispatchShipment(String shipmentId) {
+        AssignmentDto a = assignmentByShipmentId.get(shipmentId);
+        if (a == null) {
+            return; // no current assignment (maybe not routed yet / rolled back)
+        }
+
+        Shipment shipment = state.getShipment(shipmentId);
+        String destGridId = a.packingGrid();
+
+        // 1) unique bin ids needed
+        Set<String> binIds = a.picks().stream()
+            .map(PickDto::binId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        // 2) find blocking bins (not AVAILABLE)
+        Set<String> blocking = binIds.stream()
+            .filter(binId -> !state.getBin(binId).canReserve())
+            .collect(java.util.stream.Collectors.toSet());
+
+        if (!blocking.isEmpty()) {
+            // Register interest; wakeup will happen when those bins become available.
+            for (String binId : blocking) {
+                state.getBin(binId).enqueueWaiter(shipmentId);
+            }
+            return;
+        }
+
+        // 3) reserve all bins now that they're all available
+        for (String binId : binIds) {
+            state.getBin(binId).reserveForConsolidation(shipmentId);
+        }
+
+        // 4) decide if consolidation needed (bins not in destination grid)
+        Set<String> binsToTransfer = binIds.stream()
+            .filter(binId -> !state.getBin(binId).getCurrentGridId().equals(destGridId))
+            .collect(java.util.stream.Collectors.toSet());
+
+        shipment.startConsolidation();
+
+        if (binsToTransfer.isEmpty()) {
+            enqueueEvent(new ShipmentIsReadyEvent(simTime, shipmentId));
+            return;
+        }
+
+        for (String binId : binsToTransfer) {
+            enqueueEvent(new BinTransferStartedEvent(simTime, shipmentId, binId, destGridId));
+        }
     }
 }

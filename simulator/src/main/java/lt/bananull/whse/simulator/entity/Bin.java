@@ -7,6 +7,7 @@ import lt.bananull.whse.simulator.enums.BinStatus;
 
 import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +30,8 @@ public class Bin {
     private final Map<String, Integer> reservedItems = new HashMap<>();
     @Getter(AccessLevel.NONE)
     private final Queue<String> portQueue = new ArrayDeque<>();
+    private final Deque<String> waitingShipmentIds = new ArrayDeque<>();
+
 
     private Bin(String id, String currentGridId, Map<String, Integer> stock) {
         this.id = id;
@@ -187,8 +190,21 @@ public class Bin {
 
     public void reserveForConsolidation(String shipmentId) {
         this.reservedForShipmentId = shipmentId;
-        // reserve(ean, qt); will reserve in portsTatrsshipment
         status = BinStatus.RESERVED;
+    }
+
+    public void enqueueWaiter(String shipmentId) {
+        if (!waitingShipmentIds.contains(shipmentId)) { // avoid duplicates
+            waitingShipmentIds.addLast(shipmentId);
+        }
+    }
+
+    public String pollNextWaiter() {
+        return waitingShipmentIds.pollFirst(); // null if none
+    }
+
+    public boolean hasWaiters() {
+        return !waitingShipmentIds.isEmpty();
     }
 
     @Override

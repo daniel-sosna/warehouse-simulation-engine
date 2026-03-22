@@ -33,7 +33,6 @@ public class BinRequestedAtPortEvent extends Event {
 
         String binId = shipment.getPicks().stream()
                 .map(pick -> state.getBin(pick.binId()))
-                .filter(bin -> bin.getStatus() == AVAILABLE)
                 .map(Bin::getId)
                 .findFirst()
                 .orElse(null);
@@ -52,10 +51,8 @@ public class BinRequestedAtPortEvent extends Event {
     @Override
     public List<Event> execute(Simulator simulator) {
         SimulationState state = simulator.getState();
-        Bin bin = state.getBin(binId);
         Port port = state.getPort(portId);
 
-        bin.reserveForPort(portId);
         port.assignBin(binId);
 
         double mult = simulator.resolveMultiplier(simulator.getParameters().gridBinDelivery().randomness());
