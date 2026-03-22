@@ -8,8 +8,11 @@ import lt.bananull.whse.simulator.entity.Shift;
 import lt.bananull.whse.utils.DateTimeResolver;
 
 import java.time.Instant;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PortClosesEvent extends Event {
 
@@ -68,12 +71,14 @@ public class PortClosesEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-            "gridId", gridId,
-            "portId", portId,
-            "intoBreak", portBreak != null,
-            "handlingFlags", port.getHandlingFlags()
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("fromBreak", portBreak != null),
+                new AbstractMap.SimpleEntry<>("handlingFlags", port.getHandlingFlags())
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
 

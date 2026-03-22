@@ -7,9 +7,12 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PortStartsShipmentEvent extends Event {
 
@@ -55,13 +58,15 @@ public class PortStartsShipmentEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "gridId", gridId,
-                "portId", portId,
-                "shipmentId", shipmentId,
-                "sortingDirection", sortingDirection,
-                "handlingFlags", handlingFlags,
-                "shipmentItems", items
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("sortingDirection", sortingDirection),
+                new AbstractMap.SimpleEntry<>("handlingFlags", handlingFlags),
+                new AbstractMap.SimpleEntry<>("shipmentItems", items)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

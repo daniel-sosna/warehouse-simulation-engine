@@ -5,8 +5,11 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Port;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class BinArrivesAtPortEvent extends Event {
@@ -40,12 +43,14 @@ public class BinArrivesAtPortEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "binId", binId,
-                "gridId", gridId,
-                "portId", portId,
-                "shipmentId", shipmentId,
-                "binStock", binStock
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("binId", binId),
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("binStock", binStock)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -4,9 +4,12 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ShipmentShippedEvent extends Event {
 
@@ -34,11 +37,13 @@ public class ShipmentShippedEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-            "shipmentId", shipmentId,
-            "sortingDirection", sortingDirection,
-            "handlingFlags", handlingFlags,
-            "items", items
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("sortingDirection", sortingDirection),
+                new AbstractMap.SimpleEntry<>("handlingFlags", handlingFlags),
+                new AbstractMap.SimpleEntry<>("items", items)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -8,9 +8,12 @@ import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class BinPickCompletedEvent extends Event {
@@ -70,12 +73,14 @@ public class BinPickCompletedEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-                "binId", binId,
-                "gridId", gridId,
-                "portId", portId,
-                "shipmentId", shipmentId,
-                "itemsPicked", itemsPicked
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("binId", binId),
+                new AbstractMap.SimpleEntry<>("gridId", gridId),
+                new AbstractMap.SimpleEntry<>("portId", portId),
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("itemsPicked", itemsPicked)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

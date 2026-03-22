@@ -4,10 +4,13 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static lt.bananull.whse.simulator.enums.ShipmentStatus.PACKED;
 
@@ -38,9 +41,11 @@ public class TruckArrivalEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-            "shipmentsTakenForShipping", shippedShipmentCount,
-            "sortingDirection", sortingDirection
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("shipmentsTakenForShipping", shippedShipmentCount),
+                new AbstractMap.SimpleEntry<>("sortingDirection", sortingDirection)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

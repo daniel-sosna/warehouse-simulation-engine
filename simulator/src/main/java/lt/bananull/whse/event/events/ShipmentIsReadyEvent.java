@@ -6,9 +6,12 @@ import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Port;
 import lt.bananull.whse.simulator.entity.Shipment;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static lt.bananull.whse.simulator.enums.PortStatus.IDLE;
 
@@ -18,6 +21,7 @@ public class ShipmentIsReadyEvent extends Event {
     private String sortingDirection;
     private Set<String> handlingFlags;
     private Map<String, Integer> items;
+    private String gridId;
 
     public ShipmentIsReadyEvent(long simTime, String shipmentId) {
         super(simTime);
@@ -30,13 +34,13 @@ public class ShipmentIsReadyEvent extends Event {
         shipment.startConsolidation();
         shipment.markReady();
 
-        sortingDirection = shipment.getSortingDirection();
-        handlingFlags = shipment.getHandlingFlags();
-        items = shipment.getItems();
-
         Grid currentGrid = simulator.getState().getGrid(shipment.getAssignedGridId());
-        Set<String> handlingFlags = shipment.getHandlingFlags();
+        handlingFlags = shipment.getHandlingFlags();
         Port availablePort = currentGrid.getAvailablePort(handlingFlags);
+
+        sortingDirection = shipment.getSortingDirection();
+        items = shipment.getItems();
+        gridId = currentGrid.getId();
 
         if (availablePort != null) {
             shipment.assignToPort(availablePort.getPortIndex());
@@ -53,12 +57,15 @@ public class ShipmentIsReadyEvent extends Event {
 
     @Override
     public Map<String, Object> getData() {
-        return Map.of(
-            "shipmentId", shipmentId,
-            "sortingDirection", sortingDirection,
-            "handlingFlags", handlingFlags,
-            "items", items
-        );
+        return Stream.of(
+                new AbstractMap.SimpleEntry<>("shipmentId", shipmentId),
+                new AbstractMap.SimpleEntry<>("sortingDirection", sortingDirection),
+                new AbstractMap.SimpleEntry<>("handlingFlags", handlingFlags),
+                new AbstractMap.SimpleEntry<>("items", items),
+                new AbstractMap.SimpleEntry<>("gridId", gridId)
+            )
+            .filter(e -> e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
 }
