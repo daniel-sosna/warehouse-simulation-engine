@@ -14,5 +14,8 @@ COPY data ./data
 COPY build ./build
 RUN chmod +x build/router/router-linux-amd64
 
+RUN mkdir -p /app/output
+VOLUME ["/app/output"]
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
-CMD ["--dataDir", "./data/1", "--router", "build/router/router-linux-amd64", "--eventLogFile", "./output_logs.log"]
+CMD ["--dataDir", "./data/6", "--router", "build/router/router-linux-amd64", "--eventLogFile", "./output_logs.log"]
