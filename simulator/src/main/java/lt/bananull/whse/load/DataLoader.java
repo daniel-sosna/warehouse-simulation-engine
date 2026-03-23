@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.load.dto.BinDto;
 import lt.bananull.whse.load.dto.GridDto;
 import lt.bananull.whse.load.dto.ShipmentDto;
+import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.simulator.SimulationParameters;
 import lt.bananull.whse.utils.JacksonMapper;
-import lt.bananull.whse.load.dto.SimulationStateDto;
 
 import java.io.IOException;
 import java.io.InputStream;

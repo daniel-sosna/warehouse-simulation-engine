@@ -2,11 +2,12 @@ package lt.bananull.whse.event.events;
 
 import lombok.extern.slf4j.Slf4j;
 import lt.bananull.whse.event.Event;
+import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.simulator.Simulator;
 import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Port;
-import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -67,6 +68,11 @@ public class BinPickCompletedEvent extends Event {
                 events.add(event);
             }
         }
+
+        // Check assignments queue
+        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
+        assignments.forEach(assignment ->
+            events.add(new ShipmentStartsConsolidationEvent(getSimTime(), assignment)));
 
         return events;
     }

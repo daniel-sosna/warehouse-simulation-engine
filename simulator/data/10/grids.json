@@ -1,0 +1,45 @@
+[
+  {
+    "id": "AS1",
+    "shifts": [
+      {
+        "start": "06:00",
+        "end": "15:00",
+        "portConfig": [
+          {"portIndex": "port-1", "handlingFlags": []},
+          {"portIndex": "port-2", "handlingFlags": ["priority"]}
+        ],
+        "breaks": [
+          {"start": "10:30", "end": "10:50"}
+        ]
+      },
+        {
+          "start": "14:00",
+          "end": "23:00",
+          "portConfig": [
+            {"portIndex": "port-3", "handlingFlags": []},
+            {"portIndex": "port-4", "handlingFlags": ["priority", "fragile"]},
+            {"portIndex": "port-5", "handlingFlags": ["priority"]}
+          ],
+          "breaks": [
+            {"start": "16:00", "end": "16:20"}
+          ]
+        }
+    ]
+  },
+  {
+    "id": "AS2",
+    "shifts": [
+      {
+        "start": "09:00",
+        "end": "17:00",
+        "portConfig": [
+          {"portIndex": "port-6", "handlingFlags": ["fragile"]}
+        ],
+        "breaks": [
+          {"start": "13:00", "end": "14:00"}
+        ]
+      }
+    ]
+  }
+]

@@ -6,24 +6,27 @@ import lt.bananull.whse.event.Event;
 import lt.bananull.whse.event.EventHandler;
 import lt.bananull.whse.event.events.PortOpensEvent;
 import lt.bananull.whse.event.events.RouterTickEvent;
-import lt.bananull.whse.event.events.ShipmentIsReadyEvent;
 import lt.bananull.whse.event.events.TruckArrivalEvent;
 import lt.bananull.whse.load.dto.SimulationStateDto;
 import lt.bananull.whse.router.RouterClient;
 import lt.bananull.whse.router.dto.AssignmentDto;
+import lt.bananull.whse.router.dto.PickDto;
 import lt.bananull.whse.service.PortShiftService;
 import lt.bananull.whse.service.TruckArrivalService;
+import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Grid;
 import lt.bananull.whse.simulator.entity.Shift;
-import lt.bananull.whse.simulator.entity.Shipment;
 import lt.bananull.whse.simulator.entity.SimulationState;
 import lt.bananull.whse.utils.DateTimeResolver;
 import lt.bananull.whse.utils.RandomnessResolver;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.SplittableRandom;
 
@@ -71,27 +74,44 @@ public class Simulator {
     public void updateAssignments(Collection<AssignmentDto> newAssignments) {
         assignments.clear();
         assignments.addAll(newAssignments);
-        for (AssignmentDto assignment : assignments) {
-            Shipment shipment = state.getShipment(assignment.shipmentId());
-            shipment.routeToGrid(assignment.packingGrid(), assignment.picks());
-        }
     }
 
-    public void dispatchAll() {
+    public List<AssignmentDto> pollAssignmentsToDispatch() {
+        List<AssignmentDto> assignmentsToDispatch = new ArrayList<>();
+        Map<String, String> neededBinsInGrids = new HashMap<>();
+
         while (!assignments.isEmpty()) {
-            AssignmentDto a = assignments.poll();
+            AssignmentDto assignmentDto = assignments.peek();
+            String packingGrid = assignmentDto.packingGrid();
 
-            enqueueEvent(new ShipmentIsReadyEvent(simTime, a.shipmentId()));
-            // long doneAt = simTime + TRAVEL_SECONDS;
-            // enqueueEvent(new BinArrivesAtPort(doneAt, a));
+            List<Bin> requiredBins = assignmentDto.picks().stream()
+                .map(PickDto::binId)
+                .distinct()
+                .map(state::getBin)
+                .toList();
 
-            // TODO: later (deffo not now) we should create a dispacher/scheduler for the logic
-            // then we will need: Dispatcher (or PortScheduler) that:
-            // - takes AssignmentDto
-            // - decides which port/grid can start now
-            // - reserves bin/port
-            // - schedules BinArrivedAtPort, BinPickCompleted, etc.
+            boolean allBinsAreAvailable = true;
+            for (Bin bin : requiredBins) {
+                if (
+                    (!neededBinsInGrids.containsKey(bin.getId()) || neededBinsInGrids.get(bin.getId()).equals(packingGrid))
+                    && (!bin.isNeededInCurrentGrid() || bin.getCurrentGridId().equals(packingGrid))
+                ) {
+                    neededBinsInGrids.put(bin.getId(), packingGrid);
+                } else {
+                    allBinsAreAvailable = false;
+                    break;
+                }
+            }
+
+            if (!allBinsAreAvailable) {
+                break;
+            }
+
+            assignments.poll();
+            assignmentsToDispatch.add(assignmentDto);
         }
+
+        return assignmentsToDispatch;
     }
 
     public void run() {

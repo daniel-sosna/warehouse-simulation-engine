@@ -36,8 +36,8 @@ public class BinRequestedAtPortEvent extends Event {
         Port port = state.getPort(portId);
         Shipment shipment = state.getShipment(port.getActiveShipmentId());
 
-        String binId = shipment.getPicks().stream()
-                .map(pick -> state.getBin(pick.binId()))
+        String binId = shipment.getBinIds().stream()
+                .map(state::getBin)
                 .filter(bin -> bin.getStatus() == AVAILABLE)
                 .map(Bin::getId)
                 .findFirst()
@@ -71,7 +71,9 @@ public class BinRequestedAtPortEvent extends Event {
         shipmentId = port.getActiveShipmentId();
         binStock = bin.getStock();
 
-        return List.of(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
+        simulator.enqueueEvent(new BinArrivesAtPortEvent(arriveAt, duration, gridId, portId, binId));
+
+        return List.of();
     }
 
     @Override

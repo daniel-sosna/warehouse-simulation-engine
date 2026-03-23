@@ -12,7 +12,18 @@
           }
         ],
         "breaks": []
-      }
+      },
+        {
+          "start": "00:00",
+          "end": "23:59",
+          "portConfig": [
+            {
+              "portIndex": "port-2",
+              "handlingFlags": []
+            }
+          ],
+          "breaks": []
+        }
     ]
   },
   {

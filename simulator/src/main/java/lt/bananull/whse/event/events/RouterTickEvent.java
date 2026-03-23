@@ -2,14 +2,18 @@ package lt.bananull.whse.event.events;
 
 import lt.bananull.whse.event.Event;
 import lt.bananull.whse.router.RouterClient;
+import lt.bananull.whse.router.dto.AssignmentDto;
 import lt.bananull.whse.router.dto.RouterRequestDto;
 import lt.bananull.whse.router.dto.RouterResponseDto;
 import lt.bananull.whse.simulator.Simulator;
+import lt.bananull.whse.simulator.entity.Bin;
 import lt.bananull.whse.simulator.entity.Shipment;
+import lt.bananull.whse.simulator.entity.SimulationState;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static lt.bananull.whse.simulator.enums.ShipmentStatus.RECEIVED;
 
@@ -27,24 +31,28 @@ public class RouterTickEvent extends Event {
 
     @Override
     public List<Event> execute(Simulator simulator) {
+        SimulationState state = simulator.getState();
         Instant now = simulator.getSimulationStart().plusSeconds(getSimTime());
-        rollbackToReceived(simulator);
+
+        rollbackToReceived(state);
         checkForReceivedShipments(simulator, now);
-        shipmentsRerouted = simulator.getState().shipments().values().stream()
+        shipmentsRerouted = state.shipments().values().stream()
                 .filter(shipment -> shipment.getStatus() == RECEIVED)
                 .count();
 
-        RouterRequestDto request = RouterRequestDto.from(simulator.getState(), now);
+        RouterRequestDto request = RouterRequestDto.from(state, now);
         RouterResponseDto response = routerClient.route(request);
         simulator.updateAssignments(response.assignments());
-        simulator.dispatchAll();
 
         long nextSimTime = getSimTime() + ROUTER_INTERVAL_SECONDS;
         if (nextSimTime <= simulator.getSimulationDurationSeconds()) {
             simulator.enqueueEvent(new RouterTickEvent(nextSimTime, routerClient));
         }
 
-        return List.of();
+        List<AssignmentDto> assignments = simulator.pollAssignmentsToDispatch();
+        return assignments.stream()
+            .map(assignment -> new ShipmentStartsConsolidationEvent(getSimTime(), assignment))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     /**
@@ -62,10 +70,13 @@ public class RouterTickEvent extends Event {
                 });
     }
 
-    private void rollbackToReceived(Simulator simulator) {
-        simulator.getState().shipments().values().stream()
+    private void rollbackToReceived(SimulationState state) {
+        state.shipments().values().stream()
                 .filter(Shipment::isAvailableForRerouting)
-                .forEach(Shipment::rollbackToReceived);
+                .forEach(shipment -> {
+                    shipment.getBinIds().stream().map(state::getBin).forEach(Bin::decrementNeededInGrid);
+                    shipment.rollbackToReceived();
+                });
     }
 
     @Override

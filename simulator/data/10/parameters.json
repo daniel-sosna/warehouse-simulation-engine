@@ -1,4 +1,6 @@
 {
+  "simulationStartTime": "2026-03-01T05:00:00Z",
+  "simulationEndTime": "2026-03-04T12:00:00Z",
   "pickingThroughput": {
     "standard": 140,
     "fragile": 70,
@@ -11,8 +13,7 @@
     "portQueueCapacity": 20,
     "deliveryTimes": {
       "AS1": 6,
-      "AS2": 4,
-      "AS3": 5
+      "AS2": 8
     },
     "randomness": {
       "min": 0.8,
@@ -26,18 +27,6 @@
         "to": "AS2",
         "duration": 60,
         "throughput": 1000
-      },
-      {
-        "from": "AS1",
-        "to": "AS3",
-        "duration": 240,
-        "throughput": 800
-      },
-      {
-        "from": "AS2",
-        "to": "AS3",
-        "duration": 360,
-        "throughput": 600
       }
     ],
     "durationRandomness": {
@@ -54,8 +43,9 @@
       {
         "sortingDirection": "direction-1",
         "pullTimes": [
-          "14:00",
-          "18:00"
+          "13:00",
+          "18:00",
+          "23:00"
         ],
         "weekdays": [
           "Sunday",
@@ -78,10 +68,16 @@
       {
         "sortingDirection": "direction-2",
         "pullTimes": [
-          "16:30"
+          "17:30"
         ],
         "weekdays": [
-          "Wednesday"
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
         ]
       }
     ]

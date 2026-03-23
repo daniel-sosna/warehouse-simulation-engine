@@ -22,7 +22,6 @@ public class Port {
     private final Set<String> handlingFlags;
     private final int queueCapacity;
     private PortStatus status;
-    private String activeShipmentId;
     private String currentBinId;
     @Getter(AccessLevel.NONE)
     private final Queue<String> shipmentQueue;
@@ -39,6 +38,8 @@ public class Port {
         return new Port(dto.portIndex(), dto.handlingFlags(), queueCapacity);
     }
 
+    public String getActiveShipmentId() { return shipmentQueue.peek(); }
+
     public Collection<String> getShipmentQueue() { return Collections.unmodifiableCollection(shipmentQueue); }
 
     public int getQueueSize() {
@@ -46,7 +47,7 @@ public class Port {
     }
 
     public boolean hasCapacity() {
-        return getQueueSize() + 1 < queueCapacity;
+        return getQueueSize() < queueCapacity;
     }
 
     public boolean canHandle(Collection<String> shipmentHandlingFlags) {
@@ -84,12 +85,11 @@ public class Port {
                     "Port %s cannot start a shipment from status %s".formatted(portIndex, status));
         }
 
-        String nextShipmentId = shipmentQueue.poll();
+        String nextShipmentId = shipmentQueue.peek();
         if (nextShipmentId == null) {
             throw new IllegalStateException("Port %s has no queued shipments to start".formatted(portIndex));
         }
 
-        this.activeShipmentId = nextShipmentId;
         this.status = PortStatus.BUSY;
         return nextShipmentId;
     }
@@ -98,7 +98,7 @@ public class Port {
      * Assigns a bin to the port for active processing.
      */
     public void assignBin(String binId) {
-        if (status != PortStatus.BUSY) {
+        if (status != PortStatus.BUSY && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException(
                     "Port %s cannot be assigned a bin from status %s".formatted(portIndex, status));
         }
@@ -114,7 +114,7 @@ public class Port {
      * Releases the currently assigned bin from the port.
      */
     public void releaseBin() {
-        if (status != PortStatus.BUSY) {
+        if (status != PortStatus.BUSY && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException(
                     "Port %s cannot release a bin from status %s".formatted(portIndex, status));
         }
@@ -137,8 +137,7 @@ public class Port {
                     "Port %s cannot complete shipment from status %s".formatted(portIndex, status));
         }
 
-        String completedShipmentId = activeShipmentId;
-        this.activeShipmentId = null;
+        String completedShipmentId = shipmentQueue.poll();
         this.status = status == PortStatus.PENDING_CLOSE ? PortStatus.CLOSED : PortStatus.IDLE;
         return completedShipmentId;
     }
@@ -163,6 +162,6 @@ public class Port {
     @Override
     public String toString() {
         return "Port{portIndex='%s', status=%s, queueSize=%d/%d, active='%s'}"
-                .formatted(portIndex, status, getQueueSize(), queueCapacity, activeShipmentId);
+                .formatted(portIndex, status, getQueueSize(), queueCapacity, getActiveShipmentId());
     }
 }

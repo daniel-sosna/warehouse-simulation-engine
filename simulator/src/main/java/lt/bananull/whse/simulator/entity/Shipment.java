@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static lt.bananull.whse.simulator.enums.BinStatus.OUTSIDE;
+
 /**
  * Simulation entity representing a customer order.
  * Mutable throughout the shipment lifecycle.
@@ -60,11 +62,23 @@ public class Shipment {
 
     public Collection<PickDto> getPicks() { return Collections.unmodifiableCollection(picks); }
 
+    public Collection<String> getBinIds() { return picks.stream().map(PickDto::binId).distinct().toList(); }
+
     public boolean isAvailableForRerouting() {
         return (status == ShipmentStatus.ROUTED
                 || status == ShipmentStatus.CONSOLIDATION
                 || status == ShipmentStatus.READY)
                 && assignedPortId == null;
+    }
+
+    public boolean isConsolidated(SimulationState state) {
+        return getBinIds().stream()
+            .map(state::getBin)
+            .allMatch(b -> b.getStatus() != OUTSIDE);
+    }
+
+    public boolean isBinNeeded(String binId) {
+        return getBinIds().stream().anyMatch(id -> id.equals(binId));
     }
 
     public boolean isFullyPicked() {
@@ -81,8 +95,7 @@ public class Shipment {
 
     public void routeToGrid(String gridId, Collection<PickDto> picks) {
         if (status != ShipmentStatus.RECEIVED) {
-            // throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(portIndex, status));
-            // TODO: uncomment this when roll back to received is implemented and used
+            throw new IllegalStateException("Shipment %s cannot be routed from status %s".formatted(id, status));
         }
 
         this.assignedGridId = gridId;

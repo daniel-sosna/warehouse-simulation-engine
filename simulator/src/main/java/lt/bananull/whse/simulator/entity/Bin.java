@@ -21,6 +21,7 @@ public class Bin {
     @Getter(AccessLevel.NONE)
     private final Map<String, Integer> stock;
     private String currentGridId;
+    private int neededInGridCount = 0;
     private BinStatus status = BinStatus.AVAILABLE;
     private String reservedForPortId;
     @Getter(AccessLevel.NONE)
@@ -40,6 +41,10 @@ public class Bin {
         return new Bin(dto.id(), dto.currentGridLocation(), stock);
     }
 
+    public boolean isNeededInCurrentGrid() {
+        return neededInGridCount > 0;
+    }
+
     public Map<String, Integer> getStock() { return Collections.unmodifiableMap(stock); }
 
     public Map<String, Integer> getReservedItems() { return Collections.unmodifiableMap(reservedItems); }
@@ -49,7 +54,7 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : reservedItems.entrySet()) {
             String ean = entry.getKey();
-            int remaining = availableStock.get(ean) - entry.getValue();
+            int remaining = availableStock.getOrDefault(ean, 0) - entry.getValue();
 
             if (remaining <= 0) {
                 availableStock.remove(ean);
@@ -73,8 +78,14 @@ public class Bin {
 
         for (Map.Entry<String, Integer> entry : itemsToDeduct.entrySet()) {
             String ean = entry.getKey();
-            int remainingStock = stock.get(ean) - entry.getValue();
+            int remainingStock = stock.getOrDefault(ean, 0) - entry.getValue();
             int remainingReserved = reservedItems.getOrDefault(ean, 0) - entry.getValue();
+
+            if (remainingStock < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot deduct %d units of EAN %s from bin %s; only %d available"
+                                .formatted(entry.getValue(), ean, id, stock.getOrDefault(ean, 0) - reservedItems.getOrDefault(ean, 0)));
+            }
 
             if (remainingStock == 0) {
                 stock.remove(ean);
@@ -128,12 +139,12 @@ public class Bin {
     }
 
     private void reserve(String ean, int quantity) {
-        int availableQty = stock.get(ean);
+        int availableQty = stock.getOrDefault(ean, 0);
         int currentlyReserved = reservedItems.getOrDefault(ean, 0);
         if (quantity + currentlyReserved > availableQty) {
             throw new IllegalArgumentException(
-                "Bin %s has only %d units of EAN %s; cannot reserve additional %d"
-                    .formatted(id, availableQty - currentlyReserved, ean, quantity));
+                "Cannot reserve %d units of EAN %s in bin %s; only %d available"
+                    .formatted(quantity, ean, id, availableQty - currentlyReserved));
         }
 
         reservedItems.put(ean, currentlyReserved + quantity);
@@ -143,30 +154,49 @@ public class Bin {
         if (portId == null || portId.isEmpty()) {
             throw new IllegalArgumentException("Port ID must be provided when reserving bin %s".formatted(id));
         }
-        if (status == BinStatus.RESERVED) {
-            throw new IllegalStateException("Bin %s is already reserved for port %s".formatted(id, reservedForPortId));
+        if (status != BinStatus.AVAILABLE) {
+            throw new IllegalStateException("Bin %s cannot be reserved from status %s".formatted(id, status));
         }
 
         this.reservedForPortId = portId;
         this.status = BinStatus.RESERVED;
     }
 
+    public void incrementNeededInGrid() {
+        this.neededInGridCount += 1;
+    }
+
+    public void decrementNeededInGrid() {
+        this.neededInGridCount -= 1;
+    }
+
     public void release() {
+        if (status != BinStatus.RESERVED) {
+            throw new IllegalStateException("Bin %s cannot be released from status %s".formatted(id, status));
+        }
+
+        decrementNeededInGrid();
         this.reservedForPortId = null;
         this.status = BinStatus.AVAILABLE;
     }
 
-    public void sendOnConveyorBelt() {
-        this.currentGridId = null;
-        this.status = BinStatus.OUTSIDE;
-    }
-
-    public void arriveAtGrid(String gridId) {
+    public void sendOnConveyorBelt(String gridId) {
         if (gridId == null || gridId.isEmpty()) {
             throw new IllegalArgumentException("Grid ID must be provided when bin %s arrives".formatted(id));
         }
+        if (status != BinStatus.AVAILABLE) {
+            throw new IllegalStateException("Bin %s cannot be sent on conveyor belt from status %s".formatted(id, status));
+        }
 
         this.currentGridId = gridId;
+        this.status = BinStatus.OUTSIDE;
+    }
+
+    public void arriveAtGrid() {
+        if (status != BinStatus.OUTSIDE) {
+            throw new IllegalStateException("Bin %s cannot arrive at grid from status %s".formatted(id, status));
+        }
+
         this.status = BinStatus.AVAILABLE;
     }
 
