@@ -48,7 +48,7 @@ public class ShipmentIsReadyEvent extends Event {
                 return List.of(new PortStartsShipmentEvent(getSimTime(), currentGrid.getId(), availablePort.getPortIndex()));
             }
         } else {
-            currentGrid.enqueueShipment(shipmentId);
+            // currentGrid.enqueueShipment(shipmentId);
         }
 
         return List.of();
