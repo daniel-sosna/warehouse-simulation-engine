@@ -1,9 +1,9 @@
 services:
     simulator:
         build: .
-        image: whse-test
+        image: whse
         volumes:
-            - .:/app
+            - .:/work
         command: [
             "--dataDir", "./data/9",
             "--router", "./build/router-linux-amd64",

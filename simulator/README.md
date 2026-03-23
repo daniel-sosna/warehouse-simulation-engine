@@ -17,18 +17,22 @@ If you received a .tar file, first load the image into your local Docker registr
 ```bash
   docker load -i whse.tar
 ```
-### 2. Run the Simulation (Standard)
-To run the simulation with the default settings and save the logs to your current folder, use the following command in Git Bash
+### 2. Run the Simulation
+
+To run the simulation with the default settings and your current directory as a workspace, use:
 ```bash
-  docker run -v "/$(pwd):/app/output" whse
+  docker run -v "/$(pwd):/work" whse
 ```
 
-### 3. Run with Custom Args
-f you need to test specific data directories or configurations, you can pass arguments directly
+You can also pass arguments directly:
 ```bash
-  docker run -v "/$(pwd):/app/output" whse \
+  docker run -v "/$(pwd):/work" whse \
     --dataDir ./data/6 \
     --router build/router/router-linux-amd64 \
     --eventLogFile ./output/results.log
 ```
 
+To see all available options, run:
+```bash
+  docker run -v "/$(pwd):/work" whse --help
+```

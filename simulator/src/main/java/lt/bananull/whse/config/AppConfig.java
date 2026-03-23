@@ -29,7 +29,7 @@ public record AppConfig(
 
     public static String usage() {
         return String.join(System.lineSeparator(),
-            "Usage: docker run -v \"/$(pwd):/app\" whse [options]",
+            "Usage: docker run -v \"/$(pwd):/work\" whse [options]",
             "",
             "Options:",
             "  --help, -h                         Show this help message and exit",
@@ -37,8 +37,8 @@ public record AppConfig(
             "  --router <command>                 Router command to execute (default: ./build/router)",
             "  --eventLogFile <path>              Output event log file path (default: ./simulation.log)",
             "  --healthCheckInterval <seconds>    Health-check interval, 0 disables (default: 10)",
-            "  --debug                            Set log level to DEBUG",
-            "  --info                             Set log level to INFO"
+            "  --debug                            Set program log level to DEBUG (default: WARNING)",
+            "  --info                             Set program log level to INFO (default: WARNING)"
         );
     }
 
