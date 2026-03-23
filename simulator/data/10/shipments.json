@@ -1,0 +1,336 @@
+[
+  {
+    "id": "S01-before-open",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T04:00:00Z",
+    "sortingDirection": "dir-1"
+  },
+  {
+    "id": "S02-before-open",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T04:28:00Z",
+    "sortingDirection": "dir-1"
+  },
+  {
+    "id": "S1",
+    "items": { "ean-1": 2 },
+    "shipmentDate": "2026-03-01T05:10:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S2",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-01T05:25:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S3",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T06:00:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S4",
+    "items": { "ean-3": 1 },
+    "shipmentDate": "2026-03-01T06:45:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S5",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-01T07:10:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S6",
+    "items": { "ean-2": 2 },
+    "shipmentDate": "2026-03-01T08:20:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S7",
+    "items": { "ean-1": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-01T08:21:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S8",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-01T08:21:30Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S9",
+    "items": { "ean-1": 3 },
+    "shipmentDate": "2026-03-01T08:22:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S10",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T12:40:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S11-priority-fragile",
+    "items": { "ean-1": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-01T12:50:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority", "fragile"]
+  },
+  {
+    "id": "S12-priority",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-01T12:52:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S13",
+    "items": { "ean-1": 2, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T12:55:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S14-fragile",
+    "items": { "ean-2": 1, "ean-3": 2 },
+    "shipmentDate": "2026-03-01T13:05:00Z",
+    "sortingDirection": "direction-2",
+    "handlingFlags": ["fragile"]
+  },
+  {
+    "id": "S15-fragile",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-01T13:10:00Z",
+    "sortingDirection": "direction-2",
+    "handlingFlags": ["fragile"]
+  },
+  {
+    "id": "S16-priority",
+    "items": { "ean-1": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-01T13:12:00Z",
+    "sortingDirection": "direction-2",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S17",
+    "items": { "ean-3": 2 },
+    "shipmentDate": "2026-03-01T15:10:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S18-fragile",
+    "items": { "ean-1": 2 },
+    "shipmentDate": "2026-03-01T15:30:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["fragile"]
+  },
+  {
+    "id": "S19",
+    "items": { "ean-2": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-01T15:45:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S20-priority",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-01T17:40:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S21-priority",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-01T17:45:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S22",
+    "items": { "ean-1": 3 },
+    "shipmentDate": "2026-03-01T17:46:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S23",
+    "items": { "ean-2": 2 },
+    "shipmentDate": "2026-03-01T17:47:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S24",
+    "items": { "ean-3": 1 },
+    "shipmentDate": "2026-03-01T19:10:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S25",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-01T20:30:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S26",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-01T21:00:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S27-last-minute",
+    "items": { "ean-1": 1, "ean-2": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-01T22:50:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S28",
+    "items": { "ean-1": 2 },
+    "shipmentDate": "2026-03-02T05:05:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S29",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-02T05:12:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S30",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-02T05:30:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S31",
+    "items": { "ean-3": 1 },
+    "shipmentDate": "2026-03-02T06:00:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S32",
+    "items": { "ean-1": 3 },
+    "shipmentDate": "2026-03-02T06:01:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S33",
+    "items": { "ean-2": 2 },
+    "shipmentDate": "2026-03-02T06:02:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S34-fragile",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-02T09:10:00Z",
+    "sortingDirection": "direction-2",
+    "handlingFlags": ["fragile"]
+  },
+  {
+    "id": "S35-fragile",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-02T09:12:00Z",
+    "sortingDirection": "direction-2",
+    "handlingFlags": ["fragile"]
+  },
+  {
+    "id": "S36",
+    "items": { "ean-1": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-02T10:15:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S37",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-02T10:40:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S38-priority",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-02T12:45:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S39-priority",
+    "items": { "ean-1": 1, "ean-2": 1 },
+    "shipmentDate": "2026-03-02T12:47:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S40",
+    "items": { "ean-3": 2 },
+    "shipmentDate": "2026-03-02T12:50:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S41",
+    "items": { "ean-2": 1 },
+    "shipmentDate": "2026-03-02T13:05:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S42",
+    "items": { "ean-1": 2 },
+    "shipmentDate": "2026-03-02T13:07:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S43",
+    "items": { "ean-2": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-02T15:10:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S44",
+    "items": { "ean-1": 2 },
+    "shipmentDate": "2026-03-02T15:25:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S45-priority",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-02T17:40:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S46-priority",
+    "items": { "ean-1": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-02T17:41:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  },
+  {
+    "id": "S47",
+    "items": { "ean-2": 3 },
+    "shipmentDate": "2026-03-02T17:42:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S48",
+    "items": { "ean-1": 2, "ean-2": 1 },
+    "shipmentDate": "2026-03-02T17:43:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S49",
+    "items": { "ean-3": 1 },
+    "shipmentDate": "2026-03-02T19:30:00Z",
+    "sortingDirection": "direction-2"
+  },
+  {
+    "id": "S50",
+    "items": { "ean-1": 1 },
+    "shipmentDate": "2026-03-02T21:10:00Z",
+    "sortingDirection": "direction-1"
+  },
+  {
+    "id": "S51-last-minute",
+    "items": { "ean-1": 1, "ean-2": 1, "ean-3": 1 },
+    "shipmentDate": "2026-03-02T22:55:00Z",
+    "sortingDirection": "direction-1",
+    "handlingFlags": ["priority"]
+  }
+]

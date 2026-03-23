@@ -98,7 +98,7 @@ public class Port {
      * Assigns a bin to the port for active processing.
      */
     public void assignBin(String binId) {
-        if (status != PortStatus.BUSY) {
+        if (status != PortStatus.BUSY && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException(
                     "Port %s cannot be assigned a bin from status %s".formatted(portIndex, status));
         }
@@ -114,7 +114,7 @@ public class Port {
      * Releases the currently assigned bin from the port.
      */
     public void releaseBin() {
-        if (status != PortStatus.BUSY) {
+        if (status != PortStatus.BUSY && status != PortStatus.PENDING_CLOSE) {
             throw new IllegalStateException(
                     "Port %s cannot release a bin from status %s".formatted(portIndex, status));
         }
