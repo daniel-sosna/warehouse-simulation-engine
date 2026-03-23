@@ -12,7 +12,7 @@ public record AppConfig(
     public static final Path DEFAULT_DATA_DIR = Path.of("./data");
     public static final String DEFAULT_ROUTER_COMMAND = "./build/router";
     public static final Path DEFAULT_EVENT_LOG_FILE = Path.of("./simulation.log");
-    public static final int DEFAULT_HEALTH_CHECK_INTERVAL = 0;
+    public static final int DEFAULT_HEALTH_CHECK_INTERVAL = 10;
 
     public static AppConfig defaults() {
         return new AppConfig(DEFAULT_DATA_DIR, DEFAULT_ROUTER_COMMAND, DEFAULT_EVENT_LOG_FILE, DEFAULT_HEALTH_CHECK_INTERVAL);
@@ -29,14 +29,14 @@ public record AppConfig(
 
     public static String usage() {
         return String.join(System.lineSeparator(),
-            "Usage: java -jar whse.jar [options]",
+            "Usage: docker run -v \"/$(pwd):/app\" whse [options]",
             "",
             "Options:",
             "  --help, -h                         Show this help message and exit",
             "  --dataDir <path>                   Path to input data directory (default: ./data)",
             "  --router <command>                 Router command to execute (default: ./build/router)",
             "  --eventLogFile <path>              Output event log file path (default: ./simulation.log)",
-            "  --healthCheckInterval <seconds>    Health-check interval, 0 disables (default: 0)",
+            "  --healthCheckInterval <seconds>    Health-check interval, 0 disables (default: 10)",
             "  --debug                            Set log level to DEBUG",
             "  --info                             Set log level to INFO"
         );

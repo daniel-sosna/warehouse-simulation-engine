@@ -3,9 +3,9 @@ services:
         build: .
         image: whse-test
         volumes:
-            - .:/app/output
+            - .:/app
         command: [
-            "--dataDir", "./data/6",
-            "--router", "build/router/router-linux-amd64",
-            "--eventLogFile", "./output/results.log"
+            "--dataDir", "./data/9",
+            "--router", "./build/router-linux-amd64",
+            "--info"
         ]
